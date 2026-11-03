@@ -7,7 +7,13 @@ import tseslint from 'typescript-eslint';
 
 export default defineConfig(
   {
-    ignores: ['**/dist/**', '**/coverage/**', '**/node_modules/**'],
+    ignores: [
+      '**/dist/**',
+      '**/coverage/**',
+      '**/node_modules/**',
+      '**/test/fixtures/**',
+      'examples/**',
+    ],
   },
   js.configs.recommended,
   tseslint.configs.strictTypeChecked,
@@ -21,6 +27,7 @@ export default defineConfig(
             'eslint.config.js',
             'packages/cli/bin/*.js',
             'packages/*/scripts/*.js',
+            'scripts/*.js',
           ],
         },
         tsconfigRootDir: import.meta.dirname,
