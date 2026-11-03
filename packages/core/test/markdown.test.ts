@@ -1,0 +1,235 @@
+import { micromark } from 'micromark';
+import { gfm, gfmHtml } from 'micromark-extension-gfm';
+import { describe, expect, it } from 'vitest';
+import {
+  COMMENT_MARKER,
+  budgetSchema,
+  diffReports,
+  evaluateBudgets,
+  formatValue,
+  renderJson,
+  renderMarkdown,
+} from '@usertax/core';
+import type { App } from '@usertax/core';
+import { BASE_SHA, lighthouseApp, mobileApp, modify, report, webApp } from './fixtures.js';
+
+const base = report([webApp(), mobileApp()], { git: { sha: BASE_SHA } });
+const head = modify(base, (r) => {
+  r.git = { sha: 'c'.repeat(40) };
+  const web = r.apps[0] as App;
+  const main = web.assets?.[0];
+  if (main) {
+    main.raw += 72_000;
+    main.gzip = 52_000;
+    main.brotli = 45_000;
+    main.packages = [...(main.packages ?? []), { name: 'moment', bytes: 72_000 }];
+  }
+  const archive = r.apps[1]?.archives?.[0];
+  if (archive) {
+    archive.fileSize += 400_000;
+    archive.entries.push({
+      path: 'res/drawable-xxhdpi/hero.png',
+      category: 'resources',
+      compressed: 400_000,
+      uncompressed: 400_000,
+    });
+  }
+});
+
+describe('formatValue', () => {
+  it('formats each unit', () => {
+    expect(formatValue(1_500, 'bytes')).toBe('1.5 kB');
+    expect(formatValue(850, 'ms')).toBe('850 ms');
+    expect(formatValue(2_345, 'ms')).toBe('2.35 s');
+    expect(formatValue(92.5, 'score')).toBe('92.5');
+    expect(formatValue(0.1234, 'unitless')).toBe('0.123');
+    expect(formatValue(12.34, 'percent')).toBe('12.3%');
+  });
+});
+
+describe('renderMarkdown', () => {
+  it('renders a comparison with budgets', async () => {
+    const diff = diffReports(head, base);
+    const budgets = evaluateBudgets(diff, [
+      budgetSchema.parse({ app: 'web', metric: 'js.total.gzip', maxIncrease: '10kB' }),
+      budgetSchema.parse({ metric: 'archive[*].file', max: '50MB', level: 'warn' }),
+      budgetSchema.parse({ metric: 'nope.*', max: 1 }),
+    ]);
+    const markdown = renderMarkdown(diff, {
+      budgets,
+      runUrl: 'https://github.com/o/r/actions/runs/1',
+    });
+    expect(markdown.startsWith(COMMENT_MARKER)).toBe(true);
+    await expect(markdown).toMatchFileSnapshot('./__snapshots__/comparison.md');
+  });
+
+  it('renders head values when there is no base', async () => {
+    await expect(renderMarkdown(diffReports(head), { marker: false })).toMatchFileSnapshot(
+      './__snapshots__/head-only.md',
+    );
+  });
+
+  it('renders Lighthouse spread and noise', async () => {
+    const runs = (p: number[], lcp: number) => p.map((performance) => ({ performance, lcp }));
+    const lhBase = report([lighthouseApp(runs([80, 81, 80, 79, 80], 2400))], {
+      git: { sha: BASE_SHA },
+    });
+    const lhHead = report([lighthouseApp(runs([70, 72, 71, 70, 69], 2420))]);
+    const diff = diffReports(lhHead, lhBase, {
+      noise: { performance: { floor: 2, k: 1.5 }, lcp: { floor: 100, k: 1.5 } },
+    });
+    await expect(renderMarkdown(diff, { compression: 'brotli' })).toMatchFileSnapshot(
+      './__snapshots__/lighthouse.md',
+    );
+  });
+
+  it('renders additions, removals, improvements and omitted rows', async () => {
+    const before = report(
+      [
+        webApp({
+          assets: [
+            ...(webApp().assets ?? []),
+            {
+              key: 'legacy.js',
+              file: 'legacy-1.js',
+              type: 'js',
+              raw: 9_000,
+              gzip: 3_000,
+              brotli: 2_500,
+              packages: [{ name: 'lodash', bytes: 9_000 }],
+            },
+          ],
+        }),
+        mobileApp({ id: 'old-app', name: 'old-app' }),
+      ],
+      { git: { sha: BASE_SHA } },
+    );
+    const after = modify(before, (r) => {
+      r.apps = [r.apps[0] as App, mobileApp({ id: 'new-app', name: 'new-app' })];
+      const web = r.apps[0] as App;
+      web.assets = (web.assets ?? []).filter((a) => a.key !== 'legacy.js');
+      web.routes = [...(web.routes ?? []), { route: '/new', assets: ['assets/about-[hash].js'] }];
+      web.routes = web.routes.filter((route) => route.route !== '/');
+      const css = web.assets.find((a) => a.type === 'css');
+      if (css) css.gzip = 1_500;
+    });
+    const diff = diffReports(after, before, { top: 1 });
+    const budgets = evaluateBudgets(diff, [
+      budgetSchema.parse({
+        app: 'web',
+        metric: 'css.total.gzip',
+        maxDecreasePercent: 10,
+        level: 'warn',
+      }),
+      budgetSchema.parse({ app: 'web', metric: 'js.total.gzip', min: '50kB', level: 'warn' }),
+    ]);
+    await expect(renderMarkdown(diff, { budgets, marker: false })).toMatchFileSnapshot(
+      './__snapshots__/changes.md',
+    );
+  });
+
+  it('notes unassessed noise on changed metrics', () => {
+    const runs = (p: number[]) => p.map((performance) => ({ performance, lcp: 2000 }));
+    const diff = diffReports(
+      report([lighthouseApp(runs([70, 71, 72]))]),
+      report([lighthouseApp(runs([80, 81, 82]))]),
+    );
+    expect(renderMarkdown(diff)).toContain('-10 (-12.3%) <sub>noise not assessed</sub>');
+  });
+
+  it('says so when nothing changed or nothing was measured', () => {
+    const empty = report([webApp({ id: 'empty', name: 'empty', assets: [], routes: [] })]);
+    expect(renderMarkdown(diffReports(base, base))).toContain('_No changes._');
+    expect(renderMarkdown(diffReports(empty, empty))).toContain(
+      '_Nothing was measured for this app._',
+    );
+  });
+
+  it('shows the warning block', () => {
+    const other = modify(base, (r) => {
+      r.settings.compression.gzipLevel = 6;
+    });
+    expect(renderMarkdown(diffReports(other, base))).toContain('> [!WARNING]');
+  });
+
+  it('neutralises hostile strings from an untrusted report', () => {
+    const hostile = modify(head, (r) => {
+      const web = r.apps[0] as App;
+      web.name = '@everyone <img src=x onerror=alert(1)> [click](https://evil.example)';
+      web.path = 'a`b|c\n<!-- usertax:report -->';
+      const asset = web.assets?.[0];
+      if (asset) asset.file = '`](javascript:alert(1))';
+      r.tool.version = '1.0.0 <script>';
+    });
+    const markdown = renderMarkdown(diffReports(hostile, base), { runUrl: 'javascript:alert(1)' });
+    // Render the way GitHub does (GFM), keeping raw HTML, and inspect the result.
+    const html = micromark(markdown, {
+      allowDangerousHtml: true,
+      extensions: [gfm()],
+      htmlExtensions: [gfmHtml()],
+    });
+    const tags = new Set([...html.matchAll(/<([a-z][a-z0-9]*)/g)].map((m) => m[1]));
+    expect([...tags].sort()).toEqual(
+      [
+        'code',
+        'details',
+        'h2',
+        'h3',
+        'p',
+        'sub',
+        'summary',
+        'table',
+        'tbody',
+        'td',
+        'th',
+        'thead',
+        'tr',
+        'blockquote',
+      ].sort(),
+    );
+    expect(html).not.toContain('href');
+    expect(markdown).not.toContain('@everyone');
+    // The only HTML comment is our marker at the very start; a marker inside a code span is
+    // shown as text and cannot be mistaken for the sticky-comment marker by `startsWith`.
+    expect(markdown.startsWith(COMMENT_MARKER)).toBe(true);
+    expect(html.match(/<!--/g)).toHaveLength(1);
+  });
+
+  it('drops details first, then whole apps, to stay under the size limit', () => {
+    const many = (n: number) =>
+      report(
+        Array.from({ length: n }, (_, i) =>
+          webApp({ id: `app-${i}`, name: `app-${i}`, path: `apps/app-${i}` }),
+        ),
+      );
+    const bigBase = many(40);
+    const bigHead = modify(bigBase, (r) => {
+      for (const app of r.apps) {
+        const asset = app.assets?.[0];
+        if (asset) asset.gzip = 31_000;
+      }
+    });
+    const diff = diffReports(bigHead, bigBase);
+    const full = renderMarkdown(diff);
+
+    const withoutDetails = renderMarkdown(diff, { maxLength: full.length - 1 });
+    expect(withoutDetails.length).toBeLessThan(full.length);
+    expect(withoutDetails).toContain("GitHub's comment size limit");
+    expect(withoutDetails).toContain('`apps/app-39`');
+
+    const fewerApps = renderMarkdown(diff, { maxLength: 4_000 });
+    expect(fewerApps.length).toBeLessThanOrEqual(4_000);
+    expect(fewerApps).toMatch(/_…and \d+ more apps not shown\._/);
+    expect(fewerApps).toContain('`apps/app-0`');
+  });
+});
+
+describe('renderJson', () => {
+  it('serialises the diff and budgets', () => {
+    const diff = diffReports(head, base);
+    const parsed = JSON.parse(renderJson(diff)) as { diff: unknown };
+    expect(parsed).toEqual({ diff: JSON.parse(JSON.stringify(diff)) as unknown });
+    const budgets = evaluateBudgets(diff, []);
+    expect(JSON.parse(renderJson(diff, budgets))).toHaveProperty('budgets.status', 'pass');
+  });
+});
