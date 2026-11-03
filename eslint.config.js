@@ -42,5 +42,17 @@ export default defineConfig(
       'no-console': 'error',
     },
   },
+  {
+    // Repository scripts are plain JavaScript that reads JSON; type-aware "unsafe" rules only
+    // produce noise there. Library code stays fully checked.
+    files: ['scripts/**/*.js', 'packages/*/scripts/**/*.js'],
+    rules: {
+      '@typescript-eslint/no-unsafe-assignment': 'off',
+      '@typescript-eslint/no-unsafe-member-access': 'off',
+      '@typescript-eslint/no-unsafe-return': 'off',
+      '@typescript-eslint/no-unsafe-argument': 'off',
+      '@typescript-eslint/no-unsafe-call': 'off',
+    },
+  },
   prettier,
 );

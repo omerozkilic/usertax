@@ -1,5 +1,6 @@
 import type { BudgetEvaluation, BudgetResult } from '../budgets.js';
-import type { AppDiff, MetricDiff, ReportDiff } from '../diff.js';
+import { ALTERNATIVES_SOURCE } from '../alternatives.js';
+import type { AppDiff, MetricDiff, PackageCause, ReportDiff } from '../diff.js';
 import { formatByteDelta, formatBytes } from '../format.js';
 import type { MetricUnit } from '../metrics.js';
 import type { Compression, Framework } from '../schema.js';
@@ -174,23 +175,82 @@ function assetsBlock(app: AppDiff, compression: Compression): string | undefined
 
 const SCOPE_LABEL = { web: 'web', ios: 'iOS', android: 'Android' } as const;
 
+function versionList(versions: readonly string[]): string {
+  return versions.map((v) => inlineCode(v)).join(', ');
+}
+
+function viaText(via: readonly string[] | undefined): string {
+  return via === undefined || via.length === 0
+    ? ''
+    : ` via ${via.map((v) => inlineCode(v)).join(', ')}`;
+}
+
+/** Plain-English reason for a package change, from the lockfile diff. */
+export function causeText(cause: PackageCause | undefined): string {
+  if (cause === undefined) return '–';
+  switch (cause.kind) {
+    case 'no-version-change':
+      return 'same version; more or less of it is imported';
+    case 'added':
+      return `added ${versionList(cause.head)}${cause.direct ? ' (direct)' : viaText(cause.via)}`;
+    case 'removed':
+      return `removed ${versionList(cause.base)}${cause.direct ? ' (direct)' : viaText(cause.via)}`;
+    case 'upgraded':
+    case 'downgraded':
+      return `${cause.kind} ${versionList(cause.base)} → ${versionList(cause.head)}${cause.direct ? '' : viaText(cause.via)}`;
+    case 'changed':
+      return `versions ${versionList(cause.base)} → ${versionList(cause.head)}${cause.direct ? '' : viaText(cause.via)}`;
+  }
+}
+
+function safeUrl(url: string): string | undefined {
+  return /^https:\/\/[^\s<>()]+$/.test(url) ? url : undefined;
+}
+
 function packagesBlock(app: AppDiff): string | undefined {
   if (app.packages.length === 0) return undefined;
+  const withCause = app.packages.some((pkg) => pkg.cause !== undefined);
   const rows = app.packages.map((pkg) => {
     const name = pkg.name === null ? '_first-party code_' : inlineCode(pkg.name);
-    const change = pkg.change === 'added' ? ' (new)' : pkg.change === 'removed' ? ' (removed)' : '';
     const baseCell = pkg.change === 'added' ? '–' : sizeCell(pkg.base);
     const headCell = pkg.change === 'removed' ? '–' : sizeCell(pkg.head);
-    return `| ${name}${change} | ${SCOPE_LABEL[pkg.scope]} | ${baseCell} | ${headCell} | ${formatByteDelta(pkg.delta)} |`;
+    const why = withCause ? ` ${pkg.name === null ? '–' : causeText(pkg.cause)} |` : '';
+    return `| ${name} | ${SCOPE_LABEL[pkg.scope]} | ${baseCell} | ${headCell} | ${formatByteDelta(pkg.delta)} |${why}`;
   });
-  const more = moreLine(app.omitted.packages, 'package', 'packages');
+  const header = withCause
+    ? ['| Package | Bundle | Base | Head | Change | Why |', '| --- | --- | --: | --: | --: | --- |']
+    : ['| Package | Bundle | Base | Head | Change |', '| --- | --- | --: | --: | --: |'];
+  const suggestions = app.packages.flatMap((pkg) => {
+    if (pkg.name === null || pkg.alternatives === undefined) return [];
+    const url = safeUrl(pkg.alternatives.url);
+    const link = url === undefined ? '' : ` ([guide](${url}))`;
+    return [
+      `- ${inlineCode(pkg.name, { table: false })}: ${pkg.alternatives.replacements.map((r) => escapeText(r)).join(', ')}${link}`,
+    ];
+  });
+  const alternatives =
+    suggestions.length > 0
+      ? `\n\n**Alternatives** suggested by [e18e module-replacements](${ALTERNATIVES_SOURCE.url}) ${escapeText(ALTERNATIVES_SOURCE.version, 20)}:\n\n${suggestions.join('\n')}`
+      : '';
+  return [
+    '**Packages with the largest change** <sub>minified bytes from source maps</sub>',
+    '',
+    [...header, ...rows].join('\n') +
+      moreLine(app.omitted.packages, 'package', 'packages') +
+      alternatives,
+  ].join('\n');
+}
+
+function dependenciesBlock(app: AppDiff): string | undefined {
+  if (app.dependencies.length === 0) return undefined;
+  const rows = app.dependencies.map(
+    (dep) => `| ${inlineCode(dep.name)} | ${causeText(dep)}${dep.dev ? ' <sub>dev</sub>' : ''} |`,
+  );
+  const total = app.dependencies.length + app.omitted.dependencies;
   return details(
-    'Packages with the largest change (minified bytes from source maps)',
-    [
-      '| Package | Bundle | Base | Head | Change |',
-      '| --- | --- | --: | --: | --: |',
-      ...rows,
-    ].join('\n') + more,
+    `${total} lockfile ${total === 1 ? 'change' : 'changes'} without a bundle size change`,
+    ['| Package | Change |', '| --- | --- |', ...rows].join('\n') +
+      moreLine(app.omitted.dependencies, 'dependency', 'dependencies'),
   );
 }
 
@@ -245,9 +305,10 @@ function appBlocks(app: AppDiff, headOnly: boolean, compression: Compression): B
     });
   }
   for (const block of [
-    assetsBlock(app, compression),
     packagesBlock(app),
+    assetsBlock(app, compression),
     archiveEntriesBlock(app),
+    dependenciesBlock(app),
   ]) {
     if (block !== undefined) blocks.push({ text: block, optional: true });
   }
@@ -313,9 +374,7 @@ function footer(diff: ReportDiff, runUrl: string | undefined): string {
     `usertax ${escapeText(diff.tool.version, 50)}`,
     `gzip level ${gzipLevel}, brotli quality ${brotliQuality}`,
   ];
-  if (diff.apps.some((app) => app.packages.length > 0)) {
-    parts.push('package sizes are minified bytes from source maps');
-  }
+
   if (runUrl !== undefined && /^https:\/\/[^\s<>()]+$/.test(runUrl)) {
     parts.push(`[workflow run](${runUrl})`);
   }

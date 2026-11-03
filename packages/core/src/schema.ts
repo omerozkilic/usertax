@@ -160,6 +160,10 @@ export const dependencySchema = z.object({
   version: z.string().min(1).max(256),
   /** Declared in the app's own package.json (as opposed to transitive). */
   direct: z.boolean(),
+  /** Only reachable through dev dependencies. */
+  dev: z.boolean().optional(),
+  /** For transitive dependencies: up to three direct dependencies that pull it in. */
+  via: z.array(z.string().min(1).max(214)).max(3).optional(),
 });
 export type Dependency = z.infer<typeof dependencySchema>;
 

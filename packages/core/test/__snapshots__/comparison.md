@@ -20,19 +20,21 @@ Base `aaaaaaa` → head `ccccccc` · 2 apps · ❌ 1 budget failed
 
 </details>
 
+**Packages with the largest change** <sub>minified bytes from source maps</sub>
+
+| Package | Bundle | Base | Head | Change |
+| --- | --- | --: | --: | --: |
+| `moment` | web | – | 72.0 kB | +72.0 kB |
+
+**Alternatives** suggested by [e18e module-replacements](https://github.com/e18e/module-replacements) 3\.4\.0:
+
+- `moment`: day\.js, date\-fns, luxon, Date, Temporal ([guide](https://e18e.dev/docs/replacements/moment))
+
 <details><summary>Files with the largest change (gzip)</summary>
 
 | File | Base | Head | Change |
 | --- | --: | --: | --: |
 | `assets/index-1a2b3c.js` | 30.0 kB | 52.0 kB | +22.0 kB |
-
-</details>
-
-<details><summary>Packages with the largest change (minified bytes from source maps)</summary>
-
-| Package | Bundle | Base | Head | Change |
-| --- | --- | --: | --: | --: |
-| `moment` (new) | web | – | 72.0 kB | +72.0 kB |
 
 </details>
 
@@ -70,4 +72,4 @@ Base `aaaaaaa` → head `ccccccc` · 2 apps · ❌ 1 budget failed
 
 Budgets that matched no metric: `*` / `nope.*`
 
-<sub>usertax 0\.1\.0 · gzip level 9, brotli quality 11 · package sizes are minified bytes from source maps · [workflow run](https://github.com/o/r/actions/runs/1)</sub>
+<sub>usertax 0\.1\.0 · gzip level 9, brotli quality 11 · [workflow run](https://github.com/o/r/actions/runs/1)</sub>

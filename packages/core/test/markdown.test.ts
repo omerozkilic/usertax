@@ -169,25 +169,31 @@ describe('renderMarkdown', () => {
       htmlExtensions: [gfmHtml()],
     });
     const tags = new Set([...html.matchAll(/<([a-z][a-z0-9]*)/g)].map((m) => m[1]));
-    expect([...tags].sort()).toEqual(
-      [
-        'code',
-        'details',
-        'h2',
-        'h3',
-        'p',
-        'sub',
-        'summary',
-        'table',
-        'tbody',
-        'td',
-        'th',
-        'thead',
-        'tr',
-        'blockquote',
-      ].sort(),
-    );
-    expect(html).not.toContain('href');
+    const allowed = new Set([
+      'a',
+      'blockquote',
+      'code',
+      'details',
+      'h2',
+      'h3',
+      'li',
+      'p',
+      'strong',
+      'sub',
+      'summary',
+      'table',
+      'tbody',
+      'td',
+      'th',
+      'thead',
+      'tr',
+      'ul',
+    ]);
+    expect([...tags].filter((tag) => tag === undefined || !allowed.has(tag))).toEqual([]);
+    // Links only come from usertax's own curated data, never from the report.
+    const hrefs = [...html.matchAll(/href="([^"]*)"/g)].map((m) => m[1]);
+    expect(hrefs.length).toBeGreaterThan(0);
+    for (const href of hrefs) expect(href).toMatch(/^https:\/\/(e18e\.dev|github\.com\/e18e)\//);
     expect(markdown).not.toContain('@everyone');
     // The only HTML comment is our marker at the very start; a marker inside a code span is
     // shown as text and cannot be mistaken for the sticky-comment marker by `startsWith`.

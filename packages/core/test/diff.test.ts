@@ -139,7 +139,19 @@ describe('diffReports', () => {
     });
     const diff = diffReports(head, base);
     expect(diff.apps[0]?.packages).toEqual([
-      { scope: 'web', name: 'moment', base: 0, head: 70_000, delta: 70_000, change: 'added' },
+      {
+        scope: 'web',
+        name: 'moment',
+        base: 0,
+        head: 70_000,
+        delta: 70_000,
+        change: 'added',
+        alternatives: {
+          replacements: ['day.js', 'date-fns', 'luxon', 'Date', 'Temporal'],
+          url: 'https://e18e.dev/docs/replacements/moment',
+          source: 'e18e/module-replacements@3.4.0',
+        },
+      },
     ]);
     expect(diff.apps[1]?.packages).toEqual([
       {
