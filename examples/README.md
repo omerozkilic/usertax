@@ -3,12 +3,12 @@
 Real apps that usertax measures in CI. Numbers in the documentation come from these apps, with
 the commands to reproduce them.
 
-| App                     | Framework                                       | Status         |
-| ----------------------- | ----------------------------------------------- | -------------- |
-| [`vite-app`](vite-app/) | Vite + React, two HTML entries and a lazy chunk | Measured in CI |
-| `next-app`              | Next.js                                         | Milestone 4    |
-| `expo-app`              | Expo                                            | Milestone 5    |
-| `bare-rn-app`           | Bare React Native                               | Milestone 5    |
+| App                           | Framework                                                                          | Status                          |
+| ----------------------------- | ---------------------------------------------------------------------------------- | ------------------------------- |
+| [`vite-app`](vite-app/)       | Vite + React, two HTML entries and a lazy chunk                                    | Measured in CI, with Lighthouse |
+| [`next-app`](next-app/)       | Next.js 16 App Router (Turbopack)                                                  | Measured in CI, with Lighthouse |
+| [`expo-app`](expo-app/)       | Expo 58 (Hermes bundles from `expo export`; release APK in the `android` workflow) | Measured in CI                  |
+| [`bare-rn-app`](bare-rn-app/) | Bare React Native 0.88 (JavaScript bundles from `react-native bundle`)             | Measured in CI                  |
 
 ## Reproduce
 
