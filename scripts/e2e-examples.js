@@ -23,9 +23,9 @@ function check(condition, message) {
 
 for (const { dir: example, bundled } of examples) {
   const output = join(work, `${example.replaceAll('/', '-')}.json`);
-  execFileSync(process.execPath, [cli, 'measure', example, '--output', output], {
-    stdio: 'inherit',
-  });
+  // One real Lighthouse run per example checks the runner end to end (servers, Chrome, parsing).
+  const args = [cli, 'measure', example, '--output', output, '--lighthouse', '/', '--runs', '1'];
+  execFileSync(process.execPath, args, { stdio: 'inherit' });
   const report = parseReport(JSON.parse(readFileSync(output, 'utf8')));
   const [app] = report.apps;
   check(app !== undefined, `${example}: no app in report`);
@@ -58,6 +58,12 @@ for (const { dir: example, bundled } of examples) {
     `${example}: ${bundled} not found in any chunk`,
   );
 
+  const lighthouse = app.lighthouse?.[0];
+  check(lighthouse?.runs.length === 1, `${example}: expected one Lighthouse run`);
+  check(
+    lighthouse?.runs.every((run) => run.performance > 0 && run.lcp > 0) === true,
+    `${example}: Lighthouse run without a score or LCP`,
+  );
   check(
     (app.dependencies ?? []).some((d) => d.name === 'react-dom' && d.direct),
     `${example}: react-dom missing from the lockfile dependencies`,
