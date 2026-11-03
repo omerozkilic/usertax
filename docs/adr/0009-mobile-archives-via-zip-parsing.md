@@ -1,0 +1,39 @@
+# 0009. Analyse mobile archives by parsing ZIP files
+
+- Status: Accepted
+- Date: 2026-11-03
+
+## Context
+
+Teams already build their APK, AAB and IPA files. Building them in the action would be slow,
+platform-specific and would require signing secrets. Tools such as `apkanalyzer` need the
+Android SDK, and iOS tooling needs a macOS runner, which costs more.
+
+## Decision
+
+- The action never builds mobile apps. It takes artifact paths as inputs.
+- APK, AAB and IPA are ZIP archives. usertax reads the ZIP central directory itself (including
+  ZIP64) to get per-entry compressed and uncompressed sizes, and classifies entries:
+  - Android: `dex`, `native` (`lib/`), `resources` (`res/`, `resources.arsc`), `assets`,
+    `js-bundle` (`assets/index.android.bundle`), `other`.
+  - iOS: `binary`, `frameworks`, `js-bundle` (`main.jsbundle`), `assets` (`Assets.car` and
+    other resources), `other`.
+- A Hermes bytecode bundle is recognised by its magic number and reported as such.
+- Reported sizes are the archive's file size and per-category compressed sizes. These are
+  proxies for download size: Google Play builds per-device APKs from an AAB and the App Store
+  thins IPAs per device. The comment states this; per-device estimates may come later and will
+  be labelled as estimates.
+- Works on Linux runners; no macOS runner is required to analyse an IPA.
+
+## Consequences
+
+- No dependency on platform SDKs, fast and deterministic.
+- Our own CI needs small real archives as fixtures. An APK can be built from the Expo example
+  on Linux; a real IPA needs a macOS build once (in our CI or by hand), stored as a fixture.
+
+## Alternatives considered
+
+- `apkanalyzer` / `bundletool`: more accurate download estimates, but require Java and the
+  Android SDK on the runner. Possible later as an optional mode.
+- A third-party ZIP library: the central directory is small to parse and we want full control
+  over ZIP64 and malformed input.
