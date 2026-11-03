@@ -1,3 +1,4 @@
+import type { NoiseThresholds } from '@usertax/core';
 import { micromark } from 'micromark';
 import { gfm, gfmHtml } from 'micromark-extension-gfm';
 import { describe, expect, it } from 'vitest';
@@ -35,6 +36,9 @@ const head = modify(base, (r) => {
     });
   }
 });
+
+/** Turns the calibrated default noise thresholds off, to test unassessed changes. */
+const OFF: NoiseThresholds = { performance: null, lcp: null, tbt: null, cls: null };
 
 describe('formatValue', () => {
   it('formats each unit', () => {
@@ -133,6 +137,7 @@ describe('renderMarkdown', () => {
     const diff = diffReports(
       report([lighthouseApp(runs([70, 71, 72]))]),
       report([lighthouseApp(runs([80, 81, 82]))]),
+      { noise: OFF },
     );
     expect(renderMarkdown(diff)).toContain('-10 (-12.3%) <sub>noise not assessed</sub>');
   });

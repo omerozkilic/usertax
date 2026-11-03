@@ -1,3 +1,4 @@
+import type { NoiseThresholds } from '@usertax/core';
 import { describe, expect, it } from 'vitest';
 import { budgetSchema, diffReports, evaluateBudgets } from '@usertax/core';
 import type { BudgetInput } from '@usertax/core';
@@ -16,6 +17,9 @@ function evaluate(...budgets: BudgetInput[]) {
     budgets.map((b) => budgetSchema.parse(b)),
   );
 }
+
+/** Turns the calibrated default noise thresholds off, to test unassessed changes. */
+const OFF: NoiseThresholds = { performance: null, lcp: null, tbt: null, cls: null };
 
 describe('budgetSchema', () => {
   it('applies defaults', () => {
@@ -152,7 +156,7 @@ describe('evaluateBudgets', () => {
     });
 
     it('skips change limits when noise is not assessed', () => {
-      const d = diffReports(lhHead, lhBase);
+      const d = diffReports(lhHead, lhBase, { noise: OFF });
       expect(evaluateBudgets(d, [budget]).results[1]).toMatchObject({
         status: 'skipped',
         message: 'skipped: no noise threshold configured for this metric',

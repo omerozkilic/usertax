@@ -57,13 +57,16 @@ export const configSchema = z
     /** Apps to measure. Without it, usertax discovers the apps of the workspace. */
     apps: z.array(appConfigSchema).min(1).optional(),
     budgets: z.array(budgetSchema).default([]),
-    /** Noise thresholds for Lighthouse metrics (ADR 0007). */
+    /**
+     * Noise thresholds for Lighthouse metrics, over the calibrated defaults (ADR 0007). `null`
+     * turns the assessment off for a metric.
+     */
     noise: z
       .object({
-        performance: noiseThreshold.optional(),
-        lcp: noiseThreshold.optional(),
-        tbt: noiseThreshold.optional(),
-        cls: noiseThreshold.optional(),
+        performance: noiseThreshold.nullable().optional(),
+        lcp: noiseThreshold.nullable().optional(),
+        tbt: noiseThreshold.nullable().optional(),
+        cls: noiseThreshold.nullable().optional(),
       })
       .strict()
       .optional(),

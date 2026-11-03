@@ -82,6 +82,7 @@ function shortSha(sha: string | undefined): string {
 function icon(metric: MetricDiff): string {
   if (metric.change === 'added') return '🆕';
   if (metric.change === 'removed') return '➖';
+  if (metric.change === 'unchanged') return '⚪';
   if (metric.significance === 'within-noise') return '≈';
   switch (metric.verdict) {
     case 'better':
