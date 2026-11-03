@@ -9,6 +9,8 @@ export {
 } from './archive.js';
 export type { AnalyzeArchiveOptions, ArchiveAnalysis, ArchiveFormat, ZipEntry } from './archive.js';
 export { COMPRESSION_SETTINGS, compressedSize } from './compressed-size.js';
+export { CONFIG_FILES, discoverApps, loadConfig, workspaceDirs } from './config.js';
+export type { DiscoveredApp, LoadedConfig } from './config.js';
 export type { CompressedSize } from './compressed-size.js';
 export { DEFAULT_OUT_DIR, detectFramework, readPackageJson } from './detect.js';
 export type { PackageJson } from './detect.js';
