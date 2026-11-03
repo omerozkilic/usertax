@@ -1,6 +1,7 @@
 import { createRequire } from 'node:module';
 import { parseArgs } from 'node:util';
 import { diffCommand } from './commands/diff.js';
+import { measureCommand } from './commands/measure.js';
 import { EXIT, UsageError, defaultIo } from './io.js';
 import type { Io } from './io.js';
 
@@ -17,8 +18,8 @@ Usage:
   usertax <command> [options]
 
 Commands:
+  measure   Measure a built app and write a report (web: Vite, webpack, static)
   diff      Compare a head report with a base report (Markdown or JSON)
-  measure   Measure web bundles, Lighthouse, React Native bundles and app archives (in development)
   report    Render a stored diff (in development)
 
 Options:
@@ -39,7 +40,10 @@ const notImplemented =
 
 const COMMANDS: ReadonlyMap<string, Command> = new Map([
   ['diff', diffCommand],
-  ['measure', notImplemented('measure')],
+  [
+    'measure',
+    (argv, io) => measureCommand(argv, io, { version, env: process.env, cwd: process.cwd() }),
+  ],
   ['report', notImplemented('report')],
 ]);
 
