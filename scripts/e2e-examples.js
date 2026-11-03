@@ -72,6 +72,55 @@ for (const { dir: example, bundled } of examples) {
   process.stdout.write(execFileSync(process.execPath, [cli, 'diff', output], { encoding: 'utf8' }));
 }
 
+// React Native: Expo bundles are found in `expo export` output; bare apps pass their bundles.
+const mobile = [
+  { dir: 'examples/expo-app', args: [], format: 'hermes' },
+  {
+    dir: 'examples/bare-rn-app',
+    args: [
+      '--bundle',
+      'android=examples/bare-rn-app/dist/android/index.android.bundle',
+      '--bundle',
+      'ios=examples/bare-rn-app/dist/ios/main.jsbundle',
+    ],
+    format: 'js',
+  },
+];
+for (const { dir: example, args: extra, format } of mobile) {
+  const output = join(work, `${example.replaceAll('/', '-')}.json`);
+  execFileSync(process.execPath, [cli, 'measure', example, '--output', output, ...extra], {
+    stdio: 'inherit',
+  });
+  const [app] = parseReport(JSON.parse(readFileSync(output, 'utf8'))).apps;
+  const bundles = app?.bundles ?? [];
+  check(
+    bundles
+      .map((b) => b.platform)
+      .sort()
+      .join() === 'android,ios',
+    `${example}: expected android and ios bundles`,
+  );
+  for (const bundle of bundles) {
+    check(
+      bundle.format === format,
+      `${example}: ${bundle.platform} bundle is ${bundle.format}, expected ${format}`,
+    );
+    const attributed =
+      (bundle.packages ?? []).reduce((sum, p) => sum + p.bytes, 0) +
+      (bundle.firstPartyBytes ?? 0) +
+      (bundle.unattributedBytes ?? 0);
+    check(
+      bundle.packages !== undefined && attributed === bundle.raw,
+      `${example}: ${bundle.platform} bundle attributes ${attributed} of ${bundle.raw} bytes`,
+    );
+    check(
+      (bundle.packages ?? []).some((p) => p.name === 'react-native'),
+      `${example}: react-native not found in the ${bundle.platform} bundle`,
+    );
+  }
+  process.stdout.write(execFileSync(process.execPath, [cli, 'diff', output], { encoding: 'utf8' }));
+}
+
 if (failures.length > 0) {
   process.stderr.write(`\nE2E failures:\n- ${failures.join('\n- ')}\n`);
   process.exit(1);
