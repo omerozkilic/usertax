@@ -4,13 +4,16 @@ import { parseArgs } from 'node:util';
 import type { Framework } from '@usertax/core';
 import {
   DEFAULT_OUT_DIR,
+  LockfileError,
   createReport,
   detectFramework,
   gitHead,
   gitRoot,
   measureWebApp,
+  readAppDependencies,
   readPackageJson,
 } from '@usertax/measure';
+import type { AppDependencies } from '@usertax/measure';
 import { EXIT, UsageError } from '../io.js';
 import type { Io } from '../io.js';
 
@@ -111,6 +114,17 @@ export async function measureCommand(
   const sha = shaCandidate !== undefined && SHA.test(shaCandidate) ? shaCandidate : undefined;
   const ref = values.ref ?? context.env['GITHUB_REF'];
 
+  let lock: AppDependencies | undefined;
+  try {
+    lock = await readAppDependencies(appDir, repoRoot);
+  } catch (error) {
+    if (!(error instanceof LockfileError)) throw error;
+    io.stderr(`warning: lockfile ignored: ${error.message}\n`);
+  }
+  if (lock === undefined) {
+    io.stderr('warning: no lockfile found; package changes will not be explained\n');
+  }
+
   const { app, warnings } = await measureWebApp({
     id,
     name: values.name ?? id,
@@ -118,6 +132,7 @@ export async function measureCommand(
     path,
     outDir,
     framework,
+    ...(lock === undefined ? {} : { dependencies: lock.dependencies }),
   });
   for (const warning of warnings) io.stderr(`warning: ${warning.file}: ${warning.message}\n`);
 

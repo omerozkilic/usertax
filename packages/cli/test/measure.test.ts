@@ -38,7 +38,7 @@ describe('usertax measure', () => {
     vi.stubEnv('GITHUB_REF', 'refs/pull/7/merge');
     const c = capture();
     expect(await main(['measure', app], c.io)).toBe(0);
-    expect(c.err()).toBe('');
+    expect(c.err()).toBe('warning: no lockfile found; package changes will not be explained\n');
     const report = parseReport(JSON.parse(c.out()));
     expect(report.git).toEqual({ sha: 'e'.repeat(40), ref: 'refs/pull/7/merge' });
     expect(report.apps[0]).toMatchObject({
@@ -75,6 +75,33 @@ describe('usertax measure', () => {
     expect(report.git).toEqual({ sha: 'd'.repeat(40), ref: 'main' });
     expect(report.apps[0]).toMatchObject({ id: 'web', name: 'Web', framework: 'static' });
     expect(report.apps[0]).not.toHaveProperty('routes');
+  });
+
+  it('records dependencies from the nearest lockfile', async () => {
+    const withLock = await mkdtemp(join(tmpdir(), 'usertax-lock-'));
+    await cp(fixture, join(withLock, 'dist'), { recursive: true });
+    await cp(new URL('../../measure/test/fixtures/lockfiles/npm/', import.meta.url), withLock, {
+      recursive: true,
+    });
+    const c = capture();
+    expect(
+      await main(['measure', withLock, '--framework', 'vite', '--sha', 'a'.repeat(40)], c.io),
+    ).toBe(0);
+    expect(c.err()).toBe('');
+    expect(parseReport(JSON.parse(c.out())).apps[0]?.dependencies).toEqual([
+      { name: 'ms', version: '2.1.3', direct: true },
+    ]);
+  });
+
+  it('warns about unreadable lockfiles', async () => {
+    const broken = await mkdtemp(join(tmpdir(), 'usertax-broken-'));
+    await cp(fixture, join(broken, 'dist'), { recursive: true });
+    await writeFile(join(broken, 'package.json'), '{"devDependencies":{"vite":"8"}}');
+    await writeFile(join(broken, 'package-lock.json'), '{"lockfileVersion":1}');
+    const c = capture();
+    expect(await main(['measure', broken, '--sha', 'a'.repeat(40)], c.io)).toBe(0);
+    expect(c.err()).toContain('warning: lockfile ignored: unsupported package-lock.json');
+    expect(parseReport(JSON.parse(c.out())).apps[0]).not.toHaveProperty('dependencies');
   });
 
   it('prints its own help', async () => {
