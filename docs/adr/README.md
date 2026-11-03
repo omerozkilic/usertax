@@ -12,7 +12,7 @@ never deleted: a later ADR **supersedes** it instead.
 | [0004](0004-base-reports-from-artifacts.md)          | Reuse base reports stored as workflow artifacts | Accepted |
 | [0005](0005-fork-safe-two-workflow-pattern.md)       | Fork-safe two-workflow pattern                  | Accepted |
 | [0006](0006-two-repository-distribution.md)          | Source repository plus thin action repository   | Accepted |
-| [0007](0007-lighthouse-noise-model.md)               | Lighthouse noise model                          | Proposed |
+| [0007](0007-lighthouse-noise-model.md)               | Lighthouse noise model                          | Accepted |
 | [0008](0008-attribution-lockfile-and-source-maps.md) | Attribution from lockfile diffs and source maps | Accepted |
 | [0009](0009-mobile-archives-via-zip-parsing.md)      | Analyse mobile archives by parsing ZIP files    | Accepted |
 | [0010](0010-runtime-and-toolchain.md)                | Runtime and toolchain                           | Accepted |

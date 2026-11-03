@@ -1,0 +1,145 @@
+{
+  "files": [
+    "calibration/shard-1.json",
+    "calibration/shard-2.json",
+    "calibration/shard-3.json"
+  ],
+  "summary": [
+    {
+      "page": "examples/vite-app / (mobile)",
+      "metric": "performance",
+      "medians": [
+        100,
+        100,
+        100
+      ],
+      "iqrs": [
+        0,
+        0,
+        0
+      ],
+      "maxIqr": 0,
+      "range": 0,
+      "ratio": 0
+    },
+    {
+      "page": "examples/vite-app / (mobile)",
+      "metric": "lcp",
+      "medians": [
+        754.98115,
+        755.3879499999999,
+        756.87075
+      ],
+      "iqrs": [
+        4.514550000000099,
+        3.435000000000059,
+        4.555724999999711
+      ],
+      "maxIqr": 4.555724999999711,
+      "range": 1.8896000000000868,
+      "ratio": 0.4147748163026097
+    },
+    {
+      "page": "examples/vite-app / (mobile)",
+      "metric": "tbt",
+      "medians": [
+        0,
+        0,
+        0
+      ],
+      "iqrs": [
+        0,
+        0,
+        0
+      ],
+      "maxIqr": 0,
+      "range": 0,
+      "ratio": 0
+    },
+    {
+      "page": "examples/vite-app / (mobile)",
+      "metric": "cls",
+      "medians": [
+        0,
+        0,
+        0
+      ],
+      "iqrs": [
+        0,
+        0,
+        0
+      ],
+      "maxIqr": 0,
+      "range": 0,
+      "ratio": 0
+    },
+    {
+      "page": "examples/next-app / (mobile)",
+      "metric": "performance",
+      "medians": [
+        99,
+        99,
+        99
+      ],
+      "iqrs": [
+        0,
+        0,
+        0
+      ],
+      "maxIqr": 0,
+      "range": 0,
+      "ratio": 0
+    },
+    {
+      "page": "examples/next-app / (mobile)",
+      "metric": "lcp",
+      "medians": [
+        643.651525,
+        645.06685,
+        646.716
+      ],
+      "iqrs": [
+        11.477662499999951,
+        14.744187499999953,
+        9.936787500000037
+      ],
+      "maxIqr": 14.744187499999953,
+      "range": 3.064475000000016,
+      "ratio": 0.20784292115113334
+    },
+    {
+      "page": "examples/next-app / (mobile)",
+      "metric": "tbt",
+      "medians": [
+        94,
+        96,
+        97
+      ],
+      "iqrs": [
+        4,
+        8.75,
+        4.75
+      ],
+      "maxIqr": 8.75,
+      "range": 3,
+      "ratio": 0.34285714285714286
+    },
+    {
+      "page": "examples/next-app / (mobile)",
+      "metric": "cls",
+      "medians": [
+        0,
+        0,
+        0
+      ],
+      "iqrs": [
+        0,
+        0,
+        0
+      ],
+      "maxIqr": 0,
+      "range": 0,
+      "ratio": 0
+    }
+  ]
+}

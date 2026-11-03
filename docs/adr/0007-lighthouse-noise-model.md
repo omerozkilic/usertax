@@ -1,6 +1,6 @@
 # 0007. Lighthouse noise model
 
-- Status: Proposed (thresholds to be set from calibration measurements in milestone 4)
+- Status: Accepted (2026-11-03, after calibration)
 - Date: 2026-11-03
 
 ## Context
@@ -35,8 +35,19 @@ teaches people to ignore it.
   Vite and static output is served by a built-in static server with gzip; Next.js apps are
   started with `next start`; any other server can be started with `--start` and `--base-url`.
 - The calibration procedure is implemented as the `calibrate-lighthouse` workflow
-  ([docs/benchmarks](../benchmarks/README.md)). This ADR moves to Accepted once its results are
-  recorded and the default thresholds are set from them.
+  ([docs/benchmarks](../benchmarks/README.md)).
+
+## Calibration result (2026-11-03)
+
+3 GitHub-hosted runners × 30 runs of two example pages
+([data and method](../benchmarks/README.md#results-2026-11-03)):
+
+- Cross-runner spread of the medians was below the within-runner IQR for every metric, so a
+  cached Lighthouse base report is allowed like any other base report (ADR 0004).
+- Default thresholds, `k = 1.5` and floors of 1 point (performance), 25 ms (LCP, TBT) and 0
+  (CLS), keep the false-positive rate at or below 0.5 % with 5 runs per side. They are
+  `DEFAULT_NOISE_THRESHOLDS` in `@usertax/core` and can be overridden or turned off (`null`) per
+  metric in the configuration.
 
 ## Consequences
 

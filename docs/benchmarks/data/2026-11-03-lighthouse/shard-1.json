@@ -1,0 +1,480 @@
+{
+  "createdAt": "2026-11-03T19:27:39.277Z",
+  "machine": {
+    "cpus": 2,
+    "cpu": "AMD EPYC 7763 64-Core Processor",
+    "node": "v24.22.1",
+    "runner": "GitHub Actions 1000000463"
+  },
+  "runsPerPage": 30,
+  "results": [
+    {
+      "example": "examples/vite-app",
+      "url": "/",
+      "formFactor": "mobile",
+      "lighthouseVersion": "13.6.0",
+      "runs": [
+        {
+          "performance": 100,
+          "lcp": 757.4894999999999,
+          "tbt": 49.5,
+          "cls": 0
+        },
+        {
+          "performance": 100,
+          "lcp": 759.6774,
+          "tbt": 0,
+          "cls": 0
+        },
+        {
+          "performance": 100,
+          "lcp": 755.3553999999999,
+          "tbt": 0,
+          "cls": 0
+        },
+        {
+          "performance": 100,
+          "lcp": 755.1207999999999,
+          "tbt": 0,
+          "cls": 0
+        },
+        {
+          "performance": 100,
+          "lcp": 766.3035,
+          "tbt": 0,
+          "cls": 0
+        },
+        {
+          "performance": 100,
+          "lcp": 754.3906999999999,
+          "tbt": 0,
+          "cls": 0
+        },
+        {
+          "performance": 100,
+          "lcp": 757.8594,
+          "tbt": 0,
+          "cls": 0
+        },
+        {
+          "performance": 100,
+          "lcp": 755.4184,
+          "tbt": 0,
+          "cls": 0
+        },
+        {
+          "performance": 100,
+          "lcp": 754.6922,
+          "tbt": 0,
+          "cls": 0
+        },
+        {
+          "performance": 100,
+          "lcp": 759.4516000000001,
+          "tbt": 0,
+          "cls": 0
+        },
+        {
+          "performance": 100,
+          "lcp": 753.4114,
+          "tbt": 0,
+          "cls": 0
+        },
+        {
+          "performance": 100,
+          "lcp": 755.2420999999999,
+          "tbt": 0,
+          "cls": 0
+        },
+        {
+          "performance": 100,
+          "lcp": 759.8909000000001,
+          "tbt": 0,
+          "cls": 0
+        },
+        {
+          "performance": 100,
+          "lcp": 756.1596,
+          "tbt": 0,
+          "cls": 0
+        },
+        {
+          "performance": 100,
+          "lcp": 754.3232,
+          "tbt": 0,
+          "cls": 0
+        },
+        {
+          "performance": 100,
+          "lcp": 758.1065000000001,
+          "tbt": 0,
+          "cls": 0
+        },
+        {
+          "performance": 100,
+          "lcp": 754.7991999999999,
+          "tbt": 0,
+          "cls": 0
+        },
+        {
+          "performance": 100,
+          "lcp": 754.6627000000001,
+          "tbt": 0,
+          "cls": 0
+        },
+        {
+          "performance": 100,
+          "lcp": 756.8558,
+          "tbt": 0,
+          "cls": 0
+        },
+        {
+          "performance": 100,
+          "lcp": 757.8396,
+          "tbt": 0,
+          "cls": 0
+        },
+        {
+          "performance": 100,
+          "lcp": 757.0065,
+          "tbt": 0,
+          "cls": 0
+        },
+        {
+          "performance": 100,
+          "lcp": 771.483,
+          "tbt": 0,
+          "cls": 0
+        },
+        {
+          "performance": 100,
+          "lcp": 755.4099000000001,
+          "tbt": 0,
+          "cls": 0
+        },
+        {
+          "performance": 100,
+          "lcp": 762.3021000000001,
+          "tbt": 0,
+          "cls": 0
+        },
+        {
+          "performance": 100,
+          "lcp": 755.1016,
+          "tbt": 0,
+          "cls": 0
+        },
+        {
+          "performance": 100,
+          "lcp": 752.7732000000001,
+          "tbt": 0,
+          "cls": 0
+        },
+        {
+          "performance": 100,
+          "lcp": 763.5918999999999,
+          "tbt": 0,
+          "cls": 0
+        },
+        {
+          "performance": 100,
+          "lcp": 756.8857,
+          "tbt": 0,
+          "cls": 0
+        },
+        {
+          "performance": 100,
+          "lcp": 760.3806999999999,
+          "tbt": 0,
+          "cls": 0
+        },
+        {
+          "performance": 100,
+          "lcp": 761.0068000000001,
+          "tbt": 0,
+          "cls": 0
+        }
+      ],
+      "stats": {
+        "performance": {
+          "n": 30,
+          "median": 100,
+          "q1": 100,
+          "q3": 100,
+          "iqr": 0,
+          "min": 100,
+          "max": 100,
+          "mean": 100,
+          "sd": 0
+        },
+        "lcp": {
+          "n": 30,
+          "median": 756.87075,
+          "q1": 755.1063999999999,
+          "q3": 759.62095,
+          "iqr": 4.514550000000099,
+          "min": 752.7732000000001,
+          "max": 771.483,
+          "mean": 757.7663766666665,
+          "sd": 4.073612608643445
+        },
+        "tbt": {
+          "n": 30,
+          "median": 0,
+          "q1": 0,
+          "q3": 0,
+          "iqr": 0,
+          "min": 0,
+          "max": 49.5,
+          "mean": 1.65,
+          "sd": 9.037422198835232
+        },
+        "cls": {
+          "n": 30,
+          "median": 0,
+          "q1": 0,
+          "q3": 0,
+          "iqr": 0,
+          "min": 0,
+          "max": 0,
+          "mean": 0,
+          "sd": 0
+        }
+      }
+    },
+    {
+      "example": "examples/next-app",
+      "url": "/",
+      "formFactor": "mobile",
+      "lighthouseVersion": "13.6.0",
+      "runs": [
+        {
+          "performance": 97,
+          "lcp": 681.364,
+          "tbt": 184,
+          "cls": 0
+        },
+        {
+          "performance": 99,
+          "lcp": 652.8178,
+          "tbt": 96,
+          "cls": 0
+        },
+        {
+          "performance": 99,
+          "lcp": 654.82435,
+          "tbt": 99,
+          "cls": 0
+        },
+        {
+          "performance": 99,
+          "lcp": 651.2171,
+          "tbt": 94,
+          "cls": 0
+        },
+        {
+          "performance": 99,
+          "lcp": 654.37295,
+          "tbt": 96,
+          "cls": 0
+        },
+        {
+          "performance": 99,
+          "lcp": 637.4665,
+          "tbt": 100,
+          "cls": 0
+        },
+        {
+          "performance": 99,
+          "lcp": 650.27565,
+          "tbt": 97,
+          "cls": 0
+        },
+        {
+          "performance": 99,
+          "lcp": 644.6154,
+          "tbt": 98,
+          "cls": 0
+        },
+        {
+          "performance": 99,
+          "lcp": 657.65405,
+          "tbt": 98,
+          "cls": 0
+        },
+        {
+          "performance": 99,
+          "lcp": 645.41605,
+          "tbt": 103,
+          "cls": 0
+        },
+        {
+          "performance": 99,
+          "lcp": 640.5275,
+          "tbt": 96,
+          "cls": 0
+        },
+        {
+          "performance": 99,
+          "lcp": 643.50665,
+          "tbt": 95,
+          "cls": 0
+        },
+        {
+          "performance": 99,
+          "lcp": 657.53235,
+          "tbt": 113,
+          "cls": 0
+        },
+        {
+          "performance": 99,
+          "lcp": 653.5413,
+          "tbt": 94,
+          "cls": 0
+        },
+        {
+          "performance": 99,
+          "lcp": 643.8671,
+          "tbt": 100,
+          "cls": 0
+        },
+        {
+          "performance": 99,
+          "lcp": 656.6933,
+          "tbt": 98,
+          "cls": 0
+        },
+        {
+          "performance": 99,
+          "lcp": 643.2293999999999,
+          "tbt": 92,
+          "cls": 0
+        },
+        {
+          "performance": 99,
+          "lcp": 644.71765,
+          "tbt": 96,
+          "cls": 0
+        },
+        {
+          "performance": 99,
+          "lcp": 661.1414,
+          "tbt": 97,
+          "cls": 0
+        },
+        {
+          "performance": 99,
+          "lcp": 641.45795,
+          "tbt": 128,
+          "cls": 0
+        },
+        {
+          "performance": 99,
+          "lcp": 642.9275,
+          "tbt": 94,
+          "cls": 0
+        },
+        {
+          "performance": 99,
+          "lcp": 642.7139,
+          "tbt": 101,
+          "cls": 0
+        },
+        {
+          "performance": 99,
+          "lcp": 651.45155,
+          "tbt": 97,
+          "cls": 0
+        },
+        {
+          "performance": 99,
+          "lcp": 655.86835,
+          "tbt": 93,
+          "cls": 0
+        },
+        {
+          "performance": 98,
+          "lcp": 653.861,
+          "tbt": 164.99999999999977,
+          "cls": 0
+        },
+        {
+          "performance": 99,
+          "lcp": 640.05045,
+          "tbt": 97,
+          "cls": 0
+        },
+        {
+          "performance": 99,
+          "lcp": 641.4288,
+          "tbt": 96,
+          "cls": 0
+        },
+        {
+          "performance": 99,
+          "lcp": 630.71785,
+          "tbt": 96,
+          "cls": 0
+        },
+        {
+          "performance": 99,
+          "lcp": 643.7951,
+          "tbt": 106,
+          "cls": 0
+        },
+        {
+          "performance": 100,
+          "lcp": 642.0355500000001,
+          "tbt": 90,
+          "cls": 0
+        }
+      ],
+      "stats": {
+        "performance": {
+          "n": 30,
+          "median": 99,
+          "q1": 99,
+          "q3": 99,
+          "iqr": 0,
+          "min": 97,
+          "max": 100,
+          "mean": 98.93333333333334,
+          "sd": 0.44977644510880355
+        },
+        "lcp": {
+          "n": 30,
+          "median": 645.06685,
+          "q1": 642.7673,
+          "q3": 654.2449624999999,
+          "iqr": 11.477662499999951,
+          "min": 630.71785,
+          "max": 681.364,
+          "mean": 648.7029500000002,
+          "sd": 9.479525266066858
+        },
+        "tbt": {
+          "n": 30,
+          "median": 97,
+          "q1": 96,
+          "q3": 100,
+          "iqr": 4,
+          "min": 90,
+          "max": 184,
+          "mean": 103.63333333333334,
+          "sd": 20.657274469439237
+        },
+        "cls": {
+          "n": 30,
+          "median": 0,
+          "q1": 0,
+          "q3": 0,
+          "iqr": 0,
+          "min": 0,
+          "max": 0,
+          "mean": 0,
+          "sd": 0
+        }
+      }
+    }
+  ]
+}

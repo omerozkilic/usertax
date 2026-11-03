@@ -8,3 +8,4 @@ packages/measure/test/fixtures/
 packages/core/src/data/
 docs/demo/add-moment.md
 .next/
+docs/benchmarks/data/

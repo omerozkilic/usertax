@@ -1,0 +1,480 @@
+{
+  "createdAt": "2026-11-03T19:27:28.032Z",
+  "machine": {
+    "cpus": 2,
+    "cpu": "AMD EPYC 7763 64-Core Processor",
+    "node": "v24.22.1",
+    "runner": "GitHub Actions 1000000462"
+  },
+  "runsPerPage": 30,
+  "results": [
+    {
+      "example": "examples/vite-app",
+      "url": "/",
+      "formFactor": "mobile",
+      "lighthouseVersion": "13.6.0",
+      "runs": [
+        {
+          "performance": 100,
+          "lcp": 758.7447,
+          "tbt": 25.5,
+          "cls": 0
+        },
+        {
+          "performance": 100,
+          "lcp": 758.2853,
+          "tbt": 0,
+          "cls": 0
+        },
+        {
+          "performance": 100,
+          "lcp": 755.0791999999999,
+          "tbt": 0,
+          "cls": 0
+        },
+        {
+          "performance": 100,
+          "lcp": 753.6197,
+          "tbt": 0,
+          "cls": 0
+        },
+        {
+          "performance": 100,
+          "lcp": 756.6786999999999,
+          "tbt": 0,
+          "cls": 0
+        },
+        {
+          "performance": 100,
+          "lcp": 754.5467000000001,
+          "tbt": 0,
+          "cls": 0
+        },
+        {
+          "performance": 100,
+          "lcp": 753.9715000000001,
+          "tbt": 0,
+          "cls": 0
+        },
+        {
+          "performance": 100,
+          "lcp": 754.9132,
+          "tbt": 0,
+          "cls": 0
+        },
+        {
+          "performance": 100,
+          "lcp": 760.8657000000001,
+          "tbt": 0,
+          "cls": 0
+        },
+        {
+          "performance": 100,
+          "lcp": 756.1083000000001,
+          "tbt": 0,
+          "cls": 0
+        },
+        {
+          "performance": 100,
+          "lcp": 763.9763,
+          "tbt": 0,
+          "cls": 0
+        },
+        {
+          "performance": 100,
+          "lcp": 756.8013000000001,
+          "tbt": 0,
+          "cls": 0
+        },
+        {
+          "performance": 100,
+          "lcp": 753.4175,
+          "tbt": 0,
+          "cls": 0
+        },
+        {
+          "performance": 100,
+          "lcp": 1406.0352,
+          "tbt": 0,
+          "cls": 0
+        },
+        {
+          "performance": 100,
+          "lcp": 754.7274,
+          "tbt": 0,
+          "cls": 0
+        },
+        {
+          "performance": 100,
+          "lcp": 754.4637,
+          "tbt": 0,
+          "cls": 0
+        },
+        {
+          "performance": 100,
+          "lcp": 754.2855999999999,
+          "tbt": 0,
+          "cls": 0
+        },
+        {
+          "performance": 100,
+          "lcp": 753.6402,
+          "tbt": 0,
+          "cls": 0
+        },
+        {
+          "performance": 100,
+          "lcp": 753.2735,
+          "tbt": 0,
+          "cls": 0
+        },
+        {
+          "performance": 100,
+          "lcp": 755.0491,
+          "tbt": 0,
+          "cls": 0
+        },
+        {
+          "performance": 100,
+          "lcp": 759.9864,
+          "tbt": 0,
+          "cls": 0
+        },
+        {
+          "performance": 100,
+          "lcp": 759.2950000000001,
+          "tbt": 0,
+          "cls": 0
+        },
+        {
+          "performance": 100,
+          "lcp": 753.9362000000001,
+          "tbt": 0,
+          "cls": 0
+        },
+        {
+          "performance": 100,
+          "lcp": 753.9860000000001,
+          "tbt": 0,
+          "cls": 0
+        },
+        {
+          "performance": 100,
+          "lcp": 763.4187999999999,
+          "tbt": 0,
+          "cls": 0
+        },
+        {
+          "performance": 100,
+          "lcp": 758.6126999999999,
+          "tbt": 0,
+          "cls": 0
+        },
+        {
+          "performance": 100,
+          "lcp": 754.4051,
+          "tbt": 0,
+          "cls": 0
+        },
+        {
+          "performance": 100,
+          "lcp": 753.0751,
+          "tbt": 0,
+          "cls": 0
+        },
+        {
+          "performance": 100,
+          "lcp": 753.2882999999999,
+          "tbt": 0,
+          "cls": 0
+        },
+        {
+          "performance": 100,
+          "lcp": 756.1448,
+          "tbt": 0,
+          "cls": 0
+        }
+      ],
+      "stats": {
+        "performance": {
+          "n": 30,
+          "median": 100,
+          "q1": 100,
+          "q3": 100,
+          "iqr": 0,
+          "min": 100,
+          "max": 100,
+          "mean": 100,
+          "sd": 0
+        },
+        "lcp": {
+          "n": 30,
+          "median": 754.98115,
+          "q1": 753.9751250000002,
+          "q3": 758.5308499999999,
+          "iqr": 4.555724999999711,
+          "min": 753.0751,
+          "max": 1406.0352,
+          "mean": 777.8210400000002,
+          "sd": 118.6880891615196
+        },
+        "tbt": {
+          "n": 30,
+          "median": 0,
+          "q1": 0,
+          "q3": 0,
+          "iqr": 0,
+          "min": 0,
+          "max": 25.5,
+          "mean": 0.85,
+          "sd": 4.655641738793908
+        },
+        "cls": {
+          "n": 30,
+          "median": 0,
+          "q1": 0,
+          "q3": 0,
+          "iqr": 0,
+          "min": 0,
+          "max": 0,
+          "mean": 0,
+          "sd": 0
+        }
+      }
+    },
+    {
+      "example": "examples/next-app",
+      "url": "/",
+      "formFactor": "mobile",
+      "lighthouseVersion": "13.6.0",
+      "runs": [
+        {
+          "performance": 98,
+          "lcp": 656.06055,
+          "tbt": 171.00000000000023,
+          "cls": 0
+        },
+        {
+          "performance": 99,
+          "lcp": 645.4175,
+          "tbt": 97,
+          "cls": 0
+        },
+        {
+          "performance": 100,
+          "lcp": 636.50055,
+          "tbt": 91,
+          "cls": 0
+        },
+        {
+          "performance": 99,
+          "lcp": 652.38405,
+          "tbt": 96,
+          "cls": 0
+        },
+        {
+          "performance": 100,
+          "lcp": 641.2924,
+          "tbt": 91,
+          "cls": 0
+        },
+        {
+          "performance": 99,
+          "lcp": 630.1712,
+          "tbt": 92,
+          "cls": 0
+        },
+        {
+          "performance": 99,
+          "lcp": 643.0434,
+          "tbt": 94,
+          "cls": 0
+        },
+        {
+          "performance": 99,
+          "lcp": 660.33425,
+          "tbt": 92,
+          "cls": 0
+        },
+        {
+          "performance": 99,
+          "lcp": 650.4175,
+          "tbt": 111,
+          "cls": 0
+        },
+        {
+          "performance": 99,
+          "lcp": 640.8585,
+          "tbt": 92,
+          "cls": 0
+        },
+        {
+          "performance": 99,
+          "lcp": 641.95615,
+          "tbt": 93,
+          "cls": 0
+        },
+        {
+          "performance": 98,
+          "lcp": 649.44095,
+          "tbt": 167.00000000000023,
+          "cls": 0
+        },
+        {
+          "performance": 99,
+          "lcp": 640.5241,
+          "tbt": 97,
+          "cls": 0
+        },
+        {
+          "performance": 99,
+          "lcp": 645.9036,
+          "tbt": 94,
+          "cls": 0
+        },
+        {
+          "performance": 99,
+          "lcp": 649.27035,
+          "tbt": 94,
+          "cls": 0
+        },
+        {
+          "performance": 99,
+          "lcp": 636.529,
+          "tbt": 97,
+          "cls": 0
+        },
+        {
+          "performance": 99,
+          "lcp": 650.16835,
+          "tbt": 97,
+          "cls": 0
+        },
+        {
+          "performance": 100,
+          "lcp": 639.60405,
+          "tbt": 88,
+          "cls": 0
+        },
+        {
+          "performance": 99,
+          "lcp": 653.74705,
+          "tbt": 97,
+          "cls": 0
+        },
+        {
+          "performance": 99,
+          "lcp": 632.9751,
+          "tbt": 98,
+          "cls": 0
+        },
+        {
+          "performance": 98,
+          "lcp": 664.97355,
+          "tbt": 173.00000000000023,
+          "cls": 0
+        },
+        {
+          "performance": 100,
+          "lcp": 640.3832,
+          "tbt": 87,
+          "cls": 0
+        },
+        {
+          "performance": 99,
+          "lcp": 644.25965,
+          "tbt": 93,
+          "cls": 0
+        },
+        {
+          "performance": 99,
+          "lcp": 650.5888,
+          "tbt": 94,
+          "cls": 0
+        },
+        {
+          "performance": 99,
+          "lcp": 642.735,
+          "tbt": 93,
+          "cls": 0
+        },
+        {
+          "performance": 99,
+          "lcp": 649.3754,
+          "tbt": 94,
+          "cls": 0
+        },
+        {
+          "performance": 99,
+          "lcp": 639.0384,
+          "tbt": 94,
+          "cls": 0
+        },
+        {
+          "performance": 100,
+          "lcp": 641.88535,
+          "tbt": 91,
+          "cls": 0
+        },
+        {
+          "performance": 99,
+          "lcp": 637.3877,
+          "tbt": 96,
+          "cls": 0
+        },
+        {
+          "performance": 97,
+          "lcp": 663.2353,
+          "tbt": 181,
+          "cls": 0
+        }
+      ],
+      "stats": {
+        "performance": {
+          "n": 30,
+          "median": 99,
+          "q1": 99,
+          "q3": 99,
+          "iqr": 0,
+          "min": 97,
+          "max": 100,
+          "mean": 99,
+          "sd": 0.6432675209026769
+        },
+        "lcp": {
+          "n": 30,
+          "median": 643.651525,
+          "q1": 640.418425,
+          "q3": 650.3552125,
+          "iqr": 9.936787500000037,
+          "min": 630.1712,
+          "max": 664.97355,
+          "mean": 645.6820316666668,
+          "sd": 8.475575906243614
+        },
+        "tbt": {
+          "n": 30,
+          "median": 94,
+          "q1": 92.25,
+          "q3": 97,
+          "iqr": 4.75,
+          "min": 87,
+          "max": 181,
+          "mean": 104.83333333333336,
+          "sd": 27.563198019414845
+        },
+        "cls": {
+          "n": 30,
+          "median": 0,
+          "q1": 0,
+          "q3": 0,
+          "iqr": 0,
+          "min": 0,
+          "max": 0,
+          "mean": 0,
+          "sd": 0
+        }
+      }
+    }
+  ]
+}
