@@ -25,6 +25,7 @@
   "sideEffects": false,
   "dependencies": {
     "@jridgewell/sourcemap-codec": "^1.6.0",
-    "@usertax/core": "workspace:*"
+    "@usertax/core": "workspace:*",
+    "yaml": "^2.9.1"
   }
 }

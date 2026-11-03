@@ -1,0 +1,1 @@
+{ "name": "web", "version": "1.0.0", "dependencies": { "react-dom": "19.3.1", "react": "19.3.1", "lib": "workspace:*" }, "devDependencies": { "is-number": "7.0.0" } }

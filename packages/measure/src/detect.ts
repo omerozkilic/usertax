@@ -6,6 +6,8 @@ export interface PackageJson {
   readonly name?: string;
   readonly dependencies?: Record<string, string>;
   readonly devDependencies?: Record<string, string>;
+  readonly optionalDependencies?: Record<string, string>;
+  readonly workspaces?: readonly string[] | { readonly packages?: readonly string[] };
 }
 
 export async function readPackageJson(dir: string): Promise<PackageJson | undefined> {
