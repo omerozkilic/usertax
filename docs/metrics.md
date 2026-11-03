@@ -107,6 +107,35 @@ Rules:
   loads initially. Those become routes: `index.html` → `/`, `about/index.html` → `/about/`.
   Dynamic imports are not part of a route's initial JS.
 
+## Why a package changed
+
+When both reports carry a dependency snapshot (`usertax measure` reads the nearest
+`pnpm-lock.yaml`, `package-lock.json` / `npm-shrinkwrap.json` or `yarn.lock`), each package in
+the comment gets a reason:
+
+| Reason                                         | Meaning                                                                               |
+| ---------------------------------------------- | ------------------------------------------------------------------------------------- |
+| `added 2.30.1 (direct)`                        | The app now declares the package.                                                     |
+| `added 1.2.0 via x`                            | A transitive dependency, pulled in by the direct dependency or workspace package `x`. |
+| `upgraded 4.17.20 → 4.17.21`                   | One resolved version on each side.                                                    |
+| `versions a → a, b`                            | Several versions are installed (duplicates).                                          |
+| `removed …`                                    | No longer in the lockfile.                                                            |
+| `same version; more or less of it is imported` | The lockfile did not change for this package; the app imports a different part of it. |
+
+Lockfile changes that do not change any bundle (dev tooling, packages that are not bundled) are
+listed separately in a collapsed section.
+
+Supported lockfiles: pnpm 6.x and 9.x, npm lockfile versions 2 and 3, Yarn 1 and Yarn 2+.
+Workspace links are followed, so a dependency of a workspace package used by the app is reported
+as coming "via" that package. Yarn 1 lockfiles do not record workspaces; usertax reads the
+`workspaces` field of the root `package.json` and supports `dir` and `dir/*` patterns. Bun
+lockfiles are not supported yet.
+
+Alternatives are shown for packages that were added or grew, only when the
+[e18e module-replacements](https://github.com/e18e/module-replacements) dataset has an entry for
+them. The data is generated into `packages/core/src/data/alternatives.json` by
+`node scripts/update-alternatives.js`, and CI checks that it matches the pinned dataset version.
+
 ## Trying it locally
 
 ```bash

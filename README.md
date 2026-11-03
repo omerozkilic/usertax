@@ -1,92 +1,160 @@
+<div align="center">
+
 # usertax
 
-**What does this pull request cost your users?**
+**What does this pull request cost your users?**<br>
+Web and mobile · Explains _why_ · No API keys
 
-usertax measures the user-facing cost of every pull request, for **web** and **mobile**
-(React Native, Expo and bare), and explains _why_ it changed: which dependency was added or
-upgraded, and which modules grew.
+[![CI](https://github.com/omerozkilic/usertax/actions/workflows/ci.yml/badge.svg)](https://github.com/omerozkilic/usertax/actions/workflows/ci.yml)
+[![CodeQL](https://github.com/omerozkilic/usertax/actions/workflows/codeql.yml/badge.svg)](https://github.com/omerozkilic/usertax/actions/workflows/codeql.yml)
+[![Node.js](https://img.shields.io/badge/node-%E2%89%A522.18-339933)](package.json)
+[![TypeScript](https://img.shields.io/badge/TypeScript-strict-3178c6)](tsconfig.base.json)
+[![License: MIT](https://img.shields.io/badge/license-MIT-green)](LICENSE)
 
-> **Status: early development.** Nothing is released yet and there are no published numbers.
-> Every number that appears in this README will come from the apps in `examples/`,
-> with instructions to reproduce it.
+[Türkçe README](README.tr.md) · [Metrics & budgets](docs/metrics.md) · [Architecture decisions](docs/adr/README.md) · [Demo](docs/demo/README.md)
 
-[Türkçe özet](README.tr.md)
+</div>
 
-## What it will report
+---
 
-One sticky comment per pull request, plus a job summary, a check status and a JSON report:
+usertax measures what a pull request costs the people who use your app — JavaScript shipped per
+route, Lighthouse lab metrics, React Native bundles and APK / AAB / IPA size — and answers the
+question reviewers actually ask: **why did it change?** It joins the lockfile diff of the PR with
+source-map sizes, so a comment says _"`moment` was added and brought 60 kB"_ instead of _"the
+bundle grew"_.
 
-- **Web:** Lighthouse performance score and lab metrics (LCP, TBT, CLS) as the median of
-  several runs with their spread, JavaScript per route (gzip and brotli), base → head.
-- **Mobile:** iOS and Android JS / Hermes bundle size, APK / AAB / IPA size with a breakdown
-  (JS bundle, native libraries, dex, resources, assets).
-- **Why:** the lockfile diff of the PR joined with source-map module sizes, e.g. a newly added
-  date library and how many bytes it brought in, with an alternative from a curated list where
-  every entry cites its source.
-- **Budgets:** warn / fail thresholds, GitHub check status, machine-readable JSON.
+It is deterministic: **no LLM, no API key, no account, no upload.** The same build gives the
+same report.
 
-## Principles
+> [!NOTE]
+> usertax is in active development. Web bundle measurement, attribution and the CLI work today;
+> the GitHub Action, Lighthouse and mobile support are being built (see [Status](#status)).
 
-1. **Deterministic, no API keys.** No LLM in the measuring and diffing path.
-2. **Honest numbers.** Lighthouse noise is measured and shown; changes below the noise
-   threshold are reported as "no significant change".
-3. **Zero config, configurable.** Detects Vite, Next.js, webpack, Expo and bare React Native;
-   `usertax.config.(json|ts)` for budgets and paths.
-4. **The action does not build your mobile app.** Point it at the APK / AAB / IPA you already
-   build. IPA analysis runs on Linux.
-5. **Safe for fork PRs.** Measure in `pull_request`, comment in `workflow_run`; minimal
-   permissions; no secrets.
-6. **Fast.** Base reports are stored as artifacts on the default branch and reused in PRs.
-7. **Monorepos.** Several apps, one comment.
+## What it looks like
 
-Design decisions are recorded in [`docs/adr/`](docs/adr/). Metric ids, budgets and the noise
-model are described in [`docs/metrics.md`](docs/metrics.md).
+A real pull request against [`examples/vite-app`](examples/vite-app) that adds `moment` to show
+a date. This is usertax's output, measured on real builds
+([full comment](docs/demo/add-moment.md), [how to reproduce](docs/demo/README.md)):
 
-## Roadmap
+> |     | Metric                |    Base |    Head |            Change |
+> | :-: | --------------------- | ------: | ------: | ----------------: |
+> | 🔴  | JS total (gzip)       | 69.4 kB | 89.0 kB | +19.6 kB (+28.2%) |
+> | 🔴  | JS for / (gzip)       | 68.9 kB | 88.5 kB | +19.6 kB (+28.4%) |
+> | 🔴  | JS for /about/ (gzip) | 67.9 kB | 68.1 kB |    +169 B (+0.2%) |
+>
+> **Packages with the largest change** <sub>minified bytes from source maps</sub>
+>
+> | Package            | Bundle |   Base |    Head |   Change | Why                     |
+> | ------------------ | ------ | -----: | ------: | -------: | ----------------------- |
+> | `moment`           | web    |      – | 60.1 kB | +60.1 kB | added `2.30.1` (direct) |
+> | _first-party code_ | web    | 1.3 kB |  1.3 kB |    +64 B | –                       |
+>
+> **Alternatives** suggested by [e18e module-replacements](https://github.com/e18e/module-replacements) 3.4.0:
+>
+> - `moment`: day.js, date-fns, luxon, Date, Temporal ([guide](https://e18e.dev/docs/replacements/moment))
 
-| Milestone | Scope                                                       | Status      |
-| --------- | ----------------------------------------------------------- | ----------- |
-| M0        | Repository scaffold, CI, ADRs                               | In progress |
-| M1        | Report schema, diff, budgets, rendering                     | Planned     |
-| M2        | Web bundles: Vite, source-map module and package sizes      | Planned     |
-| M3        | Attribution: lockfile diffs, curated alternatives           | Planned     |
-| M4        | Next.js, Lighthouse with a measured noise model             | Planned     |
-| M5        | Mobile: Expo and bare React Native bundles, APK / AAB / IPA | Planned     |
-| M6        | GitHub Action and CLI, fork-safe workflows, monorepos       | Planned     |
-| M7        | Documentation with measured examples, release               | Planned     |
-| M8        | MCP server for coding agents                                | Later       |
+## Why usertax?
 
-## Prior art
+- **Explains the change.** Lockfile diffs (pnpm, npm, Yarn 1 and Yarn 2+) are joined with
+  byte-exact source-map attribution: added, upgraded, or "same version, more of it imported" —
+  including transitive packages and the dependency that pulled them in
+  ([ADR 0008](docs/adr/0008-attribution-lockfile-and-source-maps.md)).
+- **Honest numbers.** Every byte of every JavaScript file is attributed to a package, to your
+  code, or explicitly to "unattributed", and the three add up to the file size. Lighthouse
+  changes are judged against measured noise, never guessed
+  ([ADR 0007](docs/adr/0007-lighthouse-noise-model.md)).
+- **Sourced suggestions only.** Alternatives come from the curated, MIT-licensed
+  [e18e module-replacements](https://github.com/e18e/module-replacements) dataset, with a link
+  to its guide. Nothing is generated.
+- **Web and mobile in one comment.** The report format covers routes, React Native bundles and
+  app archives for any number of apps, so one PR comment is designed to cover a whole monorepo
+  ([ADR 0003](docs/adr/0003-report-schema-as-public-contract.md)).
+- **Safe for fork PRs by design.** Measure in `pull_request`, comment from `workflow_run`;
+  reports from PRs are validated and escaped as untrusted input
+  ([ADR 0005](docs/adr/0005-fork-safe-two-workflow-pattern.md)).
+- **Fast.** Base reports are stored once per push to the default branch and reused by every PR
+  ([ADR 0004](docs/adr/0004-base-reports-from-artifacts.md)).
 
-usertax builds on ideas from these projects; if you need only one of their features today,
-use them:
+## Status
 
-- [Lighthouse CI](https://github.com/GoogleChrome/lighthouse-ci) and
-  [treosh/lighthouse-ci-action](https://github.com/treosh/lighthouse-ci-action)
-- [size-limit](https://github.com/ai/size-limit),
-  [compressed-size-action](https://github.com/preactjs/compressed-size-action),
-  [BundleMon](https://github.com/LironEr/bundlemon),
-  [RelativeCI bundle-stats](https://github.com/relative-ci/bundle-stats)
-- [rn-size-check](https://github.com/MuhammadHamza47/rn-size-check),
-  [app-size-report](https://github.com/appshipkit/app-size-report),
-  [react-native-agents `size`](https://github.com/maheshwarimrinal/react-native-agents),
-  [Expo Atlas](https://github.com/expo/atlas),
-  [react-native-bundle-visualizer](https://github.com/callstack/react-native-bundle-visualizer)
-- [e18e module-replacements](https://github.com/e18e/module-replacements) (data source for
-  alternatives)
+| Area         | Today                                                                                         | Planned                                                  |
+| ------------ | --------------------------------------------------------------------------------------------- | -------------------------------------------------------- |
+| Web bundles  | Vite (routes from the manifest), webpack and static output (files)                            | Next.js routes (v1)                                      |
+| Attribution  | Source maps, lockfiles: pnpm 6 / 9, npm 2 / 3, Yarn 1, Yarn 2+                                | Bun                                                      |
+| Budgets      | Engine in `@usertax/core`: `max`, `min`, increase / decrease in bytes or percent, warn / fail | CLI flags and `usertax.config.(json\|ts)` (v1)           |
+| Lighthouse   | Report format, medians, IQR, noise model                                                      | Runner and calibrated defaults (v1)                      |
+| Mobile       | Report format and comment rendering                                                           | Expo and bare React Native bundles, APK / AAB / IPA (v1) |
+| Distribution | CLI from source                                                                               | GitHub Action, `npx usertax`, MCP server                 |
 
-See [`docs/research/2026-11-market-scan.md`](docs/research/2026-11-market-scan.md) for a
-comparison.
+## Quickstart (CLI)
+
+usertax is not published yet; run the CLI from a clone:
+
+```bash
+git clone https://github.com/omerozkilic/usertax && cd usertax
+pnpm install && pnpm build
+
+# Measure an app you have already built (Vite: build.sourcemap = 'hidden', build.manifest = true)
+node packages/cli/bin/usertax.js measure path/to/app --output base.json
+# …make your change, rebuild…
+node packages/cli/bin/usertax.js measure path/to/app --output head.json
+
+node packages/cli/bin/usertax.js diff head.json --base base.json          # Markdown
+node packages/cli/bin/usertax.js diff head.json --base base.json -f json  # JSON
+```
+
+`usertax measure` reads the build output, the source maps and the nearest lockfile. It never
+builds your app and never needs network access.
+
+## How it works
+
+```text
+ build output ─┐
+ source maps ──┼─▶ usertax measure ─▶ report.json ─┐
+ lockfile ─────┘   (@usertax/measure)              ├─▶ usertax diff ─▶ PR comment · job summary · JSON
+                                     base report ──┘   (@usertax/core: diff, attribution,
+                                                        budgets, noise model, rendering)
+```
+
+- [`@usertax/core`](packages/core): pure functions. Report schema, diff, attribution, budgets,
+  Markdown and JSON rendering. No file system, no network.
+- [`@usertax/measure`](packages/measure): collectors. Output directories, source maps,
+  lockfiles.
+- [`usertax`](packages/cli): the command-line interface.
+
+Metric ids, units, budgets and the noise model are documented in
+[`docs/metrics.md`](docs/metrics.md).
 
 ## Development
 
 ```bash
 pnpm install
-pnpm check   # lint, format check, typecheck, tests with coverage
+pnpm check            # typecheck, lint, format, tests with coverage
+pnpm build:examples   # build the example apps
+pnpm e2e              # measure the examples and check invariants
+pnpm demo             # reproduce docs/demo/add-moment.md
 ```
 
-See [CONTRIBUTING.md](CONTRIBUTING.md).
+See [CONTRIBUTING.md](CONTRIBUTING.md). Every number in this repository's documentation comes
+from a measurement you can reproduce with these commands.
+
+## Prior art
+
+usertax builds on ideas from these projects. If you need one of their features today, use them:
+[Lighthouse CI](https://github.com/GoogleChrome/lighthouse-ci),
+[treosh/lighthouse-ci-action](https://github.com/treosh/lighthouse-ci-action),
+[size-limit](https://github.com/ai/size-limit),
+[compressed-size-action](https://github.com/preactjs/compressed-size-action),
+[BundleMon](https://github.com/LironEr/bundlemon),
+[RelativeCI bundle-stats](https://github.com/relative-ci/bundle-stats),
+[rn-size-check](https://github.com/MuhammadHamza47/rn-size-check),
+[app-size-report](https://github.com/appshipkit/app-size-report),
+[react-native-agents `size`](https://github.com/maheshwarimrinal/react-native-agents),
+[Expo Atlas](https://github.com/expo/atlas) and
+[react-native-bundle-visualizer](https://github.com/callstack/react-native-bundle-visualizer).
+A comparison is in [`docs/research/2026-11-market-scan.md`](docs/research/2026-11-market-scan.md).
 
 ## License
 
-[MIT](LICENSE)
+[MIT](LICENSE). Alternative-package data is generated from
+[e18e module-replacements](https://github.com/e18e/module-replacements) (MIT).
