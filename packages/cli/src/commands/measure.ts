@@ -9,12 +9,18 @@ import {
   detectFramework,
   gitHead,
   gitRoot,
+  LighthouseError,
+  ServerError,
   measureNextApp,
   measureWebApp,
   readAppDependencies,
   readPackageJson,
+  runLighthouse,
+  serveStatic,
+  startCommand,
+  startNext,
 } from '@usertax/measure';
-import type { AppDependencies } from '@usertax/measure';
+import type { AppDependencies, RunningServer } from '@usertax/measure';
 import { EXIT, UsageError } from '../io.js';
 import type { Io } from '../io.js';
 
@@ -31,6 +37,15 @@ Options:
       --sha <sha>           Commit SHA (default: $GITHUB_SHA or git rev-parse HEAD)
       --ref <ref>           Git ref (default: $GITHUB_REF)
   -o, --output <file>       Write the report to a file instead of standard output
+
+Lighthouse (needs the optional packages lighthouse and chrome-launcher):
+      --lighthouse <path>   Page to audit, e.g. / or /pricing (repeatable)
+      --runs <n>            Runs per page; the report keeps every run (default 5)
+      --form-factor <f>     mobile (default) or desktop
+      --base-url <url>      Audit a server that is already running at this URL
+      --start <command>     Start the server with this shell command; needs --base-url
+                            Default: the build output is served statically (Vite, webpack,
+                            static) or with next start (Next.js)
   -h, --help                Show this help
 
 Source maps are needed to attribute bytes to packages and modules. For Vite, set
@@ -79,6 +94,11 @@ export async function measureCommand(
       sha: { type: 'string' },
       ref: { type: 'string' },
       output: { type: 'string', short: 'o' },
+      lighthouse: { type: 'string', multiple: true },
+      runs: { type: 'string' },
+      'form-factor': { type: 'string' },
+      'base-url': { type: 'string' },
+      start: { type: 'string' },
       help: { type: 'boolean', short: 'h' },
     },
   });
@@ -138,6 +158,58 @@ export async function measureCommand(
     ...(lock === undefined ? {} : { dependencies: lock.dependencies }),
   });
   for (const warning of warnings) io.stderr(`warning: ${warning.file}: ${warning.message}\n`);
+
+  const pages = values.lighthouse ?? [];
+  if (pages.length > 0) {
+    const runs = values.runs === undefined ? 5 : Number(values.runs);
+    if (!Number.isInteger(runs) || runs < 1 || runs > 100) {
+      throw new UsageError('--runs must be an integer between 1 and 100');
+    }
+    const formFactor = values['form-factor'] ?? 'mobile';
+    if (formFactor !== 'mobile' && formFactor !== 'desktop') {
+      throw new UsageError(`--form-factor must be mobile or desktop, received "${formFactor}"`);
+    }
+    if (values.start !== undefined && values['base-url'] === undefined) {
+      throw new UsageError('--start needs --base-url, the address the started server listens on');
+    }
+    for (const page of pages) {
+      if (!page.startsWith('/'))
+        throw new UsageError(`--lighthouse expects a path starting with /, received "${page}"`);
+    }
+    let server: RunningServer;
+    try {
+      if (values.start !== undefined && values['base-url'] !== undefined) {
+        server = await startCommand(values.start, appDir, values['base-url']);
+      } else if (values['base-url'] !== undefined) {
+        server = { url: values['base-url'], close: () => Promise.resolve() };
+      } else if (framework === 'next') {
+        server = await startNext(appDir);
+      } else {
+        server = await serveStatic(outDir);
+      }
+    } catch (error) {
+      if (error instanceof ServerError) throw new UsageError(error.message);
+      throw error;
+    }
+    try {
+      const base = server.url.replace(/\/$/, '');
+      app.lighthouse = await runLighthouse({
+        urls: pages.map((page) => `${base}${page}`),
+        runs,
+        formFactor,
+        onRun: (url, run, result) => {
+          io.stderr(
+            `lighthouse ${new URL(url).pathname} run ${run}/${runs}: performance ${result.performance}, LCP ${Math.round(result.lcp)} ms, TBT ${Math.round(result.tbt)} ms, CLS ${result.cls.toFixed(3)}\n`,
+          );
+        },
+      });
+    } catch (error) {
+      if (error instanceof LighthouseError) throw new UsageError(error.message);
+      throw error;
+    } finally {
+      await server.close();
+    }
+  }
 
   const report = createReport({
     apps: [app],
