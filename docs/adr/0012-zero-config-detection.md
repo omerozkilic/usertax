@@ -25,6 +25,17 @@ output folders and their own budgets.
   mobile artifact paths and budgets. Action inputs override the file for one-off settings.
 - Detection results are printed so users can see what was measured and why.
 
+## Implementation notes (milestone 6)
+
+- `usertax measure` without an app directory measures the configured apps, or else the
+  discovered workspace apps, into one report. Workspace patterns `dir`, `dir/*` and `dir/**`
+  (four levels) are supported; `node_modules` and dot-directories are skipped.
+- Bare React Native apps are not measured without configuration, because their bundles have no
+  conventional location.
+- The configuration schema is strict (unknown keys are errors) and published as JSON Schema.
+- `usertax diff` reads budgets, noise thresholds, compression and `top` from the configuration
+  and exits with code 1 when a budget fails.
+
 ## Consequences
 
 - One line works for common layouts; unusual ones need a short config.

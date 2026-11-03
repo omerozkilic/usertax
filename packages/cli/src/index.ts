@@ -18,9 +18,8 @@ Usage:
   usertax <command> [options]
 
 Commands:
-  measure   Measure a built app and write a report (web: Vite, webpack, static)
-  diff      Compare a head report with a base report (Markdown or JSON)
-  report    Render a stored diff (in development)
+  measure   Measure built apps (web, React Native, Expo) and write a report
+  diff      Compare a head report with a base report, with budgets (Markdown or JSON)
 
 Options:
   -h, --help     Show this help, or a command's help with <command> --help
@@ -31,20 +30,12 @@ Exit codes: 0 success · 1 a budget failed · 2 invalid usage or input · 3 inte
 
 type Command = (argv: readonly string[], io: Io) => Promise<number>;
 
-const notImplemented =
-  (name: string): Command =>
-  (_argv, io) => {
-    io.stderr(`usertax ${name} is not implemented yet.\n`);
-    return Promise.resolve(EXIT.usage);
-  };
-
 const COMMANDS: ReadonlyMap<string, Command> = new Map([
   ['diff', diffCommand],
   [
     'measure',
     (argv, io) => measureCommand(argv, io, { version, env: process.env, cwd: process.cwd() }),
   ],
-  ['report', notImplemented('report')],
 ]);
 
 function isUsageError(error: unknown): boolean {

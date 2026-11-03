@@ -78,14 +78,14 @@ a date. This is usertax's output, measured on real builds
 
 ## Status
 
-| Area         | Today                                                                                                    | Planned                                        |
-| ------------ | -------------------------------------------------------------------------------------------------------- | ---------------------------------------------- |
-| Web bundles  | Vite and Next.js 16 (routes), webpack and static output (files)                                          | Next.js webpack builds (v1)                    |
-| Attribution  | Source maps, lockfiles: pnpm 6 / 9, npm 2 / 3, Yarn 1, Yarn 2+                                           | Bun                                            |
-| Budgets      | Engine in `@usertax/core`: `max`, `min`, increase / decrease in bytes or percent, warn / fail            | CLI flags and `usertax.config.(json\|ts)` (v1) |
-| Lighthouse   | Runner (`--lighthouse`), every run stored, medians, IQR, noise model                                     | Calibrated default thresholds (v1)             |
-| Mobile       | Expo and bare React Native bundles (JS and Hermes bytecode, with attribution), APK / AAB / IPA breakdown | Per-device download estimates                  |
-| Distribution | CLI from source                                                                                          | GitHub Action, `npx usertax`, MCP server       |
+| Area         | Today                                                                                                                        | Planned                                  |
+| ------------ | ---------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------- |
+| Web bundles  | Vite and Next.js 16 (routes), webpack and static output (files)                                                              | Next.js webpack builds (v1)              |
+| Attribution  | Source maps, lockfiles: pnpm 6 / 9, npm 2 / 3, Yarn 1, Yarn 2+                                                               | Bun                                      |
+| Budgets      | `max`, `min`, increase / decrease in bytes or percent, warn / fail, from `usertax.config.(json\|ts)`; exit code 1 on failure | –                                        |
+| Lighthouse   | Runner (`--lighthouse`), every run stored, medians, IQR, noise model                                                         | Calibrated default thresholds (v1)       |
+| Mobile       | Expo and bare React Native bundles (JS and Hermes bytecode, with attribution), APK / AAB / IPA breakdown                     | Per-device download estimates            |
+| Distribution | CLI from source; monorepos (workspace discovery or config) in one report                                                     | GitHub Action, `npx usertax`, MCP server |
 
 ## Quickstart (CLI)
 
@@ -124,7 +124,8 @@ builds your app and never needs network access.
 - [`usertax`](packages/cli): the command-line interface.
 
 Metric ids, units, budgets and the noise model are documented in
-[`docs/metrics.md`](docs/metrics.md).
+[`docs/metrics.md`](docs/metrics.md); the configuration file in
+[`docs/configuration.md`](docs/configuration.md).
 
 ## Development
 

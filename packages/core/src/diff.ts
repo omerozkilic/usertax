@@ -34,7 +34,7 @@ export interface NoiseThreshold {
   readonly k: number;
 }
 
-export type NoiseThresholds = Partial<Record<LighthouseMetricName, NoiseThreshold>>;
+export type NoiseThresholds = Partial<Record<LighthouseMetricName, NoiseThreshold | undefined>>;
 
 export interface DiffOptions {
   /**

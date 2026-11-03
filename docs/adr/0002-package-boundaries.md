@@ -18,7 +18,7 @@ A pnpm workspace with these packages:
 | ------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------- | ----------------------------- |
 | `@usertax/core`                 | Report schema, diff, attribution (joining lockfile and source-map data), budgets, rendering (Markdown, job summary, JSON)          | No. Pure functions over data. |
 | `@usertax/measure`              | Collectors: web bundles and framework adapters, Lighthouse, React Native bundles, mobile archives, lockfile and source-map readers | Yes                           |
-| `usertax` (`packages/cli`)      | The `usertax` command: `measure`, `diff`, `report`                                                                                 | Yes                           |
+| `usertax` (`packages/cli`)      | The `usertax` command: `measure`, `diff`                                                                                           | Yes                           |
 | `packages/action` (milestone 6) | GitHub Action entry point, bundled to a single `dist/` file                                                                        | Yes, plus the GitHub API      |
 | `packages/mcp` (later)          | MCP server for coding agents                                                                                                       | Yes                           |
 

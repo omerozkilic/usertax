@@ -34,12 +34,6 @@ describe('usertax CLI', () => {
     expect(c.out()).toMatch(/^\d+\.\d+\.\d+\n$/);
   });
 
-  it('reports commands that are not implemented yet', async () => {
-    const c = capture();
-    expect(await main(['report'], c.io)).toBe(2);
-    expect(c.err()).toContain('not implemented');
-  });
-
   it('rejects unknown commands', async () => {
     const c = capture();
     expect(await main(['deploy'], c.io)).toBe(2);
