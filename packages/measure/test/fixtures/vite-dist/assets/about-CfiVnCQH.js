@@ -1,0 +1,1 @@
+import{n as e,t}from"./styles-SChyrMlz.js";var n=e(),r=t();function i(){return(0,r.jsxs)(`main`,{children:[(0,r.jsx)(`h1`,{children:`About`}),(0,r.jsx)(`p`,{children:`This page is a second HTML entry with its own JavaScript.`}),(0,r.jsx)(`p`,{children:(0,r.jsx)(`a`,{href:`/`,children:`Home`})})]})}(0,n.createRoot)(document.getElementById(`root`)).render((0,r.jsx)(i,{}));

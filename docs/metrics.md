@@ -91,10 +91,28 @@ Rules:
 - The overall status is `fail` if any budget fails, otherwise `warn` if any warns, otherwise
   `pass`.
 
+## Web bundles
+
+`usertax measure` reads the build output directory of an app that is already built:
+
+- Every shipped file is measured (raw, gzip, brotli). Source maps, `.LICENSE.txt` files and
+  dot-directories such as `.vite/` are skipped.
+- Content hashes in file names are replaced by `[hash]` so files can be matched between builds
+  (see `packages/measure/src/hash.ts` for the exact rule and its limits).
+- JavaScript files are attributed byte by byte through their source map (a
+  `sourceMappingURL` comment, an inline map, or a `<file>.map` next to the file). Every byte ends
+  up in a package, in first-party code, or in `unattributedBytes`; the three add up to the file
+  size.
+- For Vite, `.vite/manifest.json` (`build.manifest: true`) maps each HTML entry to the files it
+  loads initially. Those become routes: `index.html` → `/`, `about/index.html` → `/about/`.
+  Dynamic imports are not part of a route's initial JS.
+
 ## Trying it locally
 
 ```bash
 pnpm build
+pnpm --filter @usertax-examples/vite-app build
+node packages/cli/bin/usertax.js measure examples/vite-app --output head.json
 node packages/cli/bin/usertax.js diff head.json --base base.json
 node packages/cli/bin/usertax.js diff head.json --base base.json --format json --compression brotli
 ```

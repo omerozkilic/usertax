@@ -36,7 +36,7 @@ describe('usertax CLI', () => {
 
   it('reports commands that are not implemented yet', async () => {
     const c = capture();
-    expect(await main(['measure'], c.io)).toBe(2);
+    expect(await main(['report'], c.io)).toBe(2);
     expect(c.err()).toContain('not implemented');
   });
 
