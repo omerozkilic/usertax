@@ -1,0 +1,17 @@
+{
+  "$schema": "../packages/core/schema/config.schema.json",
+  "apps": [
+    { "path": "examples/vite-app", "lighthouse": { "pages": ["/"], "runs": 3 } },
+    { "path": "examples/next-app", "lighthouse": { "pages": ["/"], "runs": 3 } },
+    { "path": "examples/expo-app" },
+    {
+      "path": "examples/bare-rn-app",
+      "framework": "react-native",
+      "bundles": [
+        { "platform": "android", "file": "dist/android/index.android.bundle" },
+        { "platform": "ios", "file": "dist/ios/main.jsbundle" }
+      ]
+    }
+  ],
+  "budgets": [{ "metric": "route[*].js.gzip", "maxIncrease": "10 kB", "level": "warn" }]
+}
