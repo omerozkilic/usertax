@@ -1,0 +1,21 @@
+{
+  "name": "@usertax-examples/bare-rn-app",
+  "private": true,
+  "version": "0.0.0",
+  "description": "Example bare React Native app measured by usertax in CI (JavaScript bundles).",
+  "scripts": {
+    "build": "pnpm run build:android && pnpm run build:ios",
+    "build:android": "react-native bundle --platform android --dev false --minify true --entry-file index.js --bundle-output dist/android/index.android.bundle --sourcemap-output dist/android/index.android.bundle.map --assets-dest dist/android/res",
+    "build:ios": "react-native bundle --platform ios --dev false --minify true --entry-file index.js --bundle-output dist/ios/main.jsbundle --sourcemap-output dist/ios/main.jsbundle.map --assets-dest dist/ios"
+  },
+  "dependencies": {
+    "react": "19.3.1",
+    "react-native": "0.88.1"
+  },
+  "devDependencies": {
+    "@babel/runtime": "^7.29.10",
+    "@react-native-community/cli": "20.2.0",
+    "@react-native/babel-preset": "0.88.1",
+    "@react-native/metro-config": "0.88.1"
+  }
+}

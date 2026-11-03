@@ -1,0 +1,60 @@
+name: Android
+
+# Builds examples/expo-app into a real release APK and checks that usertax analyses it. This
+# is the end-to-end test of APK analysis; it is slow, so it runs when mobile code changes.
+on:
+  push:
+    branches: [main]
+  pull_request:
+    paths:
+      - packages/measure/src/archive.ts
+      - packages/measure/src/rn.ts
+      - packages/cli/src/commands/measure.ts
+      - examples/expo-app/**
+      - scripts/check-archive.js
+      - .github/workflows/android.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: android-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  apk:
+    name: Release APK (Expo)
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: pnpm/action-setup@ea17c68df8912ef543352723c149a84f56e3d413 # v6.1.0
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: 24
+          cache: pnpm
+      - uses: actions/setup-java@b843ebf9b913146b38da2eaa7aeddf76074ae1ad # v6.1.0
+        with:
+          distribution: temurin
+          java-version: '17'
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm build
+      - name: Prebuild the native Android project
+        working-directory: examples/expo-app
+        env:
+          CI: '1'
+          EXPO_NO_TELEMETRY: '1'
+        run: pnpm exec expo prebuild --platform android --no-install
+      - name: Build the release APK (only arm64-v8a, to keep the build short)
+        working-directory: examples/expo-app/android
+        run: ./gradlew assembleRelease --no-daemon -PreactNativeArchitectures=arm64-v8a
+      - name: Measure the APK with usertax
+        run: |
+          node packages/cli/bin/usertax.js measure examples/expo-app \
+            --archive examples/expo-app/android/app/build/outputs/apk/release/app-release.apk \
+            --output apk-report.json
+          node scripts/check-archive.js apk-report.json
+          node packages/cli/bin/usertax.js diff apk-report.json >> "$GITHUB_STEP_SUMMARY"

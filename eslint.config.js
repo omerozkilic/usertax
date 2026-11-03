@@ -22,14 +22,7 @@ export default defineConfig(
     languageOptions: {
       globals: globals.node,
       parserOptions: {
-        projectService: {
-          allowDefaultProject: [
-            'eslint.config.js',
-            'packages/cli/bin/*.js',
-            'packages/*/scripts/*.js',
-            'scripts/*.js',
-          ],
-        },
+        projectService: true,
         tsconfigRootDir: import.meta.dirname,
       },
     },

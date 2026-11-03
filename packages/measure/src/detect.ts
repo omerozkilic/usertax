@@ -33,6 +33,7 @@ export function detectFramework(pkg: PackageJson | undefined): Framework {
 /** Default build output directory per framework. */
 export const DEFAULT_OUT_DIR: Partial<Record<Framework, string>> = {
   next: '.next',
+  expo: 'dist',
   vite: 'dist',
   webpack: 'dist',
   static: 'dist',
