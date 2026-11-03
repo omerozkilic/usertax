@@ -22,6 +22,13 @@ export type {
   LockfileLocation,
   YarnWorkspace,
 } from './lockfile/index.js';
+export { LighthouseError, pageKey, runFromResult, runLighthouse } from './lighthouse.js';
+export type { LighthouseResultLike, RunLighthouseOptions } from './lighthouse.js';
+export { htmlAssets, htmlRoute, measureNextApp, nextKeys } from './next.js';
+export { serveStatic } from './serve.js';
+export { ServerError, freePort, startCommand, startNext, waitForUrl } from './server.js';
+export type { RunningServer } from './server.js';
+export type { StaticServer } from './serve.js';
 export { createReport } from './report.js';
 export type { CreateReportOptions } from './report.js';
 export {

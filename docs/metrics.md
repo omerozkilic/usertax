@@ -106,6 +106,31 @@ Rules:
 - For Vite, `.vite/manifest.json` (`build.manifest: true`) maps each HTML entry to the files it
   loads initially. Those become routes: `index.html` → `/`, `about/index.html` → `/about/`.
   Dynamic imports are not part of a route's initial JS.
+- For Next.js (`.next/`, `productionBrowserSourceMaps: true`), routes come from the script and
+  stylesheet tags of the prerendered pages, which is exactly what a browser loads first; legacy
+  `noModule` polyfills are excluded. Pages without prerendered HTML use the client reference
+  manifest. Next.js chunk names are only hashes, so a chunk is identified by its largest source
+  module, e.g. `chunks/[node_modules/next/dist/compiled/react-dom/cjs/react-dom-client.production.js].js`.
+  Next.js bundles its own copy of React, so React's bytes are attributed to the `next` package.
+
+## Lighthouse
+
+```bash
+usertax measure examples/vite-app --lighthouse / --lighthouse /about/ --runs 5
+usertax measure examples/next-app --lighthouse / --runs 5            # starts next start itself
+usertax measure . --lighthouse / --start "pnpm preview" --base-url http://127.0.0.1:4173
+```
+
+- Only the performance category runs, with Lighthouse's default mobile settings (simulated
+  throttling) unless `--form-factor desktop` is given. Settings and the Lighthouse version are
+  recorded in the report.
+- Every run uses a fresh Chrome; with several pages, runs alternate between pages.
+- Vite, webpack and static output is served by a built-in static server that gzips text like a
+  static host; Next.js apps are started with `next start` on a free port.
+- The report keeps every run. Comparisons use per-metric medians and show the IQR and the number
+  of runs.
+- Lighthouse and chrome-launcher are optional dependencies; install them where you run
+  `usertax measure --lighthouse`.
 
 ## Why a package changed
 

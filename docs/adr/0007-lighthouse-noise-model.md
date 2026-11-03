@@ -28,6 +28,16 @@ teaches people to ignore it.
 - Throttling and form factor use Lighthouse defaults unless configured and are recorded in the
   report.
 
+## Implementation notes (milestone 4)
+
+- `usertax measure --lighthouse <path> --runs <n>` runs Lighthouse (performance category only,
+  default mobile throttling, a fresh Chrome per run, pages interleaved) and stores every run.
+  Vite and static output is served by a built-in static server with gzip; Next.js apps are
+  started with `next start`; any other server can be started with `--start` and `--base-url`.
+- The calibration procedure is implemented as the `calibrate-lighthouse` workflow
+  ([docs/benchmarks](../benchmarks/README.md)). This ADR moves to Accepted once its results are
+  recorded and the default thresholds are set from them.
+
 ## Consequences
 
 - Fewer false alarms, at the cost of more Lighthouse runs.

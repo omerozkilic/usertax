@@ -24,3 +24,16 @@ the workspace package `lib` and, as a dev dependency, `is-number`; `packages/lib
 | `berry/` | `yarn install --mode=update-lockfile` (Yarn 4.18.1, lockfile v10) |
 
 Only the manifests and lockfiles are kept.
+
+## `next-dist/`
+
+Part of the real `.next/` output of `pnpm --filter @usertax-examples/next-app build` (Next.js
+16.4.4 with Turbopack, React 19.3.1, `productionBrowserSourceMaps: true`): `BUILD_ID`,
+`build-manifest.json`, `static/` (with `sourcesContent` removed from the maps), the prerendered
+HTML pages and the client reference manifest of `/counter`.
+
+## `lighthouse-vite.json`
+
+A real Lighthouse 13.6.0 result for `/` of the built `examples/vite-app`, served by usertax's
+static server, trimmed to the fields usertax reads plus a few for context. The requested URL is
+replaced by its path because the port was random.

@@ -91,6 +91,12 @@ export function displayPath(
     .replace(/^[a-z]+:\/\/\/?/i, '')
     .replace(/\?.*$/, '');
   if (virtual) return `(virtual) ${clean}`;
+  // Turbopack: `turbopack:///[project]/…` is relative to the project root, `[turbopack]/…` is
+  // the bundler runtime.
+  if (clean.startsWith('[turbopack]/'))
+    return `(virtual) turbopack/${clean.slice('[turbopack]/'.length)}`;
+  const project = clean.startsWith('[project]/') ? clean.slice('[project]/'.length) : undefined;
+  if (project !== undefined && !project.includes('node_modules/')) return project;
   const marker = clean.lastIndexOf('node_modules/');
   if (marker !== -1) {
     return clean

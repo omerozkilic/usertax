@@ -125,7 +125,8 @@ describe('source map discovery', () => {
 
   it('warns about missing, unsupported and broken maps', async () => {
     const dir = await mkdtemp(join(tmpdir(), 'usertax-warn-'));
-    await writeFile(join(dir, 'none.js'), 'x');
+    await writeFile(join(dir, 'none.js'), 'x'.repeat(2048));
+    await writeFile(join(dir, 'tiny.js'), 'x'); // too small to warn about
     await writeFile(join(dir, 'inline.js'), '//# sourceMappingURL=data:text/plain,abc');
     await writeFile(join(dir, 'broken.js'), 'x');
     await writeFile(join(dir, 'broken.js.map'), '{');

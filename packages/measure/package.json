@@ -27,5 +27,17 @@
     "@jridgewell/sourcemap-codec": "^1.6.0",
     "@usertax/core": "workspace:*",
     "yaml": "^2.9.1"
+  },
+  "peerDependencies": {
+    "chrome-launcher": "^1.2.0",
+    "lighthouse": "^13.0.0"
+  },
+  "peerDependenciesMeta": {
+    "chrome-launcher": {
+      "optional": true
+    },
+    "lighthouse": {
+      "optional": true
+    }
   }
 }

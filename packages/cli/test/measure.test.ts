@@ -124,7 +124,7 @@ describe('usertax measure', () => {
   it.each([
     [['a', 'b'], 'unexpected arguments: b'],
     [['--framework', 'gatsby'], 'unknown framework "gatsby"'],
-    [['--framework', 'next'], 'measuring next apps is not supported yet'],
+    [['--framework', 'expo'], 'measuring expo apps is not supported yet'],
     [['--out-dir', 'nope'], 'not found; build the app first'],
     [['--sha', 'abc'], '--sha must be a full 40-character commit SHA'],
   ])('rejects %j', async (args, expected) => {
