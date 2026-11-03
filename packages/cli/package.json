@@ -1,0 +1,45 @@
+{
+  "name": "usertax",
+  "version": "0.0.0",
+  "description": "What does this pull request cost your users? Web and mobile performance diffs from the command line.",
+  "license": "MIT",
+  "type": "module",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/omerozkilic/usertax.git",
+    "directory": "packages/cli"
+  },
+  "engines": {
+    "node": ">=22.18.0"
+  },
+  "exports": {
+    ".": {
+      "@usertax/source": "./src/index.ts",
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    }
+  },
+  "files": [
+    "bin",
+    "dist"
+  ],
+  "sideEffects": false,
+  "bin": {
+    "usertax": "./bin/usertax.js"
+  },
+  "dependencies": {
+    "@usertax/core": "workspace:*",
+    "@usertax/measure": "workspace:*"
+  },
+  "keywords": [
+    "performance",
+    "bundle-size",
+    "lighthouse",
+    "react-native",
+    "expo",
+    "apk",
+    "ipa",
+    "pull-request",
+    "ci"
+  ]
+}

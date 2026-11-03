@@ -1,0 +1,26 @@
+{
+  "name": "@usertax/core",
+  "version": "0.0.0",
+  "description": "Deterministic core of usertax: report schema, diffing, attribution, budgets and rendering.",
+  "license": "MIT",
+  "type": "module",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/omerozkilic/usertax.git",
+    "directory": "packages/core"
+  },
+  "engines": {
+    "node": ">=22.18.0"
+  },
+  "exports": {
+    ".": {
+      "@usertax/source": "./src/index.ts",
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "sideEffects": false
+}

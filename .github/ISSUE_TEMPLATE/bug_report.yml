@@ -1,0 +1,24 @@
+name: Bug report
+description: Something measured, compared or rendered incorrectly
+labels: [bug]
+body:
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened?
+      description: Include the PR comment or JSON report if possible.
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: What did you expect?
+    validations:
+      required: true
+  - type: textarea
+    id: setup
+    attributes:
+      label: Setup
+      description: usertax version, framework (Vite, Next.js, Expo, bare React Native…), package manager, workflow file.
+    validations:
+      required: true

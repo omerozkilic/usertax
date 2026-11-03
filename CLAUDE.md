@@ -1,0 +1,58 @@
+# CLAUDE.md
+
+Guidance for Claude (and other coding agents) working in this repository.
+
+## Communication
+
+- Talk to the maintainer in **Turkish**.
+- Code, comments, commit messages, PR titles/bodies, README and docs are in **English**.
+  `README.tr.md` is a short Turkish summary; keep it in sync with major README changes.
+
+## What usertax is
+
+A GitHub Action and CLI (`npx usertax`) that reports, on every pull request, what the change
+costs users on web (Lighthouse, JS per route) and mobile (React Native / Expo JS and Hermes
+bundles, APK / AAB / IPA), and attributes the change to dependencies via lockfile diffs and
+source maps. Read `docs/adr/` before changing a design; update or supersede an ADR when a
+decision changes.
+
+## Commands
+
+```bash
+pnpm install
+pnpm check          # lint + format:check + typecheck + test:coverage (what CI runs)
+pnpm test           # vitest
+pnpm build          # tsc -b for all packages
+```
+
+Every milestone PR must leave `pnpm check` and `pnpm build` green.
+
+## Layout and rules
+
+- `packages/core`: pure functions only. No `node:fs`, no child processes, no network.
+- `packages/measure`: collectors with I/O. Heavy tools (Lighthouse) are optional peers,
+  imported lazily.
+- `packages/cli`: the `usertax` binary. `main(argv, io)` returns an exit code; never call
+  `process.exit` inside library code.
+- ESM, TypeScript strict (`noUncheckedIndexedAccess`, `exactOptionalPropertyTypes`).
+  Relative imports use the `.js` extension.
+- Tests live in `packages/*/test/` and import packages by name (`@usertax/core`); Vitest aliases
+  them to sources. Use fixtures from real files for parsers (source maps, lockfiles, archives).
+- Coverage thresholds are enforced (90 % lines/functions/statements, 85 % branches).
+- Third-party GitHub Actions are pinned by commit SHA with the version in a comment.
+
+## Non-negotiables
+
+- **No invented numbers.** Every number in README, docs or examples comes from a reproducible
+  measurement in this repository. Never write illustrative numbers as if measured.
+- **No invented suggestions.** Alternative packages come only from `data/alternatives.json`,
+  each with a `source`.
+- **No LLM in the core** (ADR 0013).
+- **Fork safety** (ADR 0005): never use `pull_request_target` to run PR code; treat reports
+  from artifacts as untrusted input.
+- Ask the maintainer before irreversible steps: creating repositories, tags, releases, npm or
+  Marketplace publishing, making the repository public.
+
+## Git
+
+- Conventional Commits; PRs are squash-merged; one milestone per branch and PR.

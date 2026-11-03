@@ -1,0 +1,15 @@
+name: Feature request
+description: Suggest a metric, framework or integration
+labels: [enhancement]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem
+      description: What question about your PR's cost can't you answer today?
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposal

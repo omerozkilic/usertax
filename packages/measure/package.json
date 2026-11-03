@@ -1,0 +1,29 @@
+{
+  "name": "@usertax/measure",
+  "version": "0.0.0",
+  "description": "Collectors for usertax: web bundles, Lighthouse, React Native bundles and mobile app archives.",
+  "license": "MIT",
+  "type": "module",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/omerozkilic/usertax.git",
+    "directory": "packages/measure"
+  },
+  "engines": {
+    "node": ">=22.18.0"
+  },
+  "exports": {
+    ".": {
+      "@usertax/source": "./src/index.ts",
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "sideEffects": false,
+  "dependencies": {
+    "@usertax/core": "workspace:*"
+  }
+}
