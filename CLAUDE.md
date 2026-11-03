@@ -25,6 +25,8 @@ pnpm test -u        # update Markdown snapshots in packages/*/test/__snapshots__
 pnpm --filter @usertax/core schema   # regenerate the report JSON Schema after `pnpm build`
 pnpm test           # vitest
 pnpm build          # tsc -b for all packages
+pnpm build:examples # build the example apps in examples/
+pnpm e2e            # measure the built examples with the CLI and check invariants
 ```
 
 Every milestone PR must leave `pnpm check` and `pnpm build` green.
