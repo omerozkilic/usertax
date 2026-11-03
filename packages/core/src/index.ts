@@ -1,6 +1,14 @@
 export { ALTERNATIVES_SOURCE, alternativesFor } from './alternatives.js';
 export type { Alternatives } from './alternatives.js';
 export { budgetSchema, evaluateBudgets } from './budgets.js';
+export {
+  ConfigError,
+  appConfigSchema,
+  configJsonSchema,
+  configSchema,
+  parseConfig,
+} from './config.js';
+export type { AppConfig, Config, ConfigInput } from './config.js';
 export type {
   Budget,
   BudgetEvaluation,
@@ -55,6 +63,9 @@ export {
   ReportValidationError,
   appSchema,
   archiveSchema,
+  compressionSchema,
+  frameworkSchema,
+  platformSchema,
   assetSchema,
   jsBundleSchema,
   lighthouseSchema,

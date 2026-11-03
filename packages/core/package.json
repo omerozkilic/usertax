@@ -18,7 +18,8 @@
       "types": "./dist/index.d.ts",
       "default": "./dist/index.js"
     },
-    "./schema/report.v1.schema.json": "./schema/report.v1.schema.json"
+    "./schema/report.v1.schema.json": "./schema/report.v1.schema.json",
+    "./schema/config.schema.json": "./schema/config.schema.json"
   },
   "files": [
     "dist",
