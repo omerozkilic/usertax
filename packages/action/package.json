@@ -1,0 +1,30 @@
+{
+  "name": "@usertax/action",
+  "version": "0.0.0",
+  "private": true,
+  "description": "GitHub Action for usertax: measure pull requests and comment with what they cost users.",
+  "license": "MIT",
+  "type": "module",
+  "engines": {
+    "node": ">=22.18.0"
+  },
+  "exports": {
+    ".": {
+      "@usertax/source": "./src/index.ts",
+      "types": "./dist/lib/index.d.ts",
+      "default": "./dist/lib/index.js"
+    }
+  },
+  "scripts": {
+    "bundle": "esbuild src/main.ts --bundle --platform=node --target=node22 --format=esm --outfile=dist/index.js --external:lighthouse --external:chrome-launcher --external:lighthouse/* --banner:js=\"import { createRequire as __usertaxCreateRequire } from 'node:module'; const require = __usertaxCreateRequire(import.meta.url);\""
+  },
+  "dependencies": {
+    "@usertax/core": "workspace:*",
+    "@usertax/measure": "workspace:*",
+    "usertax": "workspace:*"
+  },
+  "files": [
+    "action.yml",
+    "dist/index.js"
+  ]
+}
