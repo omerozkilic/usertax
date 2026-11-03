@@ -1,0 +1,63 @@
+# Market scan — 2026-11-03
+
+Purpose: verify that the gap usertax targets still exists before writing code.
+Everything below was checked on 2026-11-03 via GitHub search, repository READMEs
+and public changelogs. Star counts and push dates come from the GitHub search API
+on that day. Re-check before any public claim.
+
+## Competitors
+
+| Tool | Kind | Web bundle | Lighthouse | JS/Hermes bundle (RN) | APK/AAB/IPA | Attribution of growth | PR comment | Needs account/secret | Status (2026-11-03) |
+|---|---|---|---|---|---|---|---|---|---|
+| [MuhammadHamza47/rn-size-check](https://github.com/MuhammadHamza47/rn-size-check) | CLI + Action (`packages/action`, `node20`) | – | – | Yes, per npm package from source maps | Android AAB/APK; IPA beta | Package-level diff between two builds; curated "lighter alternative" hints (moment, lodash, icon fonts) | Sticky comment, base cached from last base-branch run | No | v0.7.2, ★1, pushed 2026-10-29 |
+| [appshipkit/app-size-report](https://github.com/appshipkit/app-size-report) | Action (`node24`, zero deps) | – | – | – | APK/AAB/IPA via ZIP central directory, categories (dex/native/resources/assets; binary/frameworks/…) | Top changed entries only | Sticky comment, job summary, budgets on total size | No | ★0, pushed 2026-10-24, Marketplace listing linked |
+| [maheshwarimrinal/react-native-agents](https://github.com/maheshwarimrinal/react-native-agents) (`size` command) | CLI (deterministic); Marketplace action is a separate AI audit | – | – | Yes, source-map segment attribution, base-branch diff, budget | – | Largest contributors + alternative hints (e.g. moment → dayjs) | Not as a dedicated action | No | ★21 |
+| [Sentry Size Analysis](https://blog.sentry.io/size-analysis-generally-available) (ex-Emerge Tools) | SaaS | – | – | Via iOS/Android build upload; RN/Expo guides | Yes, with insights | Insights (duplicates, media, etc.) | PR thresholds/alerts | Sentry account + upload; 100 build uploads/month on every plan | GA Feb 2026 |
+| [microsoft/android-app-size-diff](https://github.com/microsoft/android-app-size-diff) | Action | – | – | – | APK only | – | Summary file only | No | Archived 2024-03-26 |
+| Codecov Bundle Analysis ([plugins](https://github.com/codecov/codecov-javascript-bundler-plugins)) | SaaS + bundler plugins (beta) | Vite, webpack 5, Rollup | – | – | – | Bundle/asset level | Yes | Codecov token | Beta |
+| [RelativeCI](https://github.com/relative-ci/bundle-stats) / bundle-stats | SaaS + OSS CLI | webpack, rspack, Vite, Rollup, Rolldown | – | – | – | Modules, packages, duplicates | Yes (SaaS) | API key (SaaS) | ★672, active |
+| [BundleMon](https://github.com/LironEr/bundlemon) | OSS + hosted service | Files/globs | – | – | – | File level | Yes | Hosted service or self-host | ★178, active |
+| [andresz1/size-limit-action](https://github.com/andresz1/size-limit-action) | Action | size-limit config | – | – | – | – | Yes | No | ★470, last push 2024-06 |
+| [preactjs/compressed-size-action](https://github.com/preactjs/compressed-size-action) | Action | File globs, gzip/brotli | – | – | – | File level | Yes | No | ★653, active |
+| [treosh/lighthouse-ci-action](https://github.com/treosh/lighthouse-ci-action) | Action | – | Yes (LHCI, median for assertions) | – | – | – | Links/annotations; comments via extra steps | No (optional LHCI server) | ★1292 |
+| [expo/atlas](https://github.com/expo/atlas), [callstack/react-native-bundle-visualizer](https://github.com/callstack/react-native-bundle-visualizer), [retyui/react-native-bundle-discovery](https://github.com/retyui/react-native-bundle-discovery) | Local visualisers | – | – | Yes (interactive) | – | Packages/modules | No | No | Active |
+
+Not verified (hosts blocked from this session): docs.sentry.io, docs.codecov.com,
+docs.github.com, glama.ai (NativeKeel `measure_bundle` MCP tool), Marketplace listing pages.
+
+## Verdict
+
+The gap has **narrowed, but is still open**.
+
+- Mobile-only size diff is no longer empty: two very recent OSS projects
+  (rn-size-check, app-size-report, both pushed in the last two weeks) cover
+  APK/AAB/IPA diffs and, in rn-size-check's case, per-package JS attribution with
+  alternative hints. Sentry covers mobile commercially.
+- No tool found combines, in one installable action and one PR comment:
+  1. web (Lighthouse with noise handling + per-route JS) **and** mobile (JS/Hermes
+     bundle + app archive),
+  2. causal attribution from the **lockfile diff** ("this PR added `moment`") joined
+     with source-map module sizes, with sourced, curated alternatives,
+  3. multiple apps of a monorepo in one sticky comment,
+  4. a fork-safe `pull_request` → `workflow_run` split built in.
+- Implication: usertax's differentiation is the combination and the causal
+  attribution, not "APK size diff" on its own. README must credit prior art.
+
+## Name check
+
+- npm: `usertax` and `user-tax` both return 404 (unclaimed).
+- GitHub: no account named `usertax` (search API: "users do not exist").
+  `user-tax` exists as an organisation, alongside `user-tax-dev`, `user-tax-deprecated`,
+  `user-tax-pkg`, `user-tax-web`, `user-tax-key`.
+- Marketplace: listing pages could not be fetched from this session; uniqueness of the
+  action `name` can only be confirmed at publish time.
+
+## Platform facts relevant to design
+
+- GitHub Actions runners default to Node 24 since 2026-06-16; Node 20 removed
+  2026-09-23 ([changelog](https://github.blog/changelog/2026-09-23-deprecation-of-node-20-on-github-actions-runners/)). Use `runs.using: node24`.
+- Marketplace (GitHub docs): single `action.yml` at repo root; no workflow files for
+  immediate publishing (otherwise GitHub review); name must not match an existing
+  action, user/org (unless the publisher), category or reserved feature; 2FA required.
+- Latest versions on npm (2026-11-03): next 16.4.4, vite 8.3.5, expo 58.0.22,
+  react-native 0.88.1, lighthouse 13.6.0, module-replacements 3.4.0 (MIT, e18e).
