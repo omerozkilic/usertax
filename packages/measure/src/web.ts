@@ -56,6 +56,9 @@ export interface Warning {
   readonly message: string;
 }
 
+/** JavaScript files smaller than this get no "no source map" warning. */
+export const MIN_WARN_BYTES = 1024;
+
 const SOURCE_MAPPING_URL = /\/[/*][#@]\s*sourceMappingURL=([^\s*]+)\s*(?:\*\/)?\s*$/;
 
 async function findSourceMap(
@@ -131,12 +134,14 @@ export async function scanOutputDir(options: ScanOptions): Promise<ScanResult> {
       const code = content.toString('utf8');
       try {
         const found = await findSourceMap(options.outDir, path, code, fileSet);
-        if (found === undefined) {
+        // Tiny generated files (Next.js build manifests, loaders) rarely have maps; only warn
+        // where the missing attribution matters.
+        if (found === undefined && content.byteLength >= MIN_WARN_BYTES) {
           warnings.push({
             file: path,
             message: 'no source map found; packages and modules are not attributed',
           });
-        } else {
+        } else if (found !== undefined) {
           const mapDir = posix.normalize(posix.join(outRelative, posix.dirname(found.mapFile)));
           const attribution = attributeBytes(code, found.map, mapDir);
           asset.packages = [...attribution.packages.entries()]

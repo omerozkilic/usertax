@@ -9,6 +9,7 @@ import {
   detectFramework,
   gitHead,
   gitRoot,
+  measureNextApp,
   measureWebApp,
   readAppDependencies,
   readPackageJson,
@@ -23,8 +24,8 @@ export const MEASURE_HELP = `Usage:
 Measures an app that is already built and writes a usertax report (JSON).
 
 Options:
-      --out-dir <dir>       Build output directory (default: detected, e.g. dist for Vite)
-      --framework <name>    vite, webpack or static (default: detected from package.json)
+      --out-dir <dir>       Build output directory (default: dist, or .next for Next.js)
+      --framework <name>    vite, next, webpack or static (default: detected from package.json)
       --id <id>             App id in the report (default: package name or folder name)
       --name <name>         Display name (default: the id)
       --sha <sha>           Commit SHA (default: $GITHUB_SHA or git rev-parse HEAD)
@@ -34,9 +35,10 @@ Options:
 
 Source maps are needed to attribute bytes to packages and modules. For Vite, set
 build.sourcemap to 'hidden' (maps are not shipped) and build.manifest to true (entries).
+For Next.js, set productionBrowserSourceMaps to true.
 `;
 
-const SUPPORTED: ReadonlySet<Framework> = new Set(['vite', 'webpack', 'static']);
+const SUPPORTED: ReadonlySet<Framework> = new Set(['vite', 'next', 'webpack', 'static']);
 const FRAMEWORKS: ReadonlySet<string> = new Set([
   'vite',
   'webpack',
@@ -125,7 +127,8 @@ export async function measureCommand(
     io.stderr('warning: no lockfile found; package changes will not be explained\n');
   }
 
-  const { app, warnings } = await measureWebApp({
+  const measure = framework === 'next' ? measureNextApp : measureWebApp;
+  const { app, warnings } = await measure({
     id,
     name: values.name ?? id,
     appDir,

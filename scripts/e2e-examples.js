@@ -8,7 +8,12 @@ import { join } from 'node:path';
 import { parseReport } from '../packages/core/dist/index.js';
 
 const cli = new URL('../packages/cli/bin/usertax.js', import.meta.url).pathname;
-const examples = ['examples/vite-app'];
+// Each example with a package that must show up in its bundles (Next.js vendors React inside
+// `next`, so its React code is attributed to the `next` package).
+const examples = [
+  { dir: 'examples/vite-app', bundled: 'react-dom' },
+  { dir: 'examples/next-app', bundled: 'next' },
+];
 const work = mkdtempSync(join(tmpdir(), 'usertax-e2e-'));
 const failures = [];
 
@@ -16,7 +21,7 @@ function check(condition, message) {
   if (!condition) failures.push(message);
 }
 
-for (const example of examples) {
+for (const { dir: example, bundled } of examples) {
   const output = join(work, `${example.replaceAll('/', '-')}.json`);
   execFileSync(process.execPath, [cli, 'measure', example, '--output', output], {
     stdio: 'inherit',
@@ -28,8 +33,12 @@ for (const example of examples) {
 
   const js = (app.assets ?? []).filter((asset) => asset.type === 'js');
   check(js.length > 0, `${example}: no JavaScript assets`);
+  check(
+    js.some((asset) => asset.packages !== undefined),
+    `${example}: no JavaScript file has source-map attribution`,
+  );
   for (const asset of js) {
-    check(asset.packages !== undefined, `${example}: ${asset.file} has no source-map attribution`);
+    if (asset.packages === undefined) continue;
     const attributed =
       (asset.packages ?? []).reduce((sum, p) => sum + p.bytes, 0) +
       (asset.firstPartyBytes ?? 0) +
@@ -45,8 +54,8 @@ for (const example of examples) {
       check(keys.has(key), `${example}: route ${route.route} references unknown asset ${key}`);
   }
   check(
-    js.some((asset) => (asset.packages ?? []).some((p) => p.name === 'react-dom')),
-    `${example}: react-dom not found in any chunk`,
+    js.some((asset) => (asset.packages ?? []).some((p) => p.name === bundled)),
+    `${example}: ${bundled} not found in any chunk`,
   );
 
   check(

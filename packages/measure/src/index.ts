@@ -22,6 +22,7 @@ export type {
   LockfileLocation,
   YarnWorkspace,
 } from './lockfile/index.js';
+export { htmlAssets, htmlRoute, measureNextApp, nextKeys } from './next.js';
 export { createReport } from './report.js';
 export type { CreateReportOptions } from './report.js';
 export {
