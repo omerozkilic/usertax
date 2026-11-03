@@ -18,7 +18,7 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",
-    "check": "pnpm run lint && pnpm run format:check && pnpm run typecheck && pnpm run test:coverage"
+    "check": "pnpm run typecheck && pnpm run lint && pnpm run format:check && pnpm run test:coverage"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
