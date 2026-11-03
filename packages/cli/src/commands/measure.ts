@@ -11,7 +11,9 @@ import {
   gitRoot,
   LighthouseError,
   ServerError,
+  findExpoBundles,
   measureNextApp,
+  measureRnApp,
   measureWebApp,
   readAppDependencies,
   readPackageJson,
@@ -20,7 +22,7 @@ import {
   startCommand,
   startNext,
 } from '@usertax/measure';
-import type { AppDependencies, RunningServer } from '@usertax/measure';
+import type { AppDependencies, ArchiveInput, BundleInput, RunningServer } from '@usertax/measure';
 import { EXIT, UsageError } from '../io.js';
 import type { Io } from '../io.js';
 
@@ -31,14 +33,20 @@ Measures an app that is already built and writes a usertax report (JSON).
 
 Options:
       --out-dir <dir>       Build output directory (default: dist, or .next for Next.js)
-      --framework <name>    vite, next, webpack or static (default: detected from package.json)
+      --framework <name>    vite, next, webpack, static, expo or react-native (default: detected from package.json)
       --id <id>             App id in the report (default: package name or folder name)
       --name <name>         Display name (default: the id)
       --sha <sha>           Commit SHA (default: $GITHUB_SHA or git rev-parse HEAD)
       --ref <ref>           Git ref (default: $GITHUB_REF)
   -o, --output <file>       Write the report to a file instead of standard output
 
-Lighthouse (needs the optional packages lighthouse and chrome-launcher):
+React Native and Expo (usertax never builds the app):
+      --bundle <p>=<file>   JS or Hermes bundle for android or ios, with <file>.map (repeatable)
+                            Expo default: the bundles of expo export in --out-dir (dist)
+      --archive [key=]<file>
+                            APK, AAB or IPA to break down by category (repeatable)
+
+Lighthouse (web apps; needs the optional packages lighthouse and chrome-launcher):
       --lighthouse <path>   Page to audit, e.g. / or /pricing (repeatable)
       --runs <n>            Runs per page; the report keeps every run (default 5)
       --form-factor <f>     mobile (default) or desktop
@@ -53,7 +61,30 @@ build.sourcemap to 'hidden' (maps are not shipped) and build.manifest to true (e
 For Next.js, set productionBrowserSourceMaps to true.
 `;
 
-const SUPPORTED: ReadonlySet<Framework> = new Set(['vite', 'next', 'webpack', 'static']);
+const SUPPORTED: ReadonlySet<Framework> = new Set([
+  'vite',
+  'next',
+  'webpack',
+  'static',
+  'expo',
+  'react-native',
+]);
+const PLATFORMS = new Set(['android', 'ios']);
+
+function parseBundle(value: string, cwd: string): BundleInput {
+  const match = /^(android|ios)=(.+)$/.exec(value);
+  if (match?.[1] === undefined || match[2] === undefined || !PLATFORMS.has(match[1])) {
+    throw new UsageError(`--bundle expects <android|ios>=<file>, received "${value}"`);
+  }
+  return { platform: match[1] as 'android' | 'ios', file: resolve(cwd, match[2]) };
+}
+
+function parseArchive(value: string, cwd: string): ArchiveInput {
+  const match = /^([\w.-]+)=(.+)$/.exec(value);
+  return match?.[1] !== undefined && match[2] !== undefined && !/\.(apk|aab|ipa)$/i.test(match[1])
+    ? { key: match[1], file: resolve(cwd, match[2]) }
+    : { file: resolve(cwd, value) };
+}
 const FRAMEWORKS: ReadonlySet<string> = new Set([
   'vite',
   'webpack',
@@ -95,6 +126,8 @@ export async function measureCommand(
       ref: { type: 'string' },
       output: { type: 'string', short: 'o' },
       lighthouse: { type: 'string', multiple: true },
+      bundle: { type: 'string', multiple: true },
+      archive: { type: 'string', multiple: true },
       runs: { type: 'string' },
       'form-factor': { type: 'string' },
       'base-url': { type: 'string' },
@@ -120,10 +153,29 @@ export async function measureCommand(
       `measuring ${framework} apps is not supported yet; supported: ${[...SUPPORTED].join(', ')}`,
     );
   }
+  const mobile = framework === 'expo' || framework === 'react-native';
+  const bundleInputs = (values.bundle ?? []).map((value) => parseBundle(value, context.cwd));
+  const archiveInputs = (values.archive ?? []).map((value) => parseArchive(value, context.cwd));
+  if (!mobile && (bundleInputs.length > 0 || archiveInputs.length > 0)) {
+    throw new UsageError('--bundle and --archive are for React Native and Expo apps');
+  }
+  if (mobile && (values.lighthouse ?? []).length > 0) {
+    throw new UsageError('--lighthouse is for web apps');
+  }
   const outDir = resolve(appDir, values['out-dir'] ?? DEFAULT_OUT_DIR[framework] ?? 'dist');
-  const outStat = await stat(outDir).catch(() => undefined);
-  if (!outStat?.isDirectory()) {
-    throw new UsageError(`build output ${outDir} not found; build the app first or pass --out-dir`);
+  const needsOutDir = !mobile || (framework === 'expo' && bundleInputs.length === 0);
+  const outStat = needsOutDir ? await stat(outDir).catch(() => undefined) : undefined;
+  if (needsOutDir && !outStat?.isDirectory() && !(mobile && archiveInputs.length > 0)) {
+    throw new UsageError(
+      mobile
+        ? `${outDir} not found; run expo export --source-maps first, or pass --bundle / --archive`
+        : `build output ${outDir} not found; build the app first or pass --out-dir`,
+    );
+  }
+  if (framework === 'react-native' && bundleInputs.length === 0 && archiveInputs.length === 0) {
+    throw new UsageError(
+      'pass --bundle <android|ios>=<file> and/or --archive <file> for a React Native app',
+    );
   }
 
   const repoRoot = (await gitRoot(appDir)) ?? context.cwd;
@@ -147,16 +199,28 @@ export async function measureCommand(
     io.stderr('warning: no lockfile found; package changes will not be explained\n');
   }
 
-  const measure = framework === 'next' ? measureNextApp : measureWebApp;
-  const { app, warnings } = await measure({
+  const common = {
     id,
     name: values.name ?? id,
     appDir,
     path,
-    outDir,
-    framework,
     ...(lock === undefined ? {} : { dependencies: lock.dependencies }),
-  });
+  };
+  const { app, warnings } = mobile
+    ? await measureRnApp({
+        ...common,
+        framework,
+        bundles:
+          bundleInputs.length > 0 || outStat === undefined
+            ? bundleInputs
+            : await findExpoBundles(outDir),
+        archives: archiveInputs,
+      })
+    : await (framework === 'next' ? measureNextApp : measureWebApp)({
+        ...common,
+        outDir,
+        framework,
+      });
   for (const warning of warnings) io.stderr(`warning: ${warning.file}: ${warning.message}\n`);
 
   const pages = values.lighthouse ?? [];
