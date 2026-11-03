@@ -20,9 +20,9 @@ Deterministiktir: **LLM yok, API anahtarı yok, hesap yok, veri yükleme yok.** 
 raporu verir.
 
 > [!NOTE]
-> usertax aktif geliştirme aşamasında. Web bundle ölçümü (Vite, Next.js), React Native ve Expo
-> bundle'ları, APK / AAB / IPA analizi, atıf, Lighthouse koşuları ve CLI bugün çalışıyor; GitHub
-> Action yapım aşamasında.
+> usertax aktif geliştirme aşamasında ve henüz yayınlanmadı. Web bundle ölçümü (Vite, Next.js),
+> React Native ve Expo bundle'ları, APK / AAB / IPA analizi, atıf, Lighthouse koşuları, CLI ve
+> GitHub Action bu repoda çalışıyor.
 
 ## Gerçek bir örnek
 

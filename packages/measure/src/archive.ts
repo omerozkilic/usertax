@@ -125,6 +125,36 @@ export async function readEntryPrefix(
   }
 }
 
+/**
+ * Reads one file from a ZIP archive (stored or deflated). Used for GitHub Actions artifacts,
+ * which download as ZIP files. Refuses entries larger than `maxBytes` uncompressed.
+ */
+export async function readZipFile(
+  path: string,
+  name: string,
+  maxBytes = 50_000_000,
+): Promise<Buffer> {
+  const handle = await open(path, 'r');
+  try {
+    const entries = await readZipEntries(handle, (await handle.stat()).size);
+    const entry = entries.find((e) => e.path === name);
+    if (entry === undefined) throw new ArchiveError(`${name} not found in ${basename(path)}`);
+    if (entry.uncompressed > maxBytes)
+      throw new ArchiveError(`${name} is larger than ${maxBytes} bytes`);
+    const header = await readAt(handle, entry.localHeaderOffset, 30);
+    if (header.length < 30 || header.readUInt32LE(0) !== LOCAL)
+      throw new ArchiveError(`corrupt local header for ${name}`);
+    const dataAt = entry.localHeaderOffset + 30 + header.readUInt16LE(26) + header.readUInt16LE(28);
+    const data = await readAt(handle, dataAt, entry.compressed);
+    if (entry.method === 0) return data;
+    if (entry.method !== 8)
+      throw new ArchiveError(`unsupported compression method ${entry.method} for ${name}`);
+    return inflateRawSync(data, { maxOutputLength: maxBytes });
+  } finally {
+    await handle.close();
+  }
+}
+
 /** Hermes bytecode files start with this magic number. */
 export const HERMES_MAGIC = Buffer.from('c61fbc03c103191f', 'hex');
 

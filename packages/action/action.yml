@@ -1,0 +1,52 @@
+name: usertax — PR performance cost
+description: What does this pull request cost your users? Web and mobile bundle, Lighthouse and app size diffs, explained by dependency.
+author: omerozkilic
+branding:
+  icon: activity
+  color: purple
+
+inputs:
+  mode:
+    description: >-
+      measure: measure the built apps and write the report (upload it as an artifact afterwards).
+      comment: compare a downloaded head report with the base report and post the pull request comment
+      (run it from a workflow_run workflow; see the documentation for the fork-safe setup).
+      all: measure and comment in one job, for repositories that do not accept pull requests from forks.
+    required: false
+    default: measure
+  working-directory:
+    description: Repository root to measure, relative to the workspace.
+    required: false
+    default: .
+  config:
+    description: Configuration file, relative to the working directory. Default usertax.config.* at the root.
+    required: false
+  report:
+    description: Where the measure mode writes the report.
+    required: false
+    default: usertax-report.json
+  head-report:
+    description: Comment mode. Path of the head report downloaded from the measure workflow.
+    required: false
+  github-token:
+    description: Token for reading artifacts and writing the comment. Needs actions:read and pull-requests:write.
+    required: false
+    default: ${{ github.token }}
+  fail-on-budget:
+    description: Fail the step when a budget fails.
+    required: false
+    default: 'true'
+
+outputs:
+  report:
+    description: Measure mode. Absolute path of the report.
+  artifact-name:
+    description: Measure mode. Name to upload the report under (usertax-base-<sha> on the default branch, usertax-head otherwise).
+  comment-url:
+    description: Comment mode. URL of the pull request comment.
+  status:
+    description: Comment mode. Budget status, pass, warn or fail.
+
+runs:
+  using: node24
+  main: dist/index.js

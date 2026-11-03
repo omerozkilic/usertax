@@ -48,6 +48,8 @@ jobs:
           ' >> "$GITHUB_STEP_SUMMARY"
       - name: CLI smoke test
         run: node packages/cli/bin/usertax.js --version
+      - name: Action bundle
+        run: pnpm build:action && test -s packages/action/dist/index.js
 
   examples:
     name: Examples (end to end)

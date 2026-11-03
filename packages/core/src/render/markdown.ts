@@ -21,6 +21,8 @@ export interface RenderOptions {
   readonly maxLength?: number;
   /** Link to the workflow run, from the trusted environment, not from a report. */
   readonly runUrl?: string;
+  /** Plain-text notes shown under the summary line (escaped like everything else). */
+  readonly notes?: readonly string[];
 }
 
 const FRAMEWORK_LABEL: Record<Framework, string> = {
@@ -396,6 +398,12 @@ export function renderMarkdown(diff: ReportDiff, options: RenderOptions = {}): s
   if (options.marker ?? true) header.push({ text: COMMENT_MARKER, optional: false });
   header.push({ text: '## usertax report', optional: false });
   header.push({ text: summaryLine(diff, options.budgets), optional: false });
+  if (options.notes !== undefined && options.notes.length > 0) {
+    header.push({
+      text: ['> [!NOTE]', ...options.notes.map((n) => `> ${escapeText(n, 500)}`)].join('\n'),
+      optional: false,
+    });
+  }
   if (diff.warnings.length > 0) {
     header.push({
       text: ['> [!WARNING]', ...diff.warnings.map((w) => `> ${escapeText(w, 500)}`)].join('\n'),

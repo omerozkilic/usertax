@@ -73,4 +73,10 @@ writeFileSync(
     2,
   )}\n`,
 );
+for (const result of results) {
+  const line = Object.entries(result.stats)
+    .map(([metric, s]) => `${metric} median ${s.median} iqr ${s.iqr} min ${s.min} max ${s.max}`)
+    .join('; ');
+  process.stdout.write(`calibration ${result.example} ${result.url}: ${line}\n`);
+}
 process.stdout.write(`wrote ${output}\n`);

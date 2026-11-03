@@ -27,9 +27,9 @@ It is deterministic: **no LLM, no API key, no account, no upload.** The same bui
 same report.
 
 > [!NOTE]
-> usertax is in active development. Web bundles (Vite, Next.js), React Native and Expo bundles,
-> APK / AAB / IPA analysis, attribution, Lighthouse runs and the CLI work today; the GitHub
-> Action is being built (see [Status](#status)).
+> usertax is in active development and not released yet. Web bundles (Vite, Next.js), React
+> Native and Expo bundles, APK / AAB / IPA analysis, attribution, Lighthouse runs, the CLI and the
+> GitHub Action work in this repository (see [Status](#status)).
 
 ## What it looks like
 
@@ -78,14 +78,21 @@ a date. This is usertax's output, measured on real builds
 
 ## Status
 
-| Area         | Today                                                                                                                                                   | Planned                                  |
-| ------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------- |
-| Web bundles  | Vite and Next.js 16 (routes), webpack and static output (files)                                                                                         | Next.js webpack builds (v1)              |
-| Attribution  | Source maps, lockfiles: pnpm 6 / 9, npm 2 / 3, Yarn 1, Yarn 2+                                                                                          | Bun                                      |
-| Budgets      | `max`, `min`, increase / decrease in bytes or percent, warn / fail, from `usertax.config.(json\|ts)`; exit code 1 on failure                            | –                                        |
-| Lighthouse   | Runner (`--lighthouse`), every run stored, medians, IQR, noise thresholds calibrated on GitHub-hosted runners ([benchmarks](docs/benchmarks/README.md)) | –                                        |
-| Mobile       | Expo and bare React Native bundles (JS and Hermes bytecode, with attribution), APK / AAB / IPA breakdown                                                | Per-device download estimates            |
-| Distribution | CLI from source; monorepos (workspace discovery or config) in one report                                                                                | GitHub Action, `npx usertax`, MCP server |
+| Area         | Today                                                                                                                                                   | Planned                                       |
+| ------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------- |
+| Web bundles  | Vite and Next.js 16 (routes), webpack and static output (files)                                                                                         | Next.js webpack builds (v1)                   |
+| Attribution  | Source maps, lockfiles: pnpm 6 / 9, npm 2 / 3, Yarn 1, Yarn 2+                                                                                          | Bun                                           |
+| Budgets      | `max`, `min`, increase / decrease in bytes or percent, warn / fail, from `usertax.config.(json\|ts)`; exit code 1 on failure                            | –                                             |
+| Lighthouse   | Runner (`--lighthouse`), every run stored, medians, IQR, noise thresholds calibrated on GitHub-hosted runners ([benchmarks](docs/benchmarks/README.md)) | –                                             |
+| Mobile       | Expo and bare React Native bundles (JS and Hermes bytecode, with attribution), APK / AAB / IPA breakdown                                                | Per-device download estimates                 |
+| Distribution | CLI from source; GitHub Action (fork-safe two-workflow setup, dogfooded in this repository); monorepos in one report                                    | Released action and `npx usertax`, MCP server |
+
+## GitHub Action
+
+Two workflows: one measures the pull request with a read-only token, the other posts the comment
+from your default branch, so pull requests from forks are safe
+([setup and inputs](docs/github-action.md)). This repository runs the action on its own pull
+requests. It is not released yet.
 
 ## Quickstart (CLI)
 
