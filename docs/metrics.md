@@ -113,6 +113,31 @@ Rules:
   module, e.g. `chunks/[node_modules/next/dist/compiled/react-dom/cjs/react-dom-client.production.js].js`.
   Next.js bundles its own copy of React, so React's bytes are attributed to the `next` package.
 
+## React Native and Expo
+
+```bash
+npx expo export --platform all --source-maps            # Expo: usertax finds the bundles in dist/
+usertax measure apps/mobile --archive app-release.apk --archive App.ipa
+
+usertax measure apps/bare --bundle android=dist/index.android.bundle --bundle ios=dist/main.jsbundle
+```
+
+usertax never builds a mobile app; it reads what your build produced.
+
+- **Bundles.** Each bundle is measured with its source map (`<file>.map`). Plain JavaScript
+  bundles are attributed byte by byte like web bundles, and also get gzip and brotli sizes.
+  For **Hermes bytecode**, the source map's generated columns are bytecode offsets, so the
+  bytes from one mapping to the next are attributed to that mapping's module. Headers, string
+  tables and the last mapping of each function block have no known source and are counted as
+  unattributed; the three parts still add up to the file size. Metro's indexed source maps
+  (with `sections`) are supported.
+- **Archives.** APK, AAB and IPA files are read through their ZIP central directory without
+  extracting them, including ZIP64. Entries are grouped into `dex`, `native`, `resources`,
+  `assets`, `js-bundle`, `binary`, `frameworks` and `other` (see
+  `packages/measure/src/archive.ts`), and the comment lists the entries that changed most. The
+  file size and compressed sizes are proxies for download size: stores deliver per-device
+  variants (ADR 0009).
+
 ## Lighthouse
 
 ```bash
