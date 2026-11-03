@@ -1,3 +1,4 @@
+import type { NoiseThresholds } from '@usertax/core';
 import { describe, expect, it } from 'vitest';
 import { diffReports } from '@usertax/core';
 import type { App, ReportDiff } from '@usertax/core';
@@ -8,6 +9,9 @@ const base = report([webApp(), mobileApp()], { git: { sha: BASE_SHA } });
 function metric(diff: ReportDiff, app: string, id: string) {
   return diff.apps.find((a) => a.id === app)?.metrics.find((m) => m.id === id);
 }
+
+/** Turns the calibrated default noise thresholds off, to test unassessed changes. */
+const OFF: NoiseThresholds = { performance: null, lcp: null, tbt: null, cls: null };
 
 describe('diffReports', () => {
   it('reports no changes for identical reports', () => {
@@ -217,7 +221,7 @@ describe('diffReports noise model', () => {
 
   it('leaves noisy metrics unassessed without a threshold', () => {
     const head = report([lighthouseApp(runs([70, 71, 72, 70, 69]))]);
-    const m = metric(diffReports(head, lhBase), 'site', id);
+    const m = metric(diffReports(head, lhBase, { noise: OFF }), 'site', id);
     expect(m).toMatchObject({ significance: 'unassessed', verdict: 'unknown', delta: -10 });
     expect(m?.spread?.base?.n).toBe(5);
   });

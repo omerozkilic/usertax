@@ -18,7 +18,7 @@ export type {
 } from './budgets.js';
 export { compareVersions, diffDependencies } from './dependencies.js';
 export type { DependencyChange, DependencyChangeKind } from './dependencies.js';
-export { DIFF_SCHEMA_VERSION, diffReports } from './diff.js';
+export { DEFAULT_NOISE_THRESHOLDS, DIFF_SCHEMA_VERSION, diffReports } from './diff.js';
 export type {
   AppDiff,
   ArchiveEntryDiff,

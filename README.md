@@ -78,14 +78,14 @@ a date. This is usertax's output, measured on real builds
 
 ## Status
 
-| Area         | Today                                                                                                                        | Planned                                       |
-| ------------ | ---------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------- |
-| Web bundles  | Vite and Next.js 16 (routes), webpack and static output (files)                                                              | Next.js webpack builds (v1)                   |
-| Attribution  | Source maps, lockfiles: pnpm 6 / 9, npm 2 / 3, Yarn 1, Yarn 2+                                                               | Bun                                           |
-| Budgets      | `max`, `min`, increase / decrease in bytes or percent, warn / fail, from `usertax.config.(json\|ts)`; exit code 1 on failure | –                                             |
-| Lighthouse   | Runner (`--lighthouse`), every run stored, medians, IQR, noise model                                                         | Calibrated default thresholds (v1)            |
-| Mobile       | Expo and bare React Native bundles (JS and Hermes bytecode, with attribution), APK / AAB / IPA breakdown                     | Per-device download estimates                 |
-| Distribution | CLI from source; GitHub Action (fork-safe two-workflow setup, dogfooded in this repository); monorepos in one report         | Released action and `npx usertax`, MCP server |
+| Area         | Today                                                                                                                                                   | Planned                                       |
+| ------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------- |
+| Web bundles  | Vite and Next.js 16 (routes), webpack and static output (files)                                                                                         | Next.js webpack builds (v1)                   |
+| Attribution  | Source maps, lockfiles: pnpm 6 / 9, npm 2 / 3, Yarn 1, Yarn 2+                                                                                          | Bun                                           |
+| Budgets      | `max`, `min`, increase / decrease in bytes or percent, warn / fail, from `usertax.config.(json\|ts)`; exit code 1 on failure                            | –                                             |
+| Lighthouse   | Runner (`--lighthouse`), every run stored, medians, IQR, noise thresholds calibrated on GitHub-hosted runners ([benchmarks](docs/benchmarks/README.md)) | –                                             |
+| Mobile       | Expo and bare React Native bundles (JS and Hermes bytecode, with attribution), APK / AAB / IPA breakdown                                                | Per-device download estimates                 |
+| Distribution | CLI from source; GitHub Action (fork-safe two-workflow setup, dogfooded in this repository); monorepos in one report                                    | Released action and `npx usertax`, MCP server |
 
 ## GitHub Action
 

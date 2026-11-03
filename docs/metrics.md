@@ -50,9 +50,10 @@ Each metric diff has a `significance`:
   the change but does not call it better or worse.
 - `not-comparable`: the metric exists on one side only.
 
-Default noise thresholds are not set yet. They will be derived from published calibration
-measurements (ADR 0007); until then, configure them explicitly or read Lighthouse changes as
-unassessed.
+The default thresholds come from published calibration measurements
+([docs/benchmarks](benchmarks/README.md)): `k = 1.5` with floors of 1 point for the performance
+score, 25 ms for LCP and TBT, and 0 for CLS. Override them, or turn a metric off with `null`,
+under `noise` in the configuration.
 
 ## Budgets
 

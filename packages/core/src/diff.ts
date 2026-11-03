@@ -34,12 +34,29 @@ export interface NoiseThreshold {
   readonly k: number;
 }
 
-export type NoiseThresholds = Partial<Record<LighthouseMetricName, NoiseThreshold | undefined>>;
+/** Per-metric thresholds; `null` turns the assessment off for that metric. */
+export type NoiseThresholds = Partial<
+  Record<LighthouseMetricName, NoiseThreshold | null | undefined>
+>;
+
+/**
+ * Defaults derived from the 2026-11-03 calibration (docs/benchmarks, ADR 0007): 3 GitHub-hosted
+ * runners × 30 Lighthouse 13.6.0 runs (mobile, simulated throttling) of two example pages. With
+ * 5 runs per side and base and head from different runners, these floors keep the false-positive
+ * rate at or below 0.5 % for every metric of both pages. CLS showed no variation, so it has no
+ * floor; the k × IQR term scales the threshold for noisier pages.
+ */
+export const DEFAULT_NOISE_THRESHOLDS: Readonly<Record<LighthouseMetricName, NoiseThreshold>> = {
+  performance: { floor: 1, k: 1.5 },
+  lcp: { floor: 25, k: 1.5 },
+  tbt: { floor: 25, k: 1.5 },
+  cls: { floor: 0, k: 1.5 },
+};
 
 export interface DiffOptions {
   /**
-   * Thresholds for noisy metrics. Without a threshold, a change in a noisy metric is reported
-   * as `unassessed` rather than guessed.
+   * Thresholds for noisy metrics, merged over {@link DEFAULT_NOISE_THRESHOLDS}. A metric set to
+   * `null` has no threshold: its changes are reported as `unassessed` rather than guessed.
    */
   readonly noise?: NoiseThresholds;
   /** Number of files, packages and archive entries listed per app. Defaults to 10. */
@@ -239,7 +256,8 @@ function diffMetric(
   let significance: Significance = 'exact';
   let threshold: number | undefined;
   if (spread.base !== undefined && spread.head !== undefined) {
-    const parameters = metric.noiseKey === undefined ? undefined : noise[metric.noiseKey];
+    const parameters =
+      metric.noiseKey === undefined ? undefined : (noise[metric.noiseKey] ?? undefined);
     if (parameters === undefined) {
       significance = 'unassessed';
     } else {
@@ -510,7 +528,7 @@ export function diffReports(head: Report, base?: Report, options: DiffOptions = 
   const resolved = {
     top: options.top ?? 10,
     rankBy: options.rankBy ?? 'gzip',
-    noise: options.noise ?? {},
+    noise: { ...DEFAULT_NOISE_THRESHOLDS, ...options.noise },
   };
   const baseApps = new Map((base?.apps ?? []).map((app) => [app.id, app]));
   const apps = head.apps.map((app) =>
