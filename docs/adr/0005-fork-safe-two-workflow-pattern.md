@@ -37,6 +37,18 @@ it measures but cannot comment, and says so in the job summary.
 
 No input of the action requires a secret.
 
+## Implementation notes (milestone 6)
+
+- `packages/action` implements `measure`, `comment` and `all`. The measure workflow uploads the
+  report with `actions/upload-artifact`; the comment workflow downloads it with
+  `actions/download-artifact` (`run-id` of the triggering run) and runs the action checked out
+  from the default branch.
+- The head report is refused when its SHA differs from the pull request head. This catches
+  mix-ups, not attacks: the artifact is produced by untrusted code, so safety rests on schema
+  validation, size limits and escaping, which apply to every string in the comment.
+- The sticky comment is the first comment by a bot account that starts with the marker.
+- A check run is not created yet; the job's own status and summary carry the result.
+
 ## Consequences
 
 - Safe by default for public repositories.

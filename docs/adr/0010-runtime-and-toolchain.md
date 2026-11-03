@@ -25,6 +25,13 @@ The CLI also runs on developers' machines.
   `stylisticTypeChecked`; formatting with Prettier.
 - pnpm workspaces; versions of third-party GitHub Actions are pinned by commit SHA.
 
+## Implementation notes (milestone 6)
+
+- The action is bundled with esbuild into `packages/action/dist/index.js` (ESM, Node 22 target,
+  about 1.3 MB). `lighthouse` and `chrome-launcher` stay external and are resolved from the
+  measured repository at run time. The bundle is built in CI and by the dogfooding workflows; it
+  is committed only to the thin action repository at release time (ADR 0006).
+
 ## Consequences
 
 - Modern runtime APIs (`zlib` brotli, `parseArgs`, type stripping) without polyfills.

@@ -11,6 +11,7 @@ export default defineConfig({
       '@usertax/core': src('core'),
       '@usertax/measure': src('measure'),
       usertax: src('cli'),
+      '@usertax/action': src('action'),
     },
   },
   test: {

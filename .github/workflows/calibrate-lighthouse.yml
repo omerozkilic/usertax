@@ -59,7 +59,8 @@ jobs:
           path: calibration/
           merge-multiple: true
       - name: Summarise
-        run: node scripts/aggregate-calibration.js calibration/shard-*.json --output calibration/summary.json >> "$GITHUB_STEP_SUMMARY"
+        # Also printed to the log, which can be read through the API without downloading artifacts.
+        run: node scripts/aggregate-calibration.js calibration/shard-*.json --output calibration/summary.json | tee -a "$GITHUB_STEP_SUMMARY"
       - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: calibration-summary

@@ -9,8 +9,8 @@
     "node": ">=22.18.0"
   },
   "scripts": {
-    "build": "tsc -b packages/core packages/measure packages/cli",
-    "clean": "tsc -b --clean packages/core packages/measure packages/cli",
+    "build": "tsc -b packages/core packages/measure packages/cli packages/action",
+    "clean": "tsc -b --clean packages/core packages/measure packages/cli packages/action",
     "typecheck": "pnpm run build && tsc -p tsconfig.json",
     "lint": "eslint .",
     "format": "prettier --write .",
@@ -21,13 +21,15 @@
     "check": "pnpm run typecheck && pnpm run lint && pnpm run format:check && pnpm run test:coverage",
     "build:examples": "pnpm --filter \"./examples/*\" run build",
     "e2e": "node scripts/e2e-examples.js",
-    "demo": "node scripts/demo-add-dependency.js"
+    "demo": "node scripts/demo-add-dependency.js",
+    "build:action": "pnpm --filter @usertax/action run bundle"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
     "@types/node": "^22.19.0",
     "@vitest/coverage-v8": "^5.1.0",
     "chrome-launcher": "1.2.2",
+    "esbuild": "0.28.2",
     "eslint": "^10.14.0",
     "eslint-config-prettier": "^10.1.8",
     "globals": "^17.14.0",

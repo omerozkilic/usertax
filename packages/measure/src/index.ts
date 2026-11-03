@@ -6,6 +6,7 @@ export {
   isHermesBytecode,
   readEntryPrefix,
   readZipEntries,
+  readZipFile,
 } from './archive.js';
 export type { AnalyzeArchiveOptions, ArchiveAnalysis, ArchiveFormat, ZipEntry } from './archive.js';
 export { COMPRESSION_SETTINGS, compressedSize } from './compressed-size.js';
