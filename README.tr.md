@@ -20,8 +20,8 @@ Deterministiktir: **LLM yok, API anahtarı yok, hesap yok, veri yükleme yok.** 
 raporu verir.
 
 > [!NOTE]
-> usertax aktif geliştirme aşamasında. Web bundle ölçümü, atıf ve CLI bugün çalışıyor; GitHub
-> Action, Lighthouse ve mobil desteği yapım aşamasında.
+> usertax aktif geliştirme aşamasında. Web bundle ölçümü (Vite, Next.js), atıf, Lighthouse
+> koşuları ve CLI bugün çalışıyor; GitHub Action ve mobil desteği yapım aşamasında.
 
 ## Gerçek bir örnek
 
