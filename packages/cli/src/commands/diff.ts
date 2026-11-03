@@ -1,26 +1,32 @@
 import { readFile, writeFile } from 'node:fs/promises';
+import { resolve } from 'node:path';
 import { parseArgs } from 'node:util';
 import {
+  ConfigError,
   ReportValidationError,
   diffReports,
+  evaluateBudgets,
   parseReport,
   renderJson,
   renderMarkdown,
 } from '@usertax/core';
 import type { Compression, Report } from '@usertax/core';
+import { gitRoot, loadConfig } from '@usertax/measure';
 import { EXIT, UsageError } from '../io.js';
 import type { Io } from '../io.js';
 
 export const DIFF_HELP = `Usage:
   usertax diff <head-report.json> [--base <base-report.json>] [options]
 
-Compares two usertax reports and prints the result.
+Compares two usertax reports and prints the result. Exits with code 1 when a budget fails.
 
 Options:
   -b, --base <file>          Base report. Without it, head values are listed.
   -f, --format <format>      markdown (default) or json
   -c, --compression <name>   Size shown for web assets: gzip (default), brotli or raw
       --top <n>              Files, packages and archive entries listed per app (default 10)
+      --config <file>        Configuration with budgets and noise thresholds
+                             (default: usertax.config.* at the repository root)
   -o, --output <file>        Write to a file instead of standard output
   -h, --help                 Show this help
 `;
@@ -69,7 +75,8 @@ export async function diffCommand(argv: readonly string[], io: Io): Promise<numb
     options: {
       base: { type: 'string', short: 'b' },
       format: { type: 'string', short: 'f', default: 'markdown' },
-      compression: { type: 'string', short: 'c', default: 'gzip' },
+      compression: { type: 'string', short: 'c' },
+      config: { type: 'string' },
       top: { type: 'string' },
       output: { type: 'string', short: 'o' },
       help: { type: 'boolean', short: 'h' },
@@ -83,21 +90,43 @@ export async function diffCommand(argv: readonly string[], io: Io): Promise<numb
   if (headPath === undefined) throw new UsageError('missing <head-report.json>');
   if (extra.length > 0) throw new UsageError(`unexpected arguments: ${extra.join(' ')}`);
   if (!FORMATS.has(values.format)) throw new UsageError(`unknown format "${values.format}"`);
-  if (!COMPRESSIONS.has(values.compression as Compression)) {
+  if (values.compression !== undefined && !COMPRESSIONS.has(values.compression as Compression)) {
     throw new UsageError(`unknown compression "${values.compression}"`);
   }
-  const compression = values.compression as Compression;
-  const top = parseTop(values.top);
+  const cwd = process.cwd();
+  let config;
+  try {
+    config = (
+      await loadConfig(
+        (await gitRoot(cwd)) ?? cwd,
+        values.config === undefined ? undefined : resolve(cwd, values.config),
+      )
+    )?.config;
+  } catch (error) {
+    if (error instanceof ConfigError) throw new UsageError(error.message);
+    throw error;
+  }
+  const compression =
+    (values.compression as Compression | undefined) ?? config?.compression ?? 'gzip';
+  const top = values.top === undefined ? (config?.top ?? 10) : parseTop(values.top);
 
   const head = await readReport(headPath, 'head');
   const base = values.base === undefined ? undefined : await readReport(values.base, 'base');
-  const diff = diffReports(head, base, { top, rankBy: compression });
+  const diff = diffReports(head, base, {
+    top,
+    rankBy: compression,
+    ...(config?.noise === undefined ? {} : { noise: config.noise }),
+  });
+  const budgets =
+    config === undefined || config.budgets.length === 0
+      ? undefined
+      : evaluateBudgets(diff, config.budgets);
   const output =
     values.format === 'json'
-      ? renderJson(diff)
-      : `${renderMarkdown(diff, { compression, marker: false })}\n`;
+      ? renderJson(diff, budgets)
+      : `${renderMarkdown(diff, { compression, marker: false, ...(budgets === undefined ? {} : { budgets }) })}\n`;
 
   if (values.output === undefined) io.stdout(output);
   else await writeFile(values.output, output);
-  return EXIT.ok;
+  return budgets?.status === 'fail' ? EXIT.budgetFailed : EXIT.ok;
 }
