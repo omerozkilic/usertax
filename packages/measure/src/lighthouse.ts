@@ -1,3 +1,6 @@
+import { createRequire } from 'node:module';
+import { join } from 'node:path';
+import { pathToFileURL } from 'node:url';
 import type { Lighthouse, LighthouseRun } from '@usertax/core';
 
 export class LighthouseError extends Error {
@@ -64,6 +67,12 @@ interface ChromeLauncherModule {
 async function load<T>(name: string): Promise<T> {
   try {
     return (await import(name)) as T;
+  } catch {
+    // The GitHub Action runs from its own directory; look in the project being measured too.
+  }
+  try {
+    const resolved = createRequire(join(process.cwd(), 'package.json')).resolve(name);
+    return (await import(pathToFileURL(resolved).href)) as T;
   } catch {
     throw new LighthouseError(
       `"${name}" is not installed. Lighthouse support needs the optional packages lighthouse and chrome-launcher: npm install -D lighthouse chrome-launcher`,
