@@ -1,5 +1,6 @@
 import { posix } from 'node:path';
-import { decode } from '@jridgewell/sourcemap-codec';
+import { decode, encode } from '@jridgewell/sourcemap-codec';
+import type { SourceMapMappings } from '@jridgewell/sourcemap-codec';
 
 /** The parts of a source map (v3) that usertax reads. */
 export interface RawSourceMap {
@@ -42,10 +43,8 @@ export function parseSourceMap(text: string): RawSourceMap {
   if (typeof json !== 'object' || json === null)
     throw new SourceMapError('source map is not an object');
   const map = json as Record<string, unknown>;
-  if ('sections' in map) {
-    throw new SourceMapError('indexed source maps (with "sections") are not supported');
-  }
   if (map['version'] !== 3) throw new SourceMapError('only source map version 3 is supported');
+  if ('sections' in map) return flattenSections(map['sections']);
   if (!Array.isArray(map['sources']) || typeof map['mappings'] !== 'string') {
     throw new SourceMapError('source map needs "sources" and "mappings"');
   }
@@ -55,6 +54,63 @@ export function parseSourceMap(text: string): RawSourceMap {
     ...(typeof map['sourceRoot'] === 'string' ? { sourceRoot: map['sourceRoot'] } : {}),
     mappings: map['mappings'],
   };
+}
+
+interface Section {
+  offset?: { line?: number; column?: number };
+  map?: unknown;
+  url?: unknown;
+}
+
+/**
+ * Flattens an indexed source map (Metro writes these for React Native bundles): each section's
+ * mappings are shifted by its offset and its sources appended to one list.
+ */
+function flattenSections(sections: unknown): RawSourceMap {
+  if (!Array.isArray(sections)) throw new SourceMapError('"sections" must be an array');
+  const sources: (string | null)[] = [];
+  const lines: SourceMapMappings = [];
+  for (const raw of sections as Section[]) {
+    if (raw.url !== undefined)
+      throw new SourceMapError('indexed source maps with "url" sections are not supported');
+    const inner = raw.map as
+      { sources?: unknown; sourceRoot?: unknown; mappings?: unknown } | undefined;
+    if (
+      inner === undefined ||
+      !Array.isArray(inner.sources) ||
+      typeof inner.mappings !== 'string'
+    ) {
+      throw new SourceMapError('source map section needs "sources" and "mappings"');
+    }
+    const line = raw.offset?.line ?? 0;
+    const column = raw.offset?.column ?? 0;
+    const root = typeof inner.sourceRoot === 'string' ? inner.sourceRoot : '';
+    const base = sources.length;
+    for (const source of inner.sources as (string | null)[])
+      sources.push(source === null ? null : `${root}${source}`);
+    decode(inner.mappings).forEach((segments, index) => {
+      const target = line + index;
+      while (lines.length <= target) lines.push([]);
+      const shifted = segments.map((segment) => {
+        const generated = segment[0] + (index === 0 ? column : 0);
+        if (segment.length === 1) return [generated] as [number];
+        const [, sourceIndex, originalLine, originalColumn] = segment as [
+          number,
+          number,
+          number,
+          number,
+        ];
+        return [generated, sourceIndex + base, originalLine, originalColumn] as [
+          number,
+          number,
+          number,
+          number,
+        ];
+      });
+      (lines[target] as (typeof lines)[number]).push(...shifted);
+    });
+  }
+  return { version: 3, sources, mappings: encode(lines) };
 }
 
 /** Package name of a path inside `node_modules`, e.g. `react-dom` or `@scope/pkg`. */

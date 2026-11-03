@@ -37,3 +37,19 @@ HTML pages and the client reference manifest of `/counter`.
 A real Lighthouse 13.6.0 result for `/` of the built `examples/vite-app`, served by usertax's
 static server, trimmed to the fields usertax reads plus a few for context. The requested URL is
 replaced by its path because the port was random.
+
+## `hermes/`
+
+`index.android.hbc` is real Hermes bytecode compiled by `hermesc` (from the `hermes-compiler`
+package that React Native 0.88 installs) from the two modules in `src/`. `build.mjs` reproduces
+it: it concatenates the modules into a bundle, compiles it with `-output-source-map`, and
+composes the resulting map with the bundle's map, as React Native's build does.
+
+## `archives/`
+
+ZIP archives with the real layouts of an APK, an AAB and an IPA (paths, stored vs deflated
+entries), generated deterministically by `archives/generate.py` with Python's `zipfile` and
+Info-ZIP's `zip` (`-fz` forces ZIP64 records in `zip64-ipa`; `commented` has an archive comment).
+Entry contents are placeholders, except the JS bundles of the APK and IPA, which are the real
+Hermes bytecode from `hermes/`. A real APK built from `examples/expo-app` is analysed in CI
+(see the `android` job) because this environment has no Android SDK.

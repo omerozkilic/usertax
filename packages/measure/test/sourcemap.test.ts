@@ -74,8 +74,39 @@ describe('parseSourceMap', () => {
     expect(() => parseSourceMap('{')).toThrow(SourceMapError);
     expect(() => parseSourceMap('null')).toThrow(/not an object/);
     expect(() => parseSourceMap('{"version":2,"sources":[],"mappings":""}')).toThrow(/version 3/);
-    expect(() => parseSourceMap('{"version":3,"sections":[]}')).toThrow(/indexed/);
     expect(() => parseSourceMap('{"version":3,"mappings":""}')).toThrow(/"sources"/);
+  });
+
+  it('flattens indexed maps (Metro) by shifting each section', () => {
+    const flat = parseSourceMap(
+      JSON.stringify({
+        version: 3,
+        sections: [
+          {
+            offset: { line: 0, column: 0 },
+            map: { version: 3, sources: ['a.js'], mappings: 'AAAA' },
+          },
+          {
+            offset: { line: 0, column: 4 },
+            map: { version: 3, sourceRoot: 'lib/', sources: ['b.js', null], mappings: 'AAAA;ECAA' },
+          },
+        ],
+      }),
+    );
+    expect(flat.sources).toEqual(['a.js', 'lib/b.js', null]);
+    // line 0: a.js at 0, b.js at 4; line 1: column 2 from the second section's null source
+    expect(attributeBytes('aaaabbbb\nxxyy', flat, '.').modules).toEqual([
+      { path: 'a.js', bytes: 4 },
+      { path: 'lib/b.js', bytes: 4 },
+    ]);
+  });
+
+  it('rejects malformed indexed maps', () => {
+    expect(() => parseSourceMap('{"version":3,"sections":{}}')).toThrow(/must be an array/);
+    expect(() => parseSourceMap('{"version":3,"sections":[{"url":"x.map"}]}')).toThrow(
+      /"url" sections/,
+    );
+    expect(() => parseSourceMap('{"version":3,"sections":[{"map":{}}]}')).toThrow(/section needs/);
   });
 
   it('keeps sourceRoot', () => {
