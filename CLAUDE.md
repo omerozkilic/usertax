@@ -20,9 +20,13 @@ decision changes.
 
 ```bash
 pnpm install
-pnpm check          # lint + format:check + typecheck + test:coverage (what CI runs)
+pnpm check          # typecheck (builds) + lint + format:check + test:coverage (what CI runs)
+pnpm test -u        # update Markdown snapshots in packages/*/test/__snapshots__/ (review the diff!)
+pnpm --filter @usertax/core schema   # regenerate the report JSON Schema after `pnpm build`
 pnpm test           # vitest
 pnpm build          # tsc -b for all packages
+pnpm build:examples # build the example apps in examples/
+pnpm e2e            # measure the built examples with the CLI and check invariants
 ```
 
 Every milestone PR must leave `pnpm check` and `pnpm build` green.
@@ -38,6 +42,8 @@ Every milestone PR must leave `pnpm check` and `pnpm build` green.
   Relative imports use the `.js` extension.
 - Tests live in `packages/*/test/` and import packages by name (`@usertax/core`); Vitest aliases
   them to sources. Use fixtures from real files for parsers (source maps, lockfiles, archives).
+- Renderer output is covered by file snapshots (`__snapshots__/*.md`, excluded from Prettier);
+  hostile-input tests render Markdown with a GFM parser and check the resulting HTML.
 - Coverage thresholds are enforced (90 % lines/functions/statements, 85 % branches).
 - Third-party GitHub Actions are pinned by commit SHA with the version in a comment.
 

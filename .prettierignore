@@ -2,3 +2,6 @@ dist/
 coverage/
 pnpm-lock.yaml
 CHANGELOG.md
+packages/core/schema/
+**/__snapshots__/
+packages/measure/test/fixtures/

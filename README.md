@@ -39,7 +39,8 @@ One sticky comment per pull request, plus a job summary, a check status and a JS
 6. **Fast.** Base reports are stored as artifacts on the default branch and reused in PRs.
 7. **Monorepos.** Several apps, one comment.
 
-Design decisions are recorded in [`docs/adr/`](docs/adr/).
+Design decisions are recorded in [`docs/adr/`](docs/adr/). Metric ids, budgets and the noise
+model are described in [`docs/metrics.md`](docs/metrics.md).
 
 ## Roadmap
 

@@ -7,7 +7,13 @@ import tseslint from 'typescript-eslint';
 
 export default defineConfig(
   {
-    ignores: ['**/dist/**', '**/coverage/**', '**/node_modules/**'],
+    ignores: [
+      '**/dist/**',
+      '**/coverage/**',
+      '**/node_modules/**',
+      '**/test/fixtures/**',
+      'examples/**',
+    ],
   },
   js.configs.recommended,
   tseslint.configs.strictTypeChecked,
@@ -17,7 +23,12 @@ export default defineConfig(
       globals: globals.node,
       parserOptions: {
         projectService: {
-          allowDefaultProject: ['eslint.config.js', 'packages/cli/bin/*.js'],
+          allowDefaultProject: [
+            'eslint.config.js',
+            'packages/cli/bin/*.js',
+            'packages/*/scripts/*.js',
+            'scripts/*.js',
+          ],
         },
         tsconfigRootDir: import.meta.dirname,
       },
@@ -25,6 +36,8 @@ export default defineConfig(
     rules: {
       '@typescript-eslint/consistent-type-imports': 'error',
       '@typescript-eslint/restrict-template-expressions': ['error', { allowNumber: true }],
+      // Conflicts with no-non-null-assertion; we prefer explicit `as` casts after checks.
+      '@typescript-eslint/non-nullable-type-assertion-style': 'off',
       eqeqeq: ['error', 'always'],
       'no-console': 'error',
     },
