@@ -20,7 +20,8 @@
     "test:coverage": "vitest run --coverage",
     "check": "pnpm run typecheck && pnpm run lint && pnpm run format:check && pnpm run test:coverage",
     "build:examples": "pnpm --filter \"./examples/*\" run build",
-    "e2e": "node scripts/e2e-examples.js"
+    "e2e": "node scripts/e2e-examples.js",
+    "demo": "node scripts/demo-add-dependency.js"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
@@ -31,6 +32,7 @@
     "globals": "^17.14.0",
     "micromark": "^4.0.3",
     "micromark-extension-gfm": "^3.0.0",
+    "module-replacements": "3.4.0",
     "prettier": "^3.9.10",
     "typescript": "~6.0.3",
     "typescript-eslint": "^8.72.1",

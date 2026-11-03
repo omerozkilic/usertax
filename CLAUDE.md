@@ -27,6 +27,8 @@ pnpm test           # vitest
 pnpm build          # tsc -b for all packages
 pnpm build:examples # build the example apps in examples/
 pnpm e2e            # measure the built examples with the CLI and check invariants
+pnpm demo           # add moment to the Vite example in a worktree; regenerates docs/demo/add-moment.md with --output
+node scripts/update-alternatives.js   # regenerate e18e alternatives after bumping module-replacements
 ```
 
 Every milestone PR must leave `pnpm check` and `pnpm build` green.

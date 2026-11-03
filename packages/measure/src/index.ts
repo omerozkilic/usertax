@@ -4,6 +4,24 @@ export { DEFAULT_OUT_DIR, detectFramework, readPackageJson } from './detect.js';
 export type { PackageJson } from './detect.js';
 export { gitHead, gitRoot } from './git.js';
 export { assignKeys, stableKey } from './hash.js';
+export {
+  LockfileError,
+  dependenciesOf,
+  findLockfile,
+  parseNpmLock,
+  parsePnpmLock,
+  parseYarnLock,
+  readAppDependencies,
+  readLockGraph,
+} from './lockfile/index.js';
+export type {
+  AppDependencies,
+  Importer,
+  LockGraph,
+  LockNode,
+  LockfileLocation,
+  YarnWorkspace,
+} from './lockfile/index.js';
 export { createReport } from './report.js';
 export type { CreateReportOptions } from './report.js';
 export {

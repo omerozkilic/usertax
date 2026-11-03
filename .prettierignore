@@ -5,3 +5,5 @@ CHANGELOG.md
 packages/core/schema/
 **/__snapshots__/
 packages/measure/test/fixtures/
+packages/core/src/data/
+docs/demo/add-moment.md

@@ -19,6 +19,12 @@ Base `aaaaaaa` → head `aaaaaaa` · 3 apps · ⚠️ 2 budget warnings
 
 </details>
 
+**Packages with the largest change** <sub>minified bytes from source maps</sub>
+
+| Package | Bundle | Base | Head | Change |
+| --- | --- | --: | --: | --: |
+| `lodash` | web | 9.0 kB | – | -9.0 kB |
+
 <details><summary>Files with the largest change (gzip)</summary>
 
 | File | Base | Head | Change |
@@ -26,14 +32,6 @@ Base `aaaaaaa` → head `aaaaaaa` · 3 apps · ⚠️ 2 budget warnings
 | `legacy-1.js` | 3.0 kB | – | -3.0 kB |
 
 …and 1 more changed file.
-
-</details>
-
-<details><summary>Packages with the largest change (minified bytes from source maps)</summary>
-
-| Package | Bundle | Base | Head | Change |
-| --- | --- | --: | --: | --: |
-| `lodash` (removed) | web | 9.0 kB | – | -9.0 kB |
 
 </details>
 
@@ -47,15 +45,13 @@ Base `aaaaaaa` → head `aaaaaaa` · 3 apps · ⚠️ 2 budget warnings
 | 🆕 | android\: js\-bundle \(compressed\) | – | 1.0 MB | new |
 | 🆕 | android\: native \(compressed\) | – | 20.0 MB | new |
 
-<details><summary>Packages with the largest change (minified bytes from source maps)</summary>
+**Packages with the largest change** <sub>minified bytes from source maps</sub>
 
 | Package | Bundle | Base | Head | Change |
 | --- | --- | --: | --: | --: |
-| `react-native` (new) | Android | – | 500.0 kB | +500.0 kB |
+| `react-native` | Android | – | 500.0 kB | +500.0 kB |
 
 …and 1 more changed package.
-
-</details>
 
 ### old\-app <sub>Expo · `apps/mobile` · removed</sub>
 
@@ -67,15 +63,13 @@ Base `aaaaaaa` → head `aaaaaaa` · 3 apps · ⚠️ 2 budget warnings
 | ➖ | android\: js\-bundle \(compressed\) | 1.0 MB | – | removed |
 | ➖ | android\: native \(compressed\) | 20.0 MB | – | removed |
 
-<details><summary>Packages with the largest change (minified bytes from source maps)</summary>
+**Packages with the largest change** <sub>minified bytes from source maps</sub>
 
 | Package | Bundle | Base | Head | Change |
 | --- | --- | --: | --: | --: |
-| `react-native` (removed) | Android | 500.0 kB | – | -500.0 kB |
+| `react-native` | Android | 500.0 kB | – | -500.0 kB |
 
 …and 1 more changed package.
-
-</details>
 
 ### Budgets
 
@@ -84,4 +78,4 @@ Base `aaaaaaa` → head `aaaaaaa` · 3 apps · ⚠️ 2 budget warnings
 | ⚠️ | `web` | CSS total | maxDecreasePercent 10% | 25% | maxDecreasePercent exceeded |
 | ⚠️ | `web` | JS total | min 50.0 kB | 34.0 kB | below min |
 
-<sub>usertax 0\.1\.0 · gzip level 9, brotli quality 11 · package sizes are minified bytes from source maps</sub>
+<sub>usertax 0\.1\.0 · gzip level 9, brotli quality 11</sub>

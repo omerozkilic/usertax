@@ -1,32 +1,54 @@
+<div align="center">
+
 # usertax
 
-**Bu pull request kullanıcıya ne kadara mal oluyor?**
+**Bu pull request kullanıcıya ne kadara mal oluyor?**<br>
+Web ve mobil · _Nedenini_ açıklar · API anahtarı yok
 
-usertax her pull request'in kullanıcıya maliyetini **web** ve **mobil** (React Native, Expo ve
-bare) için ölçer ve değişimin _nedenini_ açıklar: hangi bağımlılık eklendi veya güncellendi,
-hangi modüller büyüdü.
+[English README](README.md) · [Metrikler ve bütçeler](docs/metrics.md) · [Mimari kararlar](docs/adr/README.md) · [Demo](docs/demo/README.md)
 
-> **Durum: erken geliştirme.** Henüz sürüm ve yayınlanmış bir ölçüm yok. README'ye girecek her
-> rakam `examples/` altındaki uygulamalarda ölçülecek ve nasıl yeniden üretileceği
-> yazılacak.
+</div>
 
-## Ne raporlayacak
+---
 
-- **Web:** Lighthouse performans skoru ve LCP, TBT, CLS (birden fazla koşunun medyanı ve
-  dağılımı), route başına JavaScript boyutu (gzip ve brotli), base → head farkı.
-- **Mobil:** iOS ve Android JS / Hermes bundle boyutu, APK / AAB / IPA boyutu ve kırılımı.
-- **Neden:** PR'daki lockfile farkı ile source map'ten modül boyutlarının birleştirilmesi;
-  alternatif önerileri yalnızca kaynağı belirtilmiş küratörlü bir listeden.
-- **Bütçeler:** uyarı / hata eşikleri, GitHub check durumu, JSON çıktı.
+usertax bir pull request'in kullanıcıya maliyetini ölçer: route başına gönderilen JavaScript,
+Lighthouse lab metrikleri, React Native bundle'ları ve APK / AAB / IPA boyutu. Asıl farkı,
+değişimin **nedenini** söylemesidir: PR'daki lockfile farkını source map'ten çıkan boyutlarla
+birleştirir; yorum "bundle büyüdü" yerine _"`moment` eklendi, 60 kB getirdi"_ der.
 
-## İlkeler
+Deterministiktir: **LLM yok, API anahtarı yok, hesap yok, veri yükleme yok.** Aynı build aynı
+raporu verir.
 
-Deterministik çekirdek ve API anahtarı yok; dürüst rakamlar (gürültü ölçülür); sıfır
-konfigürasyon; mobil build'i action yapmaz; fork PR'larında güvenli; base raporları artefakt
-olarak yeniden kullanılır; monorepo desteği. Kararlar [`docs/adr/`](docs/adr/) altında.
+> [!NOTE]
+> usertax aktif geliştirme aşamasında. Web bundle ölçümü, atıf ve CLI bugün çalışıyor; GitHub
+> Action, Lighthouse ve mobil desteği yapım aşamasında.
 
-Ayrıntılar ve yol haritası için [İngilizce README](README.md).
+## Gerçek bir örnek
+
+[`examples/vite-app`](examples/vite-app) uygulamasına tarih göstermek için `moment` ekleyen bir
+PR. Gerçek build'lerde ölçüldü ([yorumun tamamı](docs/demo/add-moment.md),
+[nasıl yeniden üretilir](docs/demo/README.md)):
+
+- Ana sayfanın JavaScript'i (gzip): **68.9 kB → 88.5 kB (+19.6 kB, +%28.4)**
+- Neden: `moment` `2.30.1` doğrudan bağımlılık olarak eklendi, bundle'a **60.1 kB** (minified)
+  ekledi.
+- Alternatifler ([e18e module-replacements](https://github.com/e18e/module-replacements)):
+  day.js, date-fns, luxon, Date, Temporal.
+
+## Neden usertax?
+
+- **Değişimi açıklar:** pnpm, npm, Yarn 1 ve Yarn 2+ lockfile farkları byte düzeyinde source map
+  atfıyla birleştirilir; dolaylı paketler ve onları getiren bağımlılık da gösterilir.
+- **Dürüst rakamlar:** Her JavaScript byte'ı bir pakete, sizin kodunuza ya da açıkça
+  "atfedilmemiş"e yazılır; toplam dosya boyutuna eşittir. Lighthouse değişimleri ölçülmüş
+  gürültüye göre değerlendirilir.
+- **Yalnızca kaynaklı öneriler:** Alternatifler MIT lisanslı e18e veri setinden gelir.
+- **Fork PR'larında güvenli:** Ölçüm `pull_request`'te, yorum `workflow_run`'da yapılır.
+- **Hızlı:** Base raporu varsayılan branch'te bir kez üretilir, her PR'da yeniden kullanılır.
+
+Durum tablosu, hızlı kurulum ve geliştirme komutları için [İngilizce README](README.md).
 
 ## Lisans
 
-[MIT](LICENSE)
+[MIT](LICENSE). Alternatif paket verisi [e18e module-replacements](https://github.com/e18e/module-replacements)
+(MIT) veri setinden üretilir.

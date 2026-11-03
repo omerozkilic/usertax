@@ -630,6 +630,18 @@
                 },
                 "direct": {
                   "type": "boolean"
+                },
+                "dev": {
+                  "type": "boolean"
+                },
+                "via": {
+                  "maxItems": 3,
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 214
+                  }
                 }
               },
               "required": [

@@ -1,3 +1,5 @@
+export { ALTERNATIVES_SOURCE, alternativesFor } from './alternatives.js';
+export type { Alternatives } from './alternatives.js';
 export { budgetSchema, evaluateBudgets } from './budgets.js';
 export type {
   Budget,
@@ -6,6 +8,8 @@ export type {
   BudgetResult,
   BudgetStatus,
 } from './budgets.js';
+export { compareVersions, diffDependencies } from './dependencies.js';
+export type { DependencyChange, DependencyChangeKind } from './dependencies.js';
 export { DIFF_SCHEMA_VERSION, diffReports } from './diff.js';
 export type {
   AppDiff,
@@ -16,6 +20,7 @@ export type {
   MetricDiff,
   NoiseThreshold,
   NoiseThresholds,
+  PackageCause,
   PackageDiff,
   ReportDiff,
   ReportRef,
@@ -40,6 +45,7 @@ export { renderJson } from './render/json.js';
 export {
   COMMENT_MARKER,
   DEFAULT_MAX_LENGTH,
+  causeText,
   formatValue,
   renderMarkdown,
 } from './render/markdown.js';

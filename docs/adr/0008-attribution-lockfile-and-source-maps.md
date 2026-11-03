@@ -33,6 +33,15 @@ changed, but not why the change happened in this PR.
   recorded), plus entries we add by hand with a citation. A test fails if an entry has no
   source. No suggestion is generated.
 
+## Implementation notes (milestone 3)
+
+- Parsers turn each lockfile into one graph of importers and resolved nodes; real lockfiles of
+  the same workspace from pnpm 10, npm 10, Yarn 1 and Yarn 4 are test fixtures, and all four must
+  produce the same dependency list.
+- Bun lockfiles are not supported yet.
+- The alternatives data is generated from module-replacements 3.4.0 (`preferred`, `native` and
+  `micro-utilities` manifests); suggestions link to the dataset's own guides.
+
 ## Consequences
 
 - The comment answers "why" without an LLM.

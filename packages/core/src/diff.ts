@@ -1,3 +1,7 @@
+import { alternativesFor } from './alternatives.js';
+import type { Alternatives } from './alternatives.js';
+import { diffDependencies } from './dependencies.js';
+import type { DependencyChange } from './dependencies.js';
 import { extractMetrics } from './metrics.js';
 import type {
   LighthouseMetricName,
@@ -91,6 +95,13 @@ export interface AssetDiff {
   readonly delta: SizeDelta;
 }
 
+/**
+ * Why a package's bundle bytes changed, from the lockfiles (ADR 0008). `no-version-change`
+ * means the lockfiles agree on its versions, so the change comes from how much of it is
+ * imported (or from a dependency that moved into or out of the bundle).
+ */
+export type PackageCause = DependencyChange | { readonly kind: 'no-version-change' };
+
 export interface PackageDiff {
   /** `web` for browser bundles, otherwise the mobile platform. */
   readonly scope: 'web' | 'ios' | 'android';
@@ -100,6 +111,10 @@ export interface PackageDiff {
   readonly head: number;
   readonly delta: number;
   readonly change: Change;
+  /** Set when both reports carry a dependency snapshot. */
+  readonly cause?: PackageCause;
+  /** Curated alternatives, for packages that were added or grew. */
+  readonly alternatives?: Alternatives;
 }
 
 export interface ArchiveEntryDiff {
@@ -125,11 +140,17 @@ export interface AppDiff {
   readonly assets: readonly AssetDiff[];
   readonly packages: readonly PackageDiff[];
   readonly archiveEntries: readonly ArchiveEntryDiff[];
+  /**
+   * Lockfile changes not explained by the package list above (dev tooling, packages that are
+   * not bundled, or packages whose bytes did not change). Empty without dependency snapshots.
+   */
+  readonly dependencies: readonly DependencyChange[];
   /** Counts of items left out of the lists above. */
   readonly omitted: {
     readonly assets: number;
     readonly packages: number;
     readonly archiveEntries: number;
+    readonly dependencies: number;
   };
 }
 
@@ -392,6 +413,34 @@ function diffArchiveEntries(base: App | undefined, head: App | undefined, limit:
   return top(diffs, limit, (d) => Math.abs(d.delta));
 }
 
+const DEPENDENCY_LIMIT = 50;
+
+function explain(
+  packages: PackageDiff[],
+  base: App | undefined,
+  head: App | undefined,
+): { packages: PackageDiff[]; dependencies: DependencyChange[] } {
+  const known = base?.dependencies !== undefined && head?.dependencies !== undefined;
+  const changes = known ? diffDependencies(base.dependencies, head.dependencies) : [];
+  const byName = new Map(changes.map((c) => [c.name, c]));
+  const explainedNames = new Set<string>();
+  const result = packages.map((pkg) => {
+    if (pkg.name === null) return pkg;
+    const cause: PackageCause | undefined = known
+      ? (byName.get(pkg.name) ?? { kind: 'no-version-change' })
+      : undefined;
+    if (cause !== undefined && cause.kind !== 'no-version-change') explainedNames.add(pkg.name);
+    const grew = pkg.change === 'added' || pkg.change === 'increased';
+    const alternatives = grew ? alternativesFor(pkg.name) : undefined;
+    return {
+      ...pkg,
+      ...(cause === undefined ? {} : { cause }),
+      ...(alternatives === undefined ? {} : { alternatives }),
+    };
+  });
+  return { packages: result, dependencies: changes.filter((c) => !explainedNames.has(c.name)) };
+}
+
 function warningsFor(base: Report, head: Report): string[] {
   const warnings: string[] = [];
   const bc = base.settings.compression;
@@ -427,6 +476,7 @@ function diffApp(
   const assets = diffAssets(base, head, options.top, options.rankBy);
   const packages = diffPackages(base, head, options.top);
   const archiveEntries = diffArchiveEntries(base, head, options.top);
+  const explained = explain(packages.list, base, head);
   let status: AppDiff['status'] = 'compared';
   if (!hasBase) status = 'head-only';
   else if (base === undefined) status = 'added';
@@ -440,12 +490,14 @@ function diffApp(
     status,
     metrics: diffMetrics(base, head, options.noise),
     assets: hasBase ? assets.list : [],
-    packages: hasBase ? packages.list : [],
+    packages: hasBase ? explained.packages : [],
     archiveEntries: archiveEntries.list,
+    dependencies: hasBase ? explained.dependencies.slice(0, DEPENDENCY_LIMIT) : [],
     omitted: {
       assets: hasBase ? assets.omitted : 0,
       packages: hasBase ? packages.omitted : 0,
       archiveEntries: archiveEntries.omitted,
+      dependencies: hasBase ? Math.max(0, explained.dependencies.length - DEPENDENCY_LIMIT) : 0,
     },
   };
 }

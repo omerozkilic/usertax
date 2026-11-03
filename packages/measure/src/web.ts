@@ -1,6 +1,6 @@
 import { readFile, readdir, stat } from 'node:fs/promises';
 import { join, posix, relative, sep } from 'node:path';
-import type { App, Asset, AssetType, Framework, Route } from '@usertax/core';
+import type { App, Asset, AssetType, Dependency, Framework, Route } from '@usertax/core';
 import { compressedSize } from './compressed-size.js';
 import { assignKeys } from './hash.js';
 import { SourceMapError, attributeBytes, parseSourceMap } from './sourcemap.js';
@@ -222,6 +222,8 @@ export interface MeasureWebAppOptions {
   /** Absolute path of the build output directory. */
   readonly outDir: string;
   readonly framework: Framework;
+  /** Resolved dependencies from the lockfile, for attribution (ADR 0008). */
+  readonly dependencies?: readonly Dependency[];
 }
 
 export interface MeasureResult {
@@ -243,6 +245,7 @@ export async function measureWebApp(options: MeasureWebAppOptions): Promise<Meas
       framework: options.framework,
       assets: scan.assets,
       ...(routes === undefined ? {} : { routes }),
+      ...(options.dependencies === undefined ? {} : { dependencies: [...options.dependencies] }),
     },
     warnings: scan.warnings,
   };

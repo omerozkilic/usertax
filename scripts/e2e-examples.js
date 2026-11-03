@@ -49,6 +49,11 @@ for (const example of examples) {
     `${example}: react-dom not found in any chunk`,
   );
 
+  check(
+    (app.dependencies ?? []).some((d) => d.name === 'react-dom' && d.direct),
+    `${example}: react-dom missing from the lockfile dependencies`,
+  );
+
   process.stdout.write(execFileSync(process.execPath, [cli, 'diff', output], { encoding: 'utf8' }));
 }
 

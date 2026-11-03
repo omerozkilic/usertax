@@ -5,7 +5,8 @@
     "composite": false,
     "declaration": false,
     "declarationMap": false,
-    "sourceMap": false
+    "sourceMap": false,
+    "resolveJsonModule": true
   },
   "include": ["*.ts", "*.js", "packages/*/test/**/*.ts", "packages/*/vitest.config.ts"]
 }
