@@ -9,6 +9,7 @@ import type { Io } from './io.js';
 export type { Io } from './io.js';
 export { EXIT } from './io.js';
 export { VERSION } from './version.js';
+export { nodeVersionWarning } from './node-version.js';
 export { MCP_HELP, createMcpServer, mcpCommand } from './mcp.js';
 export type { McpOptions } from './mcp.js';
 

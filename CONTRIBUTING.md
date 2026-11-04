@@ -4,7 +4,7 @@ Thanks for your interest! usertax is in early development; issues and discussion
 
 ## Setup
 
-Requirements: Node.js 22.18 or newer (24 recommended, see `.nvmrc`) and pnpm 10
+Requirements: Node.js 22.23.4 / 24.22.1 / 26.12.1 or newer (24 recommended, see `.nvmrc`) and pnpm 10
 (`corepack enable` installs the version pinned in `package.json`).
 
 ```bash

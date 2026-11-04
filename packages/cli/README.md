@@ -121,7 +121,7 @@ for the budgets, in a setup that is safe for pull requests from forks.
 | `usertax mcp`                         | Start the MCP server on standard input and output.                         |
 
 Exit codes: `0` success, `1` a budget failed, `2` invalid usage or input, `3` internal error.
-Requires Node.js 22.18 or later. `lighthouse` and `chrome-launcher` are optional peer
+Requires Node.js 22.23.4, 24.22.1, 26.12.1 or later (the October 2026 security releases). `lighthouse` and `chrome-launcher` are optional peer
 dependencies, needed only for `--lighthouse`.
 
 ## Links
