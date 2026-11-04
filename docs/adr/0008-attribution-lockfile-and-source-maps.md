@@ -42,6 +42,16 @@ changed, but not why the change happened in this PR.
 - The alternatives data is generated from module-replacements 3.4.0 (`preferred`, `native` and
   `micro-utilities` manifests); suggestions link to the dataset's own guides.
 
+## Implementation notes (Next.js webpack builds)
+
+- Bundlers can chain a dependency's own source map without rebasing its relative paths; Next.js's
+  webpack build does this for Next.js itself (`webpack://_N_E/../../src/client/…`). Such a
+  source is outside the app directory, not in `node_modules`, and neither on disk nor inside the
+  repository. Counting it as first-party would claim hundreds of kilobytes of Next.js as the
+  app's code, and the package cannot be recovered from the path, so these _foreign_ sources are
+  counted as unattributed. Workspace packages imported from outside the app directory exist on
+  disk and stay first-party.
+
 ## Consequences
 
 - The comment answers "why" without an LLM.

@@ -103,16 +103,29 @@ Rules:
 - JavaScript files are attributed byte by byte through their source map (a
   `sourceMappingURL` comment, an inline map, or a `<file>.map` next to the file). Every byte ends
   up in a package, in first-party code, or in `unattributedBytes`; the three add up to the file
-  size.
+  size. `unattributedBytes` holds bytes that no mapping covers, and bytes mapped to a _foreign_
+  source: a path outside the app directory that is not in `node_modules` and exists neither on
+  disk nor inside the repository. Foreign sources appear when a bundler chains a dependency's own
+  source map without rebasing its paths; usertax cannot tell which package they belong to and
+  does not count them as your code.
+- webpack source paths (`webpack://<namespace>/…`) are resolved against the webpack context (the
+  app root); the webpack runtime and ignored or generated modules are shown as `(virtual)`.
 - For Vite, `.vite/manifest.json` (`build.manifest: true`) maps each HTML entry to the files it
   loads initially. Those become routes: `index.html` → `/`, `about/index.html` → `/about/`.
   Dynamic imports are not part of a route's initial JS.
 - For Next.js (`.next/`, `productionBrowserSourceMaps: true`), routes come from the script and
   stylesheet tags of the prerendered pages, which is exactly what a browser loads first; legacy
   `noModule` polyfills are excluded. Pages without prerendered HTML use the client reference
-  manifest. Next.js chunk names are only hashes, so a chunk is identified by its largest source
-  module, e.g. `chunks/[node_modules/next/dist/compiled/react-dom/cjs/react-dom-client.production.js].js`.
-  Next.js bundles its own copy of React, so React's bytes are attributed to the `next` package.
+  manifest. Both bundlers are supported:
+  - Turbopack (the default): chunk names are only hashes, so a chunk is identified by its largest
+    source module, e.g.
+    `chunks/[node_modules/next/dist/compiled/react-dom/cjs/react-dom-client.production.js].js`.
+    Next.js bundles its own copy of React, so React's bytes are attributed to the `next` package.
+  - webpack (`next build --webpack`): chunk names keep their stable part, e.g.
+    `chunks/framework-[hash].js`. Next.js's webpack build maps Next.js's own client code to its
+    original TypeScript sources (`../../src/client/…`), which are foreign sources: those bytes are
+    reported as unattributed, not as `next` and not as your code. Packages in `node_modules`
+    (React in `framework-[hash].js`, your dependencies) are attributed as usual.
 
 ## React Native and Expo
 

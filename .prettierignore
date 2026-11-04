@@ -8,4 +8,7 @@ packages/measure/test/fixtures/
 packages/core/src/data/
 docs/demo/add-moment.md
 .next/
+.next-webpack/
 docs/benchmarks/data/
+release/
+CHANGELOG.md

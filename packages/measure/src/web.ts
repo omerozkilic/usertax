@@ -3,6 +3,7 @@ import { join, posix, relative, sep } from 'node:path';
 import type { App, Asset, AssetType, Dependency, Framework, Route } from '@usertax/core';
 import { compressedSize } from './compressed-size.js';
 import { assignKeys } from './hash.js';
+import { foreignSources } from './foreign.js';
 import { SourceMapError, attributeBytes, parseSourceMap } from './sourcemap.js';
 import type { RawSourceMap } from './sourcemap.js';
 
@@ -95,6 +96,8 @@ export interface ScanOptions {
   readonly appDir: string;
   /** Largest modules kept per asset. Defaults to 100. */
   readonly maxModules?: number;
+  /** App root relative to the repository root, to recognise sources outside the repository. */
+  readonly appPath?: string;
 }
 
 export interface ScanResult {
@@ -143,7 +146,13 @@ export async function scanOutputDir(options: ScanOptions): Promise<ScanResult> {
           });
         } else if (found !== undefined) {
           const mapDir = posix.normalize(posix.join(outRelative, posix.dirname(found.mapFile)));
-          const attribution = attributeBytes(code, found.map, mapDir);
+          const isForeign = await foreignSources(
+            found.map,
+            mapDir,
+            options.appDir,
+            options.appPath,
+          );
+          const attribution = attributeBytes(code, found.map, mapDir, isForeign);
           asset.packages = [...attribution.packages.entries()]
             .map(([name, bytes]) => ({ name, bytes }))
             .sort((a, b) => b.bytes - a.bytes || a.name.localeCompare(b.name));
@@ -238,7 +247,11 @@ export interface MeasureResult {
 
 /** Measures a built web app. The app must already be built. */
 export async function measureWebApp(options: MeasureWebAppOptions): Promise<MeasureResult> {
-  const scan = await scanOutputDir({ outDir: options.outDir, appDir: options.appDir });
+  const scan = await scanOutputDir({
+    outDir: options.outDir,
+    appDir: options.appDir,
+    appPath: options.path,
+  });
   const routes =
     options.framework === 'vite' ? await viteRoutes(options.outDir, scan.keys) : undefined;
   return {

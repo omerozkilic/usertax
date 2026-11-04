@@ -21,6 +21,15 @@ Release notes must be accurate without manual bookkeeping.
   release PRs or tags appear during early development. Creating tags, publishing to npm and
   publishing to Marketplace are done only with the maintainer's approval.
 
+## Implementation notes (milestone 7)
+
+- `release-please-config.json` and `.release-please-manifest.json` (starting from 0.0.0, so the
+  first release is 0.1.0 unless the maintainer sets `release-as`). The workflow
+  `.github/workflows/release.yml` also publishes the action repository and npm, each only when
+  its secret exists; see [docs/releasing.md](../releasing.md).
+- The npm package `usertax` is one bundled file (core and measure inside), built by
+  `pnpm pack:cli`; the workspace packages stay private for now.
+
 ## Consequences
 
 - CHANGELOG and versions follow from commit history.

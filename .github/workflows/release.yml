@@ -1,0 +1,128 @@
+name: Release
+
+# release-please opens and updates a release pull request from Conventional Commits. Merging it
+# (a maintainer's decision) creates the tag vX.Y.Z and the GitHub release; the jobs below then
+# publish, each only when its secret is configured (docs/releasing.md):
+#   ACTION_REPO_DEPLOY_KEY  write deploy key of omerozkilic/usertax-action (ADR 0006)
+#   NPM_TOKEN               npm automation token for the usertax package
+on:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  release-please:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+    outputs:
+      released: ${{ steps.release.outputs.release_created }}
+      tag: ${{ steps.release.outputs.tag_name }}
+      major: ${{ steps.release.outputs.major }}
+    steps:
+      - id: release
+        uses: googleapis/release-please-action@45996ed1f6d02564a971a2fa1b5860e934307cf7 # v5.0.0
+        with:
+          config-file: release-please-config.json
+          manifest-file: .release-please-manifest.json
+
+  action-repo:
+    name: Publish to usertax-action
+    needs: release-please
+    if: needs.release-please.outputs.released == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check for the deploy key
+        id: key
+        env:
+          KEY: ${{ secrets.ACTION_REPO_DEPLOY_KEY }}
+        run: |
+          if [ -z "$KEY" ]; then
+            echo "::notice::ACTION_REPO_DEPLOY_KEY is not set; skipping the usertax-action repository"
+            echo "present=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "present=true" >> "$GITHUB_OUTPUT"
+          fi
+      - if: steps.key.outputs.present == 'true'
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - if: steps.key.outputs.present == 'true'
+        uses: pnpm/action-setup@ea17c68df8912ef543352723c149a84f56e3d413 # v6.1.0
+      - if: steps.key.outputs.present == 'true'
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: 24
+          cache: pnpm
+      - if: steps.key.outputs.present == 'true'
+        run: pnpm install --frozen-lockfile && pnpm build && pnpm build:action
+      - if: steps.key.outputs.present == 'true'
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          repository: omerozkilic/usertax-action
+          ssh-key: ${{ secrets.ACTION_REPO_DEPLOY_KEY }}
+          path: usertax-action
+      - if: steps.key.outputs.present == 'true'
+        name: Sync, commit and tag
+        env:
+          TAG: ${{ needs.release-please.outputs.tag }}
+          MAJOR: v${{ needs.release-please.outputs.major }}
+        run: |
+          mkdir -p usertax-action/dist
+          cp packages/action/action.yml usertax-action/action.yml
+          cp packages/action/dist/index.js usertax-action/dist/index.js
+          cp packages/action/README.md usertax-action/README.md
+          cp LICENSE usertax-action/LICENSE
+          cd usertax-action
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -m "release: usertax $TAG" || echo "no changes"
+          git tag -a "$TAG" -m "usertax $TAG"
+          git tag -fa "$MAJOR" -m "usertax $TAG"
+          git push origin HEAD:main
+          git push origin "$TAG"
+          git push --force origin "$MAJOR"
+
+  npm:
+    name: Publish to npm
+    needs: release-please
+    if: needs.release-please.outputs.released == 'true'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - name: Check for the npm token
+        id: token
+        env:
+          TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: |
+          if [ -z "$TOKEN" ]; then
+            echo "::notice::NPM_TOKEN is not set; skipping npm"
+            echo "present=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "present=true" >> "$GITHUB_OUTPUT"
+          fi
+      - if: steps.token.outputs.present == 'true'
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - if: steps.token.outputs.present == 'true'
+        uses: pnpm/action-setup@ea17c68df8912ef543352723c149a84f56e3d413 # v6.1.0
+      - if: steps.token.outputs.present == 'true'
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: 24
+          cache: pnpm
+          registry-url: https://registry.npmjs.org
+      - if: steps.token.outputs.present == 'true'
+        run: pnpm install --frozen-lockfile && pnpm build && pnpm pack:cli
+      - if: steps.token.outputs.present == 'true'
+        working-directory: release/npm
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: npm publish --provenance --access public

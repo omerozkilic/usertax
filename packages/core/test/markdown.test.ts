@@ -152,6 +152,21 @@ describe('renderMarkdown', () => {
     );
   });
 
+  it('suggests alternatives once for a package that changed in several bundles', () => {
+    const android = mobileApp().bundles?.[0];
+    if (android === undefined) throw new Error('fixture without a bundle');
+    const ios = { ...android, platform: 'ios' as const, file: 'dist/ios/main.jsbundle' };
+    const before = report([mobileApp({ bundles: [android, ios] })]);
+    const after = modify(before, (r) => {
+      for (const bundle of r.apps[0]?.bundles ?? []) {
+        bundle.packages = [...(bundle.packages ?? []), { name: 'moment', bytes: 60_000 }];
+      }
+    });
+    const markdown = renderMarkdown(diffReports(after, before));
+    expect(markdown.match(/\| `moment` \|/g)).toHaveLength(2);
+    expect(markdown.match(/^- `moment`:/gm)).toHaveLength(1);
+  });
+
   it('says so when nothing changed or nothing was measured', () => {
     const empty = report([webApp({ id: 'empty', name: 'empty', assets: [], routes: [] })]);
     expect(renderMarkdown(diffReports(base, base))).toContain('_No changes._');

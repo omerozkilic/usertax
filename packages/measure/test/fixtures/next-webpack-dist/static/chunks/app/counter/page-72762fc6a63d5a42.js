@@ -1,0 +1,2 @@
+(self.webpackChunk_N_E=self.webpackChunk_N_E||[]).push([[601],{2425:(e,t,n)=>{"use strict";n.d(t,{Counter:()=>i});var s=n(6369),u=n(6245);function i(){let[e,t]=(0,u.useState)(0);return(0,s.jsxs)("button",{type:"button",onClick:()=>t(e=>e+1),children:["Clicked ",e," times"]})}},3666:(e,t,n)=>{Promise.resolve().then(n.bind(n,2425))}},e=>{e.O(0,[956,882,358],()=>e(e.s=3666)),_N_E=e.O()}]);
+//# sourceMappingURL=page-72762fc6a63d5a42.js.map

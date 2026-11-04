@@ -32,6 +32,15 @@ Part of the real `.next/` output of `pnpm --filter @usertax-examples/next-app bu
 `build-manifest.json`, `static/` (with `sourcesContent` removed from the maps), the prerendered
 HTML pages and the client reference manifest of `/counter`.
 
+## `next-webpack-dist/`
+
+Part of the real `.next-webpack/` output of the same example built with
+`pnpm --filter @usertax-examples/next-app run build:webpack` (Next.js 16.4.4 with webpack):
+`BUILD_ID`, `build-manifest.json`, the prerendered HTML pages and the small chunks of `static/`
+(`sourcesContent` removed from the maps). The four large shared chunks (`framework`, `main`,
+`882`, `42cfba27`) and `polyfills` are left out to keep the fixture small, so routes list only
+the files that are present.
+
 ## `lighthouse-vite.json`
 
 A real Lighthouse 13.6.0 result for `/` of the built `examples/vite-app`, served by usertax's

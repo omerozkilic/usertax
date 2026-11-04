@@ -80,6 +80,26 @@ describe('nextKeys', () => {
     });
   });
 
+  it('keeps the stable part of webpack chunk names', () => {
+    const keys = nextKeys(
+      [
+        asset('chunks/framework-df4c685bfa2a539c.js', 'node_modules/react-dom/x.js'),
+        asset('chunks/42cfba27-6cf1496adca048aa.js', 'node_modules/next/x.js'),
+        asset('chunks/app/counter/page-72762fc6a63d5a42.js', 'app/counter/Counter.jsx'),
+        asset('chunks/app/page-a0e18fd15371eacd.js'),
+        asset('chunks/app/layout-a0e18fd15371eacd.js'),
+      ],
+      undefined,
+    );
+    expect(Object.fromEntries(keys)).toEqual({
+      'chunks/framework-df4c685bfa2a539c.js': 'chunks/framework-[hash].js',
+      'chunks/42cfba27-6cf1496adca048aa.js': 'chunks/42cfba27-[hash].js',
+      'chunks/app/counter/page-72762fc6a63d5a42.js': 'chunks/app/counter/page-[hash].js',
+      'chunks/app/page-a0e18fd15371eacd.js': 'chunks/app/page-[hash].js',
+      'chunks/app/layout-a0e18fd15371eacd.js': 'chunks/app/layout-[hash].js',
+    });
+  });
+
   it('disambiguates chunks with the same largest module', () => {
     const keys = nextKeys(
       [asset('chunks/aaaa1111.js', 'src/x.js'), asset('chunks/bbbb2222.js', 'src/x.js')],
@@ -137,5 +157,45 @@ describe('measureNextApp on a real Next.js 16 build', () => {
     const { app } = await measureNextApp(options(dir));
     expect(app.assets?.some((a) => a.key.startsWith('[build-id]/'))).toBe(false);
     expect(app.routes).toHaveLength(3);
+  });
+});
+
+describe('measureNextApp on a real Next.js 16 webpack build', () => {
+  const webpackDir = fileURLToPath(new URL('./fixtures/next-webpack-dist/', import.meta.url));
+
+  it('keys chunks by name and keeps Next.js internals out of first-party code', async () => {
+    const { app, warnings } = await measureNextApp(options(webpackDir));
+    expect(warnings).toEqual([]);
+    // The fixture leaves out the large shared chunks, so routes list only the files present.
+    expect(app.routes).toEqual([
+      { route: '/', assets: ['chunks/webpack-[hash].js', 'chunks/main-app-[hash].js'] },
+      { route: '/about', assets: ['chunks/webpack-[hash].js', 'chunks/main-app-[hash].js'] },
+      {
+        route: '/counter',
+        assets: [
+          'chunks/webpack-[hash].js',
+          'chunks/main-app-[hash].js',
+          'chunks/app/counter/page-[hash].js',
+        ],
+      },
+    ]);
+    const byKey = new Map(app.assets?.map((a) => [a.key, a]));
+    const counter = byKey.get('chunks/app/counter/page-[hash].js');
+    expect(counter?.modules?.map((m) => m.path)).toEqual([
+      'app/counter/Counter.jsx',
+      '(virtual) webpack',
+    ]);
+    // `_not-found` is Next.js code mapped to `../../../../src/client/…`: unattributed.
+    const notFound = byKey.get('chunks/app/_not-found/page-[hash].js');
+    expect(notFound?.modules?.every((m) => m.path.startsWith('(virtual) '))).toBe(true);
+    expect(notFound?.unattributedBytes).toBeGreaterThan(notFound?.firstPartyBytes ?? 0);
+    for (const asset of app.assets ?? []) {
+      if (asset.packages === undefined) continue;
+      const total =
+        asset.packages.reduce((sum, p) => sum + p.bytes, 0) +
+        (asset.firstPartyBytes ?? 0) +
+        (asset.unattributedBytes ?? 0);
+      expect(total).toBe(asset.raw);
+    }
   });
 });
