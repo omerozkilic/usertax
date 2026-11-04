@@ -1,0 +1,480 @@
+{
+  "createdAt": "2026-11-04T11:10:38.502Z",
+  "machine": {
+    "cpus": 2,
+    "cpu": "Intel(R) Xeon(R) Platinum 8370C CPU @ 2.80GHz",
+    "node": "v24.22.1",
+    "runner": "GitHub Actions 1000000555"
+  },
+  "runsPerPage": 30,
+  "results": [
+    {
+      "example": "examples/vite-app",
+      "url": "/",
+      "formFactor": "mobile",
+      "lighthouseVersion": "13.6.0",
+      "runs": [
+        {
+          "performance": 100,
+          "lcp": 756.9925000000001,
+          "tbt": 54.5,
+          "cls": 0
+        },
+        {
+          "performance": 100,
+          "lcp": 757.761,
+          "tbt": 0,
+          "cls": 0
+        },
+        {
+          "performance": 100,
+          "lcp": 752.8199,
+          "tbt": 0,
+          "cls": 0
+        },
+        {
+          "performance": 100,
+          "lcp": 754.6835000000001,
+          "tbt": 0,
+          "cls": 0
+        },
+        {
+          "performance": 100,
+          "lcp": 762.6185,
+          "tbt": 0,
+          "cls": 0
+        },
+        {
+          "performance": 100,
+          "lcp": 754.1836000000001,
+          "tbt": 0,
+          "cls": 0
+        },
+        {
+          "performance": 100,
+          "lcp": 755.0289,
+          "tbt": 0,
+          "cls": 0
+        },
+        {
+          "performance": 100,
+          "lcp": 755.2194999999999,
+          "tbt": 0,
+          "cls": 0
+        },
+        {
+          "performance": 100,
+          "lcp": 762.3986,
+          "tbt": 0,
+          "cls": 0
+        },
+        {
+          "performance": 100,
+          "lcp": 756.5302999999999,
+          "tbt": 0,
+          "cls": 0
+        },
+        {
+          "performance": 100,
+          "lcp": 755.8417999999999,
+          "tbt": 0,
+          "cls": 0
+        },
+        {
+          "performance": 100,
+          "lcp": 755.1324999999999,
+          "tbt": 0,
+          "cls": 0
+        },
+        {
+          "performance": 100,
+          "lcp": 755.5952,
+          "tbt": 0,
+          "cls": 0
+        },
+        {
+          "performance": 100,
+          "lcp": 755.8327999999999,
+          "tbt": 0,
+          "cls": 0
+        },
+        {
+          "performance": 100,
+          "lcp": 757.7715000000001,
+          "tbt": 0,
+          "cls": 0
+        },
+        {
+          "performance": 100,
+          "lcp": 753.9652000000001,
+          "tbt": 0,
+          "cls": 0
+        },
+        {
+          "performance": 100,
+          "lcp": 757.2683,
+          "tbt": 0,
+          "cls": 0
+        },
+        {
+          "performance": 100,
+          "lcp": 757.317,
+          "tbt": 0,
+          "cls": 0
+        },
+        {
+          "performance": 100,
+          "lcp": 1420.1876,
+          "tbt": 0,
+          "cls": 0
+        },
+        {
+          "performance": 100,
+          "lcp": 754.6413,
+          "tbt": 0,
+          "cls": 0
+        },
+        {
+          "performance": 100,
+          "lcp": 755.2520999999999,
+          "tbt": 0,
+          "cls": 0
+        },
+        {
+          "performance": 100,
+          "lcp": 758.8099,
+          "tbt": 0,
+          "cls": 0
+        },
+        {
+          "performance": 100,
+          "lcp": 753.4001000000001,
+          "tbt": 0,
+          "cls": 0
+        },
+        {
+          "performance": 100,
+          "lcp": 757.8952999999999,
+          "tbt": 0,
+          "cls": 0
+        },
+        {
+          "performance": 100,
+          "lcp": 758.6781000000001,
+          "tbt": 0,
+          "cls": 0
+        },
+        {
+          "performance": 100,
+          "lcp": 757.5695000000001,
+          "tbt": 0,
+          "cls": 0
+        },
+        {
+          "performance": 100,
+          "lcp": 753.7538999999999,
+          "tbt": 0,
+          "cls": 0
+        },
+        {
+          "performance": 100,
+          "lcp": 755.3373999999999,
+          "tbt": 0,
+          "cls": 0
+        },
+        {
+          "performance": 100,
+          "lcp": 756.605,
+          "tbt": 0,
+          "cls": 0
+        },
+        {
+          "performance": 100,
+          "lcp": 763.1134999999999,
+          "tbt": 0,
+          "cls": 0
+        }
+      ],
+      "stats": {
+        "performance": {
+          "n": 30,
+          "median": 100,
+          "q1": 100,
+          "q3": 100,
+          "iqr": 0,
+          "min": 100,
+          "max": 100,
+          "mean": 100,
+          "sd": 0
+        },
+        "lcp": {
+          "n": 30,
+          "median": 756.1860499999999,
+          "q1": 755.0548,
+          "q3": 757.768875,
+          "iqr": 2.71407499999998,
+          "min": 752.8199,
+          "max": 1420.1876,
+          "mean": 778.7401433333333,
+          "sd": 121.17753964843794
+        },
+        "tbt": {
+          "n": 30,
+          "median": 0,
+          "q1": 0,
+          "q3": 0,
+          "iqr": 0,
+          "min": 0,
+          "max": 54.5,
+          "mean": 1.8166666666666667,
+          "sd": 9.950293128010522
+        },
+        "cls": {
+          "n": 30,
+          "median": 0,
+          "q1": 0,
+          "q3": 0,
+          "iqr": 0,
+          "min": 0,
+          "max": 0,
+          "mean": 0,
+          "sd": 0
+        }
+      }
+    },
+    {
+      "example": "examples/next-app",
+      "url": "/",
+      "formFactor": "mobile",
+      "lighthouseVersion": "13.6.0",
+      "runs": [
+        {
+          "performance": 98,
+          "lcp": 647.62035,
+          "tbt": 167.00000000000023,
+          "cls": 0
+        },
+        {
+          "performance": 99,
+          "lcp": 645.21495,
+          "tbt": 93,
+          "cls": 0
+        },
+        {
+          "performance": 100,
+          "lcp": 634.93685,
+          "tbt": 90,
+          "cls": 0
+        },
+        {
+          "performance": 100,
+          "lcp": 642.7415,
+          "tbt": 87,
+          "cls": 0
+        },
+        {
+          "performance": 100,
+          "lcp": 655.21175,
+          "tbt": 88,
+          "cls": 0
+        },
+        {
+          "performance": 100,
+          "lcp": 636.83745,
+          "tbt": 86,
+          "cls": 0
+        },
+        {
+          "performance": 100,
+          "lcp": 659.1191,
+          "tbt": 88,
+          "cls": 0
+        },
+        {
+          "performance": 100,
+          "lcp": 645.35325,
+          "tbt": 89,
+          "cls": 0
+        },
+        {
+          "performance": 100,
+          "lcp": 659.6183,
+          "tbt": 88,
+          "cls": 0
+        },
+        {
+          "performance": 100,
+          "lcp": 649.0433,
+          "tbt": 83,
+          "cls": 0
+        },
+        {
+          "performance": 100,
+          "lcp": 651.97685,
+          "tbt": 91,
+          "cls": 0
+        },
+        {
+          "performance": 100,
+          "lcp": 657.0304,
+          "tbt": 89,
+          "cls": 0
+        },
+        {
+          "performance": 99,
+          "lcp": 647.6649,
+          "tbt": 102,
+          "cls": 0
+        },
+        {
+          "performance": 100,
+          "lcp": 661.3262,
+          "tbt": 90,
+          "cls": 0
+        },
+        {
+          "performance": 100,
+          "lcp": 632.712,
+          "tbt": 89,
+          "cls": 0
+        },
+        {
+          "performance": 100,
+          "lcp": 643.04345,
+          "tbt": 89,
+          "cls": 0
+        },
+        {
+          "performance": 100,
+          "lcp": 643.7506,
+          "tbt": 91,
+          "cls": 0
+        },
+        {
+          "performance": 99,
+          "lcp": 638.5438,
+          "tbt": 99,
+          "cls": 0
+        },
+        {
+          "performance": 100,
+          "lcp": 651.5008,
+          "tbt": 90,
+          "cls": 0
+        },
+        {
+          "performance": 99,
+          "lcp": 652.5785,
+          "tbt": 104,
+          "cls": 0
+        },
+        {
+          "performance": 100,
+          "lcp": 652.26635,
+          "tbt": 85,
+          "cls": 0
+        },
+        {
+          "performance": 100,
+          "lcp": 644.72615,
+          "tbt": 88,
+          "cls": 0
+        },
+        {
+          "performance": 100,
+          "lcp": 646.76015,
+          "tbt": 91,
+          "cls": 0
+        },
+        {
+          "performance": 100,
+          "lcp": 651.45985,
+          "tbt": 86,
+          "cls": 0
+        },
+        {
+          "performance": 100,
+          "lcp": 638.58775,
+          "tbt": 84,
+          "cls": 0
+        },
+        {
+          "performance": 100,
+          "lcp": 647.379,
+          "tbt": 87,
+          "cls": 0
+        },
+        {
+          "performance": 100,
+          "lcp": 969.4575,
+          "tbt": 87,
+          "cls": 0
+        },
+        {
+          "performance": 99,
+          "lcp": 642.81555,
+          "tbt": 95,
+          "cls": 0
+        },
+        {
+          "performance": 100,
+          "lcp": 651.95025,
+          "tbt": 89,
+          "cls": 0
+        },
+        {
+          "performance": 100,
+          "lcp": 637.10155,
+          "tbt": 86,
+          "cls": 0
+        }
+      ],
+      "stats": {
+        "performance": {
+          "n": 30,
+          "median": 100,
+          "q1": 100,
+          "q3": 100,
+          "iqr": 0,
+          "min": 98,
+          "max": 100,
+          "mean": 99.76666666666667,
+          "sd": 0.504006932993731
+        },
+        "lcp": {
+          "n": 30,
+          "median": 647.499675,
+          "q1": 642.872525,
+          "q3": 652.193975,
+          "iqr": 9.321450000000027,
+          "min": 632.712,
+          "max": 969.4575,
+          "mean": 657.9442799999999,
+          "sd": 59.301828317415364
+        },
+        "tbt": {
+          "n": 30,
+          "median": 89,
+          "q1": 87,
+          "q3": 91,
+          "iqr": 4,
+          "min": 83,
+          "max": 167.00000000000023,
+          "mean": 92.36666666666666,
+          "sd": 14.884575059861293
+        },
+        "cls": {
+          "n": 30,
+          "median": 0,
+          "q1": 0,
+          "q3": 0,
+          "iqr": 0,
+          "min": 0,
+          "max": 0,
+          "mean": 0,
+          "sd": 0
+        }
+      }
+    }
+  ]
+}

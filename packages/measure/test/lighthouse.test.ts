@@ -71,6 +71,7 @@ describe('runLighthouse', () => {
     const result = await runLighthouse({
       urls: ['http://127.0.0.1:1/', 'http://127.0.0.1:1/about'],
       runs: 2,
+      warmup: 0,
       onRun: (url, run) => progress.push(`${new URL(url).pathname}#${run}`),
     });
     expect(calls.map((c) => new URL(c.url).pathname)).toEqual(['/', '/about', '/', '/about']);
@@ -98,6 +99,22 @@ describe('runLighthouse', () => {
       },
     ]);
     expect(calls[0]?.config).toBeUndefined();
+  });
+
+  it('discards one warm-up run per page by default', async () => {
+    const progress: string[] = [];
+    const [entry] = await runLighthouse({
+      urls: ['http://127.0.0.1:1/'],
+      runs: 2,
+      onRun: (url, run) => progress.push(`${new URL(url).pathname}#${run}`),
+    });
+    expect(calls).toHaveLength(3);
+    expect(launched).toHaveLength(3);
+    expect(progress).toEqual(['/#1', '/#2']);
+    expect(entry?.runs).toHaveLength(2);
+    await expect(runLighthouse({ urls: ['http://x/'], runs: 1, warmup: 11 })).rejects.toThrow(
+      /warmup must be an integer/,
+    );
   });
 
   it('uses the desktop configuration on request', async () => {

@@ -50,10 +50,13 @@ Each metric diff has a `significance`:
   the change but does not call it better or worse.
 - `not-comparable`: the metric exists on one side only.
 
-The default thresholds come from published calibration measurements
-([docs/benchmarks](benchmarks/README.md)): `k = 1.5` with floors of 1 point for the performance
-score, 25 ms for LCP and TBT, and 0 for CLS. Override them, or turn a metric off with `null`,
-under `noise` in the configuration.
+The default thresholds come from published measurements on GitHub-hosted runners
+([docs/benchmarks](benchmarks/README.md)): `k = 1.5` with floors of 2 points for the performance
+score, 40 ms for LCP, 130 ms for TBT and 0 for CLS. They cover the difference between two
+runners, because the base report usually comes from an earlier run on another machine. Override
+them, or turn a metric off with `null`, under `noise` in the configuration. Every page gets one
+unrecorded warm-up run before the recorded runs (`warmup`, default 1), because the first run
+after a server starts is consistently slower.
 
 ## Budgets
 

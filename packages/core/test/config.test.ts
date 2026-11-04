@@ -24,7 +24,12 @@ describe('parseConfig', () => {
       compression: 'brotli',
       top: 5,
     });
-    expect(config.apps?.[0]?.lighthouse).toEqual({ pages: ['/'], runs: 5, formFactor: 'mobile' });
+    expect(config.apps?.[0]?.lighthouse).toEqual({
+      pages: ['/'],
+      runs: 5,
+      warmup: 1,
+      formFactor: 'mobile',
+    });
     expect(config.budgets[0]).toMatchObject({ app: '*', level: 'fail' });
     expect(config.compression).toBe('brotli');
   });

@@ -44,6 +44,11 @@ export interface RunLighthouseOptions {
   readonly urls: readonly string[];
   /** Runs per URL. */
   readonly runs: number;
+  /**
+   * Runs per URL before the recorded ones, discarded (default 1). The first run after a server
+   * starts is consistently slower (ADR 0007 calibration: Next.js TBT 167–191 ms against ~90 ms).
+   */
+  readonly warmup?: number;
   readonly formFactor?: 'mobile' | 'desktop';
   /** Chrome executable; defaults to chrome-launcher's detection (`CHROME_PATH` is honoured). */
   readonly chromePath?: string;
@@ -94,6 +99,10 @@ export async function runLighthouse(options: RunLighthouseOptions): Promise<Ligh
   if (!Number.isInteger(options.runs) || options.runs < 1 || options.runs > 100) {
     throw new LighthouseError('runs must be an integer between 1 and 100');
   }
+  const warmup = options.warmup ?? 1;
+  if (!Number.isInteger(warmup) || warmup < 0 || warmup > 10) {
+    throw new LighthouseError('warmup must be an integer between 0 and 10');
+  }
   const { default: lighthouse } = await load<LighthouseModule>('lighthouse');
   const launcher = await load<ChromeLauncherModule>('chrome-launcher');
   const formFactor = options.formFactor ?? 'mobile';
@@ -106,7 +115,8 @@ export async function runLighthouse(options: RunLighthouseOptions): Promise<Ligh
   if (process.getuid?.() === 0) flags.push('--no-sandbox');
 
   const results = new Map<string, { version: string; runs: LighthouseRun[] }>();
-  for (let run = 1; run <= options.runs; run += 1) {
+  // Runs 0 and below are warm-up runs: audited like the others, not recorded.
+  for (let run = 1 - warmup; run <= options.runs; run += 1) {
     for (const url of options.urls) {
       const chrome = await launcher.launch({
         chromeFlags: flags,
@@ -121,6 +131,7 @@ export async function runLighthouse(options: RunLighthouseOptions): Promise<Ligh
         if (result === undefined)
           throw new LighthouseError(`Lighthouse returned no result for ${url}`);
         const measured = runFromResult(result.lhr);
+        if (run < 1) continue;
         const entry = results.get(url) ?? { version: result.lhr.lighthouseVersion, runs: [] };
         entry.runs.push(measured);
         results.set(url, entry);

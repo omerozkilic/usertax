@@ -37,6 +37,7 @@ export const appConfigSchema = z
       .object({
         pages: z.array(z.string().startsWith('/')).min(1),
         runs: z.number().int().min(1).max(100).default(5),
+        warmup: z.number().int().min(0).max(10).default(1),
         formFactor: z.enum(['mobile', 'desktop']).default('mobile'),
         baseUrl: z.url().optional(),
         startCommand: z.string().min(1).optional(),

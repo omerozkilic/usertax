@@ -44,10 +44,27 @@ teaches people to ignore it.
 
 - Cross-runner spread of the medians was below the within-runner IQR for every metric, so a
   cached Lighthouse base report is allowed like any other base report (ADR 0004).
-- Default thresholds, `k = 1.5` and floors of 1 point (performance), 25 ms (LCP, TBT) and 0
+- (Superseded on 2026-11-04, see below.) Default thresholds, `k = 1.5` and floors of 1 point (performance), 25 ms (LCP, TBT) and 0
   (CLS), keep the false-positive rate at or below 0.5 % with 5 runs per side. They are
   `DEFAULT_NOISE_THRESHOLDS` in `@usertax/core` and can be overridden or turned off (`null`) per
   metric in the configuration.
+
+## Cross-runner check (2026-11-04)
+
+The 2026-11-03 floors produced false positives on this repository's own pull requests: 14 real
+reports of unchanged pages, each from another runner, disagreed far more than the three
+calibration runners had (Next.js TBT medians 43–171 ms). A second calibration run confirmed that
+the first run on a runner is consistently slow
+([data and method](../benchmarks/README.md#cross-runner-check-2026-11-04)). Decisions:
+
+- The defaults become floors of 2 points (performance), 40 ms (LCP), 130 ms (TBT) and 0 (CLS),
+  `k = 1.5`: the smallest tested floors without a false positive on the 182 report pairs and in
+  the simulation from six calibration runners. They replace the 2026-11-03 values.
+- One unrecorded warm-up run per page precedes the recorded runs (`warmup`, default 1).
+- A cached Lighthouse base report stays allowed: with these floors it does not produce false
+  positives, and measuring the base in the same job would double the cost of every pull request.
+- The thresholds are re-checked with `scripts/cross-runner-noise.js` when new reports or another
+  calibration run disagree with them.
 
 ## Consequences
 

@@ -63,6 +63,7 @@ React Native and Expo (usertax never builds the app):
 Lighthouse (web apps; needs the optional packages lighthouse and chrome-launcher):
       --lighthouse <path>   Page to audit, e.g. / or /pricing (repeatable)
       --runs <n>            Runs per page; the report keeps every run (default 5)
+      --warmup <n>          Unrecorded runs per page before them (default 1)
       --form-factor <f>     mobile (default) or desktop
       --base-url <url>      Audit a server that is already running at this URL
       --start <command>     Start the server with this shell command; needs --base-url
@@ -125,6 +126,7 @@ export interface MeasureContext {
 interface LighthouseSpec {
   readonly pages: readonly string[];
   readonly runs: number;
+  readonly warmup: number;
   readonly formFactor: 'mobile' | 'desktop';
   readonly baseUrl?: string | undefined;
   readonly start?: string | undefined;
@@ -165,6 +167,7 @@ function specFromConfig(entry: AppConfig, root: string): AppSpec {
           lighthouse: {
             pages: entry.lighthouse.pages,
             runs: entry.lighthouse.runs,
+            warmup: entry.lighthouse.warmup,
             formFactor: entry.lighthouse.formFactor,
             baseUrl: entry.lighthouse.baseUrl,
             start: entry.lighthouse.startCommand,
@@ -198,6 +201,7 @@ async function runPages(
     app.lighthouse = await runLighthouse({
       urls: spec.pages.map((page) => `${base}${page}`),
       runs: spec.runs,
+      warmup: spec.warmup,
       formFactor: spec.formFactor,
       onRun: (url, run, result) => {
         io.stderr(
@@ -290,6 +294,10 @@ function lighthouseFromFlags(values: Record<string, unknown>): LighthouseSpec | 
   const runs = rawRuns === undefined ? 5 : Number(rawRuns);
   if (!Number.isInteger(runs) || runs < 1 || runs > 100)
     throw new UsageError('--runs must be an integer between 1 and 100');
+  const rawWarmup = values['warmup'] as string | undefined;
+  const warmup = rawWarmup === undefined ? 1 : Number(rawWarmup);
+  if (!Number.isInteger(warmup) || warmup < 0 || warmup > 10)
+    throw new UsageError('--warmup must be an integer between 0 and 10');
   const formFactor = (values['form-factor'] as string | undefined) ?? 'mobile';
   if (formFactor !== 'mobile' && formFactor !== 'desktop') {
     throw new UsageError(`--form-factor must be mobile or desktop, received "${formFactor}"`);
@@ -303,7 +311,7 @@ function lighthouseFromFlags(values: Record<string, unknown>): LighthouseSpec | 
     if (!page.startsWith('/'))
       throw new UsageError(`--lighthouse expects a path starting with /, received "${page}"`);
   }
-  return { pages, runs, formFactor, baseUrl, start };
+  return { pages, runs, warmup, formFactor, baseUrl, start };
 }
 
 const APP_FLAGS = [
@@ -342,6 +350,7 @@ export async function measureCommand(
       bundle: { type: 'string', multiple: true },
       archive: { type: 'string', multiple: true },
       runs: { type: 'string' },
+      warmup: { type: 'string' },
       'form-factor': { type: 'string' },
       'base-url': { type: 'string' },
       start: { type: 'string' },
