@@ -51,6 +51,11 @@ These steps cannot be undone easily, so they are done by hand:
 
 ## Notes
 
+- release-please would make a first release `1.0.0`; `initial-version: 0.1.0` in
+  `release-please-config.json` makes it `0.1.0`. It only applies while no release exists.
+- release-please needs **Settings → Actions → General → Workflow permissions → "Allow GitHub
+  Actions to create and approve pull requests"** to open the release pull request.
+
 - Pull requests created by release-please with the default `GITHUB_TOKEN` do not trigger other
   workflows, so the release pull request shows no CI checks. Its content (version and CHANGELOG)
   comes from commits that already passed CI on `main`.
