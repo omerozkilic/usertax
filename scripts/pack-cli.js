@@ -42,11 +42,12 @@ for (const file of ['config.schema.json', 'report.v1.schema.json']) {
   copyFileSync(join(root, 'packages/core/schema', file), join(out, 'schema', file));
 }
 const pkg = {
-  name: 'usertax',
+  name: '@usertax/cli',
   version: cli.version,
   description: cli.description,
   license: 'MIT',
   author: 'Omer Ozkilic',
+  publishConfig: { access: 'public' },
   type: 'module',
   repository: { type: 'git', url: 'git+https://github.com/omerozkilic/usertax.git' },
   homepage: 'https://github.com/omerozkilic/usertax#readme',
@@ -59,4 +60,4 @@ const pkg = {
   peerDependenciesMeta: measure.peerDependenciesMeta,
 };
 writeFileSync(join(out, 'package.json'), `${JSON.stringify(pkg, null, 2)}\n`);
-process.stdout.write(`packed usertax ${pkg.version} into ${out}\n`);
+process.stdout.write(`packed ${pkg.name} ${pkg.version} into ${out}\n`);

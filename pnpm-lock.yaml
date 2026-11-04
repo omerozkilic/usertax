@@ -124,15 +124,15 @@ importers:
 
   packages/action:
     dependencies:
+      '@usertax/cli':
+        specifier: workspace:*
+        version: link:../cli
       '@usertax/core':
         specifier: workspace:*
         version: link:../core
       '@usertax/measure':
         specifier: workspace:*
         version: link:../measure
-      usertax:
-        specifier: workspace:*
-        version: link:../cli
 
   packages/cli:
     dependencies:

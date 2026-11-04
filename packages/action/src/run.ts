@@ -9,7 +9,7 @@ import {
 } from '@usertax/core';
 import type { BudgetEvaluation, Config, Report } from '@usertax/core';
 import { loadConfig } from '@usertax/measure';
-import { main } from 'usertax';
+import { main } from '@usertax/cli';
 import { BASE_ARTIFACT_PREFIX, REPORT_FILE, findBaseReport, mergeBase } from './base.js';
 import { upsertComment } from './comment.js';
 import {

@@ -2,7 +2,7 @@ import { mkdtemp, readFile, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { afterEach, beforeAll, describe, expect, it, vi } from 'vitest';
-import { HELP, main } from 'usertax';
+import { HELP, main } from '@usertax/cli';
 import { BASE_SHA, modify, report, webApp } from '../../core/test/fixtures.js';
 
 function capture() {

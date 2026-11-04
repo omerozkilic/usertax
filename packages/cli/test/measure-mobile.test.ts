@@ -4,7 +4,7 @@ import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { beforeAll, describe, expect, it } from 'vitest';
 import { parseReport } from '@usertax/core';
-import { main } from 'usertax';
+import { main } from '@usertax/cli';
 
 const fixtures = fileURLToPath(new URL('../../measure/test/fixtures/', import.meta.url));
 

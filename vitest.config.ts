@@ -10,7 +10,7 @@ export default defineConfig({
     alias: {
       '@usertax/core': src('core'),
       '@usertax/measure': src('measure'),
-      usertax: src('cli'),
+      '@usertax/cli': src('cli'),
       '@usertax/action': src('action'),
     },
   },

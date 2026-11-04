@@ -27,7 +27,7 @@ vi.mock('lighthouse', async () => {
   };
 });
 
-const { main } = await import('usertax');
+const { main } = await import('@usertax/cli');
 const fixture = new URL('../../measure/test/fixtures/vite-dist/', import.meta.url);
 
 function capture() {

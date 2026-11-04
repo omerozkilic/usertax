@@ -1,11 +1,11 @@
 # GitHub Action
 
 > [!NOTE]
-> The action is not released yet. This repository runs it on its own pull requests
+> The action is published as [`omerozkilic/usertax-action`](https://github.com/omerozkilic/usertax-action)
+> (ADR 0006). Use `@v0` for the latest 0.x release or pin an exact version such as `@v0.1.3`.
+> This repository runs it on its own pull requests
 > ([`usertax.yml`](../.github/workflows/usertax.yml) and
-> [`usertax-comment.yml`](../.github/workflows/usertax-comment.yml)). After the first release it
-> will be available as `omerozkilic/usertax-action@v0` (ADR 0006; the major tag follows the
-> version, `v0` during 0.x); the examples below use that name.
+> [`usertax-comment.yml`](../.github/workflows/usertax-comment.yml)).
 
 ## Fork-safe setup (recommended)
 

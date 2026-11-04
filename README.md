@@ -26,10 +26,10 @@ bundle grew"_.
 It is deterministic: **no LLM, no API key, no account, no upload.** The same build gives the
 same report.
 
-> [!NOTE]
-> usertax is in active development and not released yet. Web bundles (Vite, Next.js), React
-> Native and Expo bundles, APK / AAB / IPA analysis, attribution, Lighthouse runs, the CLI, the
-> GitHub Action and the MCP server work in this repository (see [Status](#status)).
+**Get it:** the GitHub Action [`omerozkilic/usertax-action@v0`](https://github.com/omerozkilic/usertax-action) ·
+the CLI and MCP server [`npx @usertax/cli`](https://www.npmjs.com/package/@usertax/cli). usertax is
+at 0.x: the report schema and the action inputs may still change between minor versions
+([changelog](CHANGELOG.md)).
 
 ## What it looks like
 
@@ -69,38 +69,37 @@ a date, measured on real builds ([full comment](docs/demo/add-moment.md),
 
 ## Status
 
-| Area         | Today                                                                                                                                                   | Planned                           |
-| ------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------- |
-| Web bundles  | Vite and Next.js 16 with Turbopack or webpack (routes), webpack and static output (files)                                                               | –                                 |
-| Attribution  | Source maps, lockfiles: pnpm 6 / 9, npm 2 / 3, Yarn 1, Yarn 2+                                                                                          | Bun                               |
-| Budgets      | `max`, `min`, increase / decrease in bytes or percent, warn / fail, from `usertax.config.(json\|ts)`; exit code 1 on failure                            | –                                 |
-| Lighthouse   | Runner (`--lighthouse`), every run stored, medians, IQR, noise thresholds calibrated on GitHub-hosted runners ([benchmarks](docs/benchmarks/README.md)) | –                                 |
-| Mobile       | Expo and bare React Native bundles (JS and Hermes bytecode, with attribution), APK / AAB / IPA breakdown                                                | Per-device download estimates     |
-| Distribution | CLI from source; GitHub Action (fork-safe two-workflow setup, dogfooded in this repository); MCP server (`usertax mcp`); monorepos in one report        | Released action and `npx usertax` |
+| Area         | Today                                                                                                                                                   | Planned                       |
+| ------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------- |
+| Web bundles  | Vite and Next.js 16 with Turbopack or webpack (routes), webpack and static output (files)                                                               | –                             |
+| Attribution  | Source maps, lockfiles: pnpm 6 / 9, npm 2 / 3, Yarn 1, Yarn 2+                                                                                          | Bun                           |
+| Budgets      | `max`, `min`, increase / decrease in bytes or percent, warn / fail, from `usertax.config.(json\|ts)`; exit code 1 on failure                            | –                             |
+| Lighthouse   | Runner (`--lighthouse`), every run stored, medians, IQR, noise thresholds calibrated on GitHub-hosted runners ([benchmarks](docs/benchmarks/README.md)) | –                             |
+| Mobile       | Expo and bare React Native bundles (JS and Hermes bytecode, with attribution), APK / AAB / IPA breakdown                                                | Per-device download estimates |
+| Distribution | GitHub Action (fork-safe two-workflow setup, dogfooded in this repository); CLI `npx @usertax/cli`; MCP server (`usertax mcp`); monorepos in one report | GitHub Marketplace listing    |
 
 ## GitHub Action
 
 Two workflows: one measures the pull request with a read-only token, the other posts the comment
 from your default branch, so pull requests from forks are safe
 ([setup and inputs](docs/github-action.md)). This repository runs the action on its own pull
-requests. It is not released yet.
+requests. The [action's page](https://github.com/omerozkilic/usertax-action) has both workflows
+ready to copy, and a one-workflow setup for private repositories.
 
 ## Quickstart (CLI)
 
-usertax is not published yet; run the CLI from a clone:
-
 ```bash
-git clone https://github.com/omerozkilic/usertax && cd usertax
-pnpm install && pnpm build
-
 # Measure an app you have already built (Vite: build.sourcemap = 'hidden', build.manifest = true)
-node packages/cli/bin/usertax.js measure path/to/app --output base.json
+npx @usertax/cli measure path/to/app --output base.json
 # …make your change, rebuild…
-node packages/cli/bin/usertax.js measure path/to/app --output head.json
+npx @usertax/cli measure path/to/app --output head.json
 
-node packages/cli/bin/usertax.js diff head.json --base base.json          # Markdown
-node packages/cli/bin/usertax.js diff head.json --base base.json -f json  # JSON
+npx @usertax/cli diff head.json --base base.json          # Markdown
+npx @usertax/cli diff head.json --base base.json -f json  # JSON
 ```
+
+Installed as a dev dependency (`npm i -D @usertax/cli`), the command is `usertax`. Node.js 22.18
+or later; `lighthouse` and `chrome-launcher` are optional, for `--lighthouse`.
 
 `usertax measure` reads the build output, the source maps and the nearest lockfile. It never
 builds your app and never needs network access.
@@ -125,7 +124,7 @@ and no LLM inside ([setup](docs/mcp.md)).
   Markdown and JSON rendering. No file system, no network.
 - [`@usertax/measure`](packages/measure): collectors. Output directories, source maps,
   lockfiles.
-- [`usertax`](packages/cli): the command-line interface and the MCP server.
+- [`@usertax/cli`](packages/cli): the command-line interface (`usertax`) and the MCP server.
 
 Metric ids, units, budgets and the noise model are documented in
 [`docs/metrics.md`](docs/metrics.md); the configuration file in

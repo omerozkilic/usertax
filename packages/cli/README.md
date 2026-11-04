@@ -8,9 +8,9 @@ Measure the JavaScript each route ships, Lighthouse lab metrics, React Native bu
 APK / AAB / IPA size, then compare two builds and see **which dependency caused the difference**.
 From your terminal, any CI, or your coding agent. No account, no API key, no upload.
 
-[![npm](https://img.shields.io/npm/v/usertax)](https://www.npmjs.com/package/usertax)
-[![Node.js](https://img.shields.io/node/v/usertax)](https://github.com/omerozkilic/usertax/blob/main/package.json)
-[![License: MIT](https://img.shields.io/npm/l/usertax)](https://github.com/omerozkilic/usertax/blob/main/LICENSE)
+[![npm](https://img.shields.io/npm/v/@usertax/cli)](https://www.npmjs.com/package/@usertax/cli)
+[![Node.js](https://img.shields.io/node/v/@usertax/cli)](https://github.com/omerozkilic/usertax/blob/main/package.json)
+[![License: MIT](https://img.shields.io/npm/l/@usertax/cli)](https://github.com/omerozkilic/usertax/blob/main/LICENSE)
 
 </div>
 
@@ -28,17 +28,17 @@ Build your app with source maps (Vite: `build.sourcemap: 'hidden'` and `build.ma
 Next.js: `productionBrowserSourceMaps: true`), then:
 
 ```bash
-npx usertax measure apps/web -o before.json
+npx @usertax/cli measure apps/web -o before.json
 ```
 
 Make your change and build again:
 
 ```bash
-npx usertax measure apps/web -o after.json
+npx @usertax/cli measure apps/web -o after.json
 ```
 
 ```bash
-npx usertax diff after.json --base before.json
+npx @usertax/cli diff after.json --base before.json
 ```
 
 `diff` prints the report above as Markdown (`-f json` for JSON). usertax never builds your app and
@@ -62,23 +62,23 @@ Every byte of a JavaScript file is attributed to a package, to your code or expl
 
 ```bash
 # Measure every app of a monorepo (pnpm, npm or Yarn workspaces)
-npx usertax measure -o report.json
+npx @usertax/cli measure -o report.json
 
 # Lighthouse: 5 recorded runs of two pages (needs lighthouse and chrome-launcher installed)
-npx usertax measure apps/web --lighthouse / --lighthouse /pricing -o report.json
+npx @usertax/cli measure apps/web --lighthouse / --lighthouse /pricing -o report.json
 
 # Expo: finds the bundles of `npx expo export --source-maps` in dist/
 # (export one platform at a time: --platform all is not byte-for-byte reproducible)
-npx usertax measure apps/mobile -o report.json
+npx @usertax/cli measure apps/mobile -o report.json
 
 # Bare React Native: your bundles (with .map files) and a release archive
-npx usertax measure apps/bare \
+npx @usertax/cli measure apps/bare \
   --bundle android=apps/bare/dist/index.android.bundle \
   --bundle ios=apps/bare/dist/main.jsbundle \
   --archive apps/bare/android/app/build/outputs/apk/release/app-release.apk
 
 # Fail a CI job when a budget is exceeded (exit code 1)
-npx usertax diff head.json --base base.json --config usertax.config.json
+npx @usertax/cli diff head.json --base base.json --config usertax.config.json
 ```
 
 ## Budgets
@@ -88,7 +88,7 @@ when a `fail` budget is exceeded, on any CI:
 
 ```json
 {
-  "$schema": "./node_modules/usertax/schema/config.schema.json",
+  "$schema": "./node_modules/@usertax/cli/schema/config.schema.json",
   "budgets": [
     { "metric": "route[*].js.gzip", "maxIncrease": "10 kB" },
     { "metric": "archive[*].file", "maxIncreasePercent": 2, "level": "warn" }
@@ -103,7 +103,7 @@ can measure a change instead of guessing its cost. Tools: `measure`, `compare`, 
 and `alternatives`. With Claude Code:
 
 ```bash
-claude mcp add usertax -- npx -y usertax mcp
+claude mcp add usertax -- npx -y @usertax/cli mcp
 ```
 
 ## On every pull request

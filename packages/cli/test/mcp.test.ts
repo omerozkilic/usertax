@@ -5,7 +5,7 @@ import { Client } from '@modelcontextprotocol/sdk/client/index.js';
 import { InMemoryTransport } from '@modelcontextprotocol/sdk/inMemory.js';
 import { beforeAll, describe, expect, it } from 'vitest';
 import { formatBytes, parseReport } from '@usertax/core';
-import { createMcpServer, main, mcpCommand } from 'usertax';
+import { createMcpServer, main, mcpCommand } from '@usertax/cli';
 
 const fixture = new URL('../../measure/test/fixtures/vite-dist/', import.meta.url);
 

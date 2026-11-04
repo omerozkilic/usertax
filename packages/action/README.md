@@ -213,10 +213,10 @@ GitHub API.
 API key.
 
 **Is there an AI summary?** No. The comment is deterministic: the same builds give the same report.
-For coding agents, the CLI includes an MCP server (`npx usertax mcp`) that returns the same numbers.
+For coding agents, the CLI includes an MCP server (`npx @usertax/cli mcp`) that returns the same numbers.
 
 **Can I use it outside GitHub Actions?** Yes, with the CLI:
-[`npx usertax`](https://www.npmjs.com/package/usertax) on any CI or on your machine.
+[`npx @usertax/cli`](https://www.npmjs.com/package/@usertax/cli) on any CI or on your machine.
 
 ## Links
 
