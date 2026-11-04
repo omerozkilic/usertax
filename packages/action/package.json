@@ -16,7 +16,7 @@
     }
   },
   "scripts": {
-    "bundle": "esbuild src/main.ts --bundle --platform=node --target=node22 --format=esm --outfile=dist/index.js --external:lighthouse --external:chrome-launcher --external:lighthouse/* --banner:js=\"import { createRequire as __usertaxCreateRequire } from 'node:module'; const require = __usertaxCreateRequire(import.meta.url);\""
+    "bundle": "node scripts/bundle.js"
   },
   "dependencies": {
     "@usertax/core": "workspace:*",
