@@ -5,7 +5,8 @@ name: Release
 # publish, each only when it is configured (docs/releasing.md):
 #   secrets.ACTION_REPO_DEPLOY_KEY  write deploy key of omerozkilic/usertax-action (ADR 0006)
 #   vars.NPM_TRUSTED_PUBLISHING     'true' once this workflow is the package's trusted publisher
-#                                   on npmjs.com (OIDC; no npm token is stored anywhere)
+#                                   on npmjs.com (OIDC, staged publishing: a maintainer approves
+#                                   each version with 2FA; no npm token is stored anywhere)
 on:
   push:
     branches: [main]
@@ -128,9 +129,10 @@ jobs:
           node-version: 24
           cache: pnpm
       - run: pnpm install --frozen-lockfile && pnpm build && pnpm pack:cli
-      - name: Check the npm version (trusted publishing needs npm 11.5.1 or later)
-        run: |
-          npm --version
-          node -e "const [a,b,c]=process.argv[1].split('.').map(Number);process.exit(a>11||(a===11&&(b>5||(b===5&&c>=1)))?0:1)" "$(npm --version)"
+      # `npm stage publish` (staged publishing) needs npm 12; pinned for reproducible releases.
+      - run: npm install --global npm@12.2.1 && npm --version
+      # Staged, not direct: the version waits on npmjs.com until a maintainer approves it with
+      # 2FA (`npm stage approve <id>` or the package's "Staged" tab). The trusted publisher on
+      # npmjs.com allows only `npm stage publish`, as npm recommends (docs/releasing.md).
       - working-directory: release/npm
-        run: npm publish --access public
+        run: npm stage publish --access public
