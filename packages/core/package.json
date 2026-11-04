@@ -1,6 +1,6 @@
 {
   "name": "@usertax/core",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "Deterministic core of usertax: report schema, diffing, attribution, budgets and rendering.",
   "license": "MIT",
   "type": "module",
