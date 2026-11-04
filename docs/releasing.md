@@ -51,6 +51,11 @@ These steps cannot be undone easily, so they are done by hand:
 
 ## Notes
 
+- The publishing jobs build from the release tag and check that the package version matches it.
+  Merging two pull requests seconds apart can make the run of the earlier one create the release;
+  building that run's own commit once shipped the 0.1.1 action labelled 0.1.0. Merging the
+  release pull request on its own, after the previous run finished, avoids the race altogether.
+
 - release-please would make a first release `1.0.0`; `initial-version: 0.1.0` in
   `release-please-config.json` makes it `0.1.0`. It only applies while no release exists.
 - release-please needs **Settings → Actions → General → Workflow permissions → "Allow GitHub
