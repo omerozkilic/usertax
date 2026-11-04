@@ -34,7 +34,8 @@ Options:
 const FORMATS = new Set(['markdown', 'json']);
 const COMPRESSIONS = new Set<Compression>(['gzip', 'brotli', 'raw']);
 
-async function readReport(path: string, role: string): Promise<Report> {
+/** Reads and validates a report file; problems become usage errors. */
+export async function readReport(path: string, role: string): Promise<Report> {
   let text: string;
   try {
     text = await readFile(path, 'utf8');

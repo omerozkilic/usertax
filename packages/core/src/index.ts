@@ -36,6 +36,8 @@ export type {
   SizeDelta,
   Verdict,
 } from './diff.js';
+export { explainPackage } from './explain.js';
+export type { PackageExplanation, PackageInApp, PackageInFile } from './explain.js';
 export { formatByteDelta, formatBytes, formatPercentChange } from './format.js';
 export type { FormatBytesOptions } from './format.js';
 export { globToRegExp, matchesGlob } from './glob.js';

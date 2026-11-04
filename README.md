@@ -11,7 +11,7 @@ Web and mobile · Explains _why_ · No API keys
 [![TypeScript](https://img.shields.io/badge/TypeScript-strict-3178c6)](tsconfig.base.json)
 [![License: MIT](https://img.shields.io/badge/license-MIT-green)](LICENSE)
 
-[Türkçe README](README.tr.md) · [Metrics & budgets](docs/metrics.md) · [Architecture decisions](docs/adr/README.md) · [Demo](docs/demo/README.md)
+[Türkçe README](README.tr.md) · [Metrics & budgets](docs/metrics.md) · [GitHub Action](docs/github-action.md) · [MCP server](docs/mcp.md) · [Architecture decisions](docs/adr/README.md) · [Demo](docs/demo/README.md)
 
 </div>
 
@@ -28,8 +28,8 @@ same report.
 
 > [!NOTE]
 > usertax is in active development and not released yet. Web bundles (Vite, Next.js), React
-> Native and Expo bundles, APK / AAB / IPA analysis, attribution, Lighthouse runs, the CLI and the
-> GitHub Action work in this repository (see [Status](#status)).
+> Native and Expo bundles, APK / AAB / IPA analysis, attribution, Lighthouse runs, the CLI, the
+> GitHub Action and the MCP server work in this repository (see [Status](#status)).
 
 ## What it looks like
 
@@ -78,14 +78,14 @@ a date. This is usertax's output, measured on real builds
 
 ## Status
 
-| Area         | Today                                                                                                                                                   | Planned                                       |
-| ------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------- |
-| Web bundles  | Vite and Next.js 16 with Turbopack or webpack (routes), webpack and static output (files)                                                               | –                                             |
-| Attribution  | Source maps, lockfiles: pnpm 6 / 9, npm 2 / 3, Yarn 1, Yarn 2+                                                                                          | Bun                                           |
-| Budgets      | `max`, `min`, increase / decrease in bytes or percent, warn / fail, from `usertax.config.(json\|ts)`; exit code 1 on failure                            | –                                             |
-| Lighthouse   | Runner (`--lighthouse`), every run stored, medians, IQR, noise thresholds calibrated on GitHub-hosted runners ([benchmarks](docs/benchmarks/README.md)) | –                                             |
-| Mobile       | Expo and bare React Native bundles (JS and Hermes bytecode, with attribution), APK / AAB / IPA breakdown                                                | Per-device download estimates                 |
-| Distribution | CLI from source; GitHub Action (fork-safe two-workflow setup, dogfooded in this repository); monorepos in one report                                    | Released action and `npx usertax`, MCP server |
+| Area         | Today                                                                                                                                                   | Planned                           |
+| ------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------- |
+| Web bundles  | Vite and Next.js 16 with Turbopack or webpack (routes), webpack and static output (files)                                                               | –                                 |
+| Attribution  | Source maps, lockfiles: pnpm 6 / 9, npm 2 / 3, Yarn 1, Yarn 2+                                                                                          | Bun                               |
+| Budgets      | `max`, `min`, increase / decrease in bytes or percent, warn / fail, from `usertax.config.(json\|ts)`; exit code 1 on failure                            | –                                 |
+| Lighthouse   | Runner (`--lighthouse`), every run stored, medians, IQR, noise thresholds calibrated on GitHub-hosted runners ([benchmarks](docs/benchmarks/README.md)) | –                                 |
+| Mobile       | Expo and bare React Native bundles (JS and Hermes bytecode, with attribution), APK / AAB / IPA breakdown                                                | Per-device download estimates     |
+| Distribution | CLI from source; GitHub Action (fork-safe two-workflow setup, dogfooded in this repository); MCP server (`usertax mcp`); monorepos in one report        | Released action and `npx usertax` |
 
 ## GitHub Action
 
@@ -114,6 +114,12 @@ node packages/cli/bin/usertax.js diff head.json --base base.json -f json  # JSON
 `usertax measure` reads the build output, the source maps and the nearest lockfile. It never
 builds your app and never needs network access.
 
+## MCP server
+
+`usertax mcp` lets coding agents measure a change and explain its cost with usertax's numbers:
+tools `measure`, `compare`, `explain_package` and `alternatives`, over stdio, with no network
+and no LLM inside ([setup](docs/mcp.md)).
+
 ## How it works
 
 ```text
@@ -128,7 +134,7 @@ builds your app and never needs network access.
   Markdown and JSON rendering. No file system, no network.
 - [`@usertax/measure`](packages/measure): collectors. Output directories, source maps,
   lockfiles.
-- [`usertax`](packages/cli): the command-line interface.
+- [`usertax`](packages/cli): the command-line interface and the MCP server.
 
 Metric ids, units, budgets and the noise model are documented in
 [`docs/metrics.md`](docs/metrics.md); the configuration file in

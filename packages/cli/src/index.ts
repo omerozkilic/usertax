@@ -3,10 +3,13 @@ import { parseArgs } from 'node:util';
 import { diffCommand } from './commands/diff.js';
 import { measureCommand } from './commands/measure.js';
 import { EXIT, UsageError, defaultIo } from './io.js';
+import { mcpCommand } from './mcp.js';
 import type { Io } from './io.js';
 
 export type { Io } from './io.js';
 export { EXIT } from './io.js';
+export { MCP_HELP, createMcpServer, mcpCommand } from './mcp.js';
+export type { McpOptions } from './mcp.js';
 
 const require = createRequire(import.meta.url);
 const { version } = require('../package.json') as { version: string };
@@ -20,6 +23,7 @@ Usage:
 Commands:
   measure   Measure built apps (web, React Native, Expo) and write a report
   diff      Compare a head report with a base report, with budgets (Markdown or JSON)
+  mcp       Start the MCP server for AI assistants (standard input and output)
 
 Options:
   -h, --help     Show this help, or a command's help with <command> --help
@@ -36,6 +40,7 @@ const COMMANDS: ReadonlyMap<string, Command> = new Map([
     'measure',
     (argv, io) => measureCommand(argv, io, { version, env: process.env, cwd: process.cwd() }),
   ],
+  ['mcp', (argv, io) => mcpCommand(argv, io, { version, env: process.env, cwd: process.cwd() })],
 ]);
 
 function isUsageError(error: unknown): boolean {

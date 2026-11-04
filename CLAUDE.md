@@ -41,8 +41,8 @@ Every milestone PR must leave `pnpm check` and `pnpm build` green.
 - `packages/core`: pure functions only. No `node:fs`, no child processes, no network.
 - `packages/measure`: collectors with I/O. Heavy tools (Lighthouse) are optional peers,
   imported lazily.
-- `packages/cli`: the `usertax` binary. `main(argv, io)` returns an exit code; never call
-  `process.exit` inside library code.
+- `packages/cli`: the `usertax` binary and its MCP server (`usertax mcp`, ADR 0015). `main(argv, io)`
+  returns an exit code; never call `process.exit` inside library code.
 - ESM, TypeScript strict (`noUncheckedIndexedAccess`, `exactOptionalPropertyTypes`).
   Relative imports use the `.js` extension.
 - Tests live in `packages/*/test/` and import packages by name (`@usertax/core`); Vitest aliases
