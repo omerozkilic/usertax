@@ -1,18 +1,18 @@
-import { createRequire } from 'node:module';
 import { parseArgs } from 'node:util';
 import { diffCommand } from './commands/diff.js';
 import { measureCommand } from './commands/measure.js';
 import { EXIT, UsageError, defaultIo } from './io.js';
 import { mcpCommand } from './mcp.js';
+import { VERSION } from './version.js';
 import type { Io } from './io.js';
 
 export type { Io } from './io.js';
 export { EXIT } from './io.js';
+export { VERSION } from './version.js';
 export { MCP_HELP, createMcpServer, mcpCommand } from './mcp.js';
 export type { McpOptions } from './mcp.js';
 
-const require = createRequire(import.meta.url);
-const { version } = require('../package.json') as { version: string };
+const version = VERSION;
 
 export const HELP = `usertax ${version}
 What does this pull request cost your users?

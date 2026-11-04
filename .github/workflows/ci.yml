@@ -51,7 +51,8 @@ jobs:
           node packages/cli/bin/usertax.js --version
           node scripts/mcp-smoke.js packages/cli/bin/usertax.js
       - name: Action bundle
-        run: pnpm build:action && test -s packages/action/dist/index.js
+        # Runs the bundle as the action repository ships it: no package.json, no node_modules.
+        run: pnpm build:action && node scripts/action-smoke.js
       - name: npm package
         run: |
           pnpm pack:cli

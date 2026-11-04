@@ -26,6 +26,7 @@ execFileSync(
     '--external:lighthouse',
     '--external:lighthouse/*',
     '--external:chrome-launcher',
+    `--define:__USERTAX_VERSION__=${JSON.stringify(cli.version)}`,
     "--banner:js=import { createRequire as __usertaxCreateRequire } from 'node:module'; const require = __usertaxCreateRequire(import.meta.url);",
     '--log-level=warning',
   ],

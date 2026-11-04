@@ -61,6 +61,9 @@ jobs:
       - if: steps.key.outputs.present == 'true'
         run: pnpm install --frozen-lockfile && pnpm build && pnpm build:action
       - if: steps.key.outputs.present == 'true'
+        name: Smoke test the bundle as the action repository ships it
+        run: node scripts/action-smoke.js
+      - if: steps.key.outputs.present == 'true'
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           repository: omerozkilic/usertax-action
