@@ -47,13 +47,16 @@ jobs:
             console.log(`### Coverage\n\n| Metric | Covered |\n| --- | --- |\n${rows}`);
           ' >> "$GITHUB_STEP_SUMMARY"
       - name: CLI smoke test
-        run: node packages/cli/bin/usertax.js --version
+        run: |
+          node packages/cli/bin/usertax.js --version
+          node scripts/mcp-smoke.js packages/cli/bin/usertax.js
       - name: Action bundle
         run: pnpm build:action && test -s packages/action/dist/index.js
       - name: npm package
         run: |
           pnpm pack:cli
           node release/npm/bin/usertax.js --version
+          node scripts/mcp-smoke.js release/npm/bin/usertax.js
           (cd release/npm && npm pack --dry-run)
 
   examples:

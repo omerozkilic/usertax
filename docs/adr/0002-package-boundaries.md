@@ -20,10 +20,15 @@ A pnpm workspace with these packages:
 | `@usertax/measure`              | Collectors: web bundles and framework adapters, Lighthouse, React Native bundles, mobile archives, lockfile and source-map readers | Yes                           |
 | `usertax` (`packages/cli`)      | The `usertax` command: `measure`, `diff`                                                                                           | Yes                           |
 | `packages/action` (milestone 6) | GitHub Action entry point, bundled to a single `dist/` file                                                                        | Yes, plus the GitHub API      |
-| `packages/mcp` (later)          | MCP server for coding agents                                                                                                       | Yes                           |
+| `packages/mcp` (see ADR 0015)   | MCP server for coding agents                                                                                                       | Yes                           |
 
 Heavy dependencies such as Lighthouse are optional peer dependencies of `@usertax/measure`,
 loaded only when the corresponding collector runs.
+
+## Implementation notes
+
+- The MCP server became the `usertax mcp` command in `packages/cli` instead of a separate
+  package ([ADR 0015](0015-mcp-server-in-the-cli.md)).
 
 ## Consequences
 

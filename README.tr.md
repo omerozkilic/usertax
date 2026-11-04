@@ -21,8 +21,8 @@ raporu verir.
 
 > [!NOTE]
 > usertax aktif geliştirme aşamasında ve henüz yayınlanmadı. Web bundle ölçümü (Vite, Next.js),
-> React Native ve Expo bundle'ları, APK / AAB / IPA analizi, atıf, Lighthouse koşuları, CLI ve
-> GitHub Action bu repoda çalışıyor.
+> React Native ve Expo bundle'ları, APK / AAB / IPA analizi, atıf, Lighthouse koşuları, CLI,
+> GitHub Action ve MCP sunucusu bu repoda çalışıyor.
 
 ## Gerçek bir örnek
 
@@ -46,6 +46,8 @@ PR. Gerçek build'lerde ölçüldü ([yorumun tamamı](docs/demo/add-moment.md),
 - **Yalnızca kaynaklı öneriler:** Alternatifler MIT lisanslı e18e veri setinden gelir.
 - **Fork PR'larında güvenli:** Ölçüm `pull_request`'te, yorum `workflow_run`'da yapılır.
 - **Hızlı:** Base raporu varsayılan branch'te bir kez üretilir, her PR'da yeniden kullanılır.
+- **Yapay zekâ asistanları için:** `usertax mcp` bir MCP sunucusu başlatır; kodlama ajanları
+  tahmin etmek yerine usertax'in ölçtüğü rakamları kullanır ([kurulum](docs/mcp.md)).
 
 Durum tablosu, hızlı kurulum ve geliştirme komutları için [İngilizce README](README.md).
 

@@ -19,5 +19,6 @@ never deleted: a later ADR **supersedes** it instead.
 | [0011](0011-versioning-and-releases.md)              | Versioning and releases                         | Accepted |
 | [0012](0012-zero-config-detection.md)                | Zero-config detection and configuration file    | Accepted |
 | [0013](0013-no-llm-in-core.md)                       | No LLM in the core                              | Accepted |
+| [0015](0015-mcp-server-in-the-cli.md)                | The MCP server is a command of the CLI          | Accepted |
 
 Use [`template.md`](template.md) for new records.

@@ -28,8 +28,10 @@
     "usertax": "./bin/usertax.js"
   },
   "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.32.2",
     "@usertax/core": "workspace:*",
-    "@usertax/measure": "workspace:*"
+    "@usertax/measure": "workspace:*",
+    "zod": "^4.6.7"
   },
   "keywords": [
     "performance",
