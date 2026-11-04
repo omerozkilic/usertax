@@ -141,6 +141,16 @@ usertax measure apps/bare --bundle android=dist/index.android.bundle --bundle io
 
 usertax never builds a mobile app; it reads what your build produced.
 
+> [!TIP]
+> Export one platform at a time for exact comparisons. With Expo 58,
+> `expo export --platform all` builds both platforms in parallel and is not byte-for-byte
+> reproducible: on the unchanged [`examples/expo-app`](../examples/expo-app) it produced two
+> different pairs of Hermes bundles in four runs (Android 1,250,708 or 1,250,656 bytes, iOS
+> 1,246,572 or 1,246,608 bytes), so pull requests showed bundle changes of a few dozen bytes
+> without a code change. Each platform exported on its own gave the same bundle in four out of
+> four runs. The example exports Android into `dist/` and copies the iOS bundle next to it
+> ([`export.mjs`](../examples/expo-app/export.mjs)).
+
 - **Bundles.** Each bundle is measured with its source map (`<file>.map`). Plain JavaScript
   bundles are attributed byte by byte like web bundles, and also get gzip and brotli sizes.
   For **Hermes bytecode**, the source map's generated columns are bytecode offsets, so the

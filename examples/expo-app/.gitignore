@@ -1,4 +1,5 @@
 dist/
+.dist-ios/
 .expo/
 android/
 ios/
