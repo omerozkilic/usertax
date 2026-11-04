@@ -1,6 +1,7 @@
 import { readFile, readdir } from 'node:fs/promises';
 import { join, relative, sep } from 'node:path';
 import type { Asset, Route } from '@usertax/core';
+import { stableKey } from './hash.js';
 import { scanOutputDir } from './web.js';
 import type { MeasureResult, MeasureWebAppOptions } from './web.js';
 
@@ -21,10 +22,12 @@ function isHashOnly(stem: string): boolean {
 }
 
 /**
- * Next.js chunk names carry no stable part, so a chunk is identified by its largest source
- * module (`chunks/[node_modules/react-dom/cjs/react-dom-client.production.js].js`), which stays
- * the same between builds unless the chunk's content changes substantially. The build id
- * directory becomes `[build-id]`.
+ * Keys for Next.js chunks. webpack builds name chunks with a stable part and a content hash
+ * (`framework-df4c685bfa2a539c.js` → `chunks/framework-[hash].js`). Turbopack chunk names are
+ * only a hash, so such a chunk is identified by its largest source module
+ * (`chunks/[node_modules/react-dom/cjs/react-dom-client.production.js].js`), which stays the
+ * same between builds unless the chunk's content changes substantially. The build id directory
+ * becomes `[build-id]`.
  */
 export function nextKeys(
   assets: readonly Asset[],
@@ -39,7 +42,9 @@ export function nextKeys(
     const dir = match?.[1];
     const stem = match?.[2];
     if (dir !== undefined && stem !== undefined) {
+      const stable = stableKey(asset.file);
       if (stem.startsWith('turbopack-')) key = `${dir}[turbopack-runtime].js`;
+      else if (stable !== asset.file && stable !== `${dir}[hash].js`) key = stable;
       else if (isHashOnly(stem)) {
         const top = asset.modules?.[0]?.path;
         key = top === undefined ? `${dir}[hash].js` : `${dir}[${top}].js`;
@@ -129,7 +134,11 @@ async function manifestRoutes(
 /** Measures a built Next.js app (`.next/`), with routes from prerendered pages and manifests. */
 export async function measureNextApp(options: MeasureWebAppOptions): Promise<MeasureResult> {
   const staticDir = join(options.outDir, 'static');
-  const scan = await scanOutputDir({ outDir: staticDir, appDir: options.appDir });
+  const scan = await scanOutputDir({
+    outDir: staticDir,
+    appDir: options.appDir,
+    appPath: options.path,
+  });
   const buildId =
     (await readFile(join(options.outDir, 'BUILD_ID'), 'utf8').catch(() => '')).trim() || undefined;
   const keys = nextKeys(scan.assets, buildId);
