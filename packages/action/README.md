@@ -28,7 +28,7 @@ jobs:
       - uses: actions/checkout@v6
       - run: npm ci && npm run build
       - id: usertax
-        uses: omerozkilic/usertax-action@v1
+        uses: omerozkilic/usertax-action@v0
         with:
           mode: measure
       - uses: actions/upload-artifact@v7
@@ -62,7 +62,7 @@ jobs:
           run-id: ${{ github.event.workflow_run.id }}
           github-token: ${{ github.token }}
           path: .usertax-head
-      - uses: omerozkilic/usertax-action@v1
+      - uses: omerozkilic/usertax-action@v0
         with:
           mode: comment
           head-report: .usertax-head/usertax-report.json
