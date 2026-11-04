@@ -14,10 +14,13 @@ the first release is `v0.1.0`, and the action's major tag is `v0` until 1.0.0.
    and the license are pushed to [`omerozkilic/usertax-action`](https://github.com/omerozkilic/usertax-action),
    tagged `vX.Y.Z`, and the major tag `vX` is moved (ADR 0006).
 3. **npm** (if the repository variable `NPM_TRUSTED_PUBLISHING` is `true`): `release/npm/`
-   (built by `pnpm pack:cli`, one bundled file) is published as
-   [`@usertax/cli`](https://www.npmjs.com/package/@usertax/cli) through npm trusted publishing: GitHub's
-   OIDC token proves that this workflow built the package, npm adds provenance, and no npm token
-   is stored in the repository.
+   (built by `pnpm pack:cli`, one bundled file) is **staged** as
+   [`@usertax/cli`](https://www.npmjs.com/package/@usertax/cli) through npm trusted publishing:
+   GitHub's OIDC token proves that this workflow built the package, npm adds provenance, and no
+   npm token is stored in the repository. A staged version is not installable until a maintainer
+   approves it with 2FA, on npmjs.com (the package's staged versions) or with
+   `npm stage list @usertax/cli` and `npm stage approve <stage-id>`. A compromised workflow can
+   therefore stage, but never publish, a version.
 
 Without the deploy key the action job logs a notice and does nothing; without the variable the
 npm job is skipped.
@@ -41,9 +44,11 @@ These steps cannot be undone easily, so they are done by hand:
    ```
 
    Then, on npmjs.com, open the `@usertax/cli` package → Settings → Trusted publishing, add GitHub
-   Actions with repository `omerozkilic/usertax` and workflow `release.yml`, and set the
-   repository variable `NPM_TRUSTED_PUBLISHING` to `true` (Settings → Secrets and variables →
-   Actions → Variables). Later releases are published by the workflow.
+   Actions with repository `omerozkilic/usertax`, workflow `release.yml` and no environment, and
+   leave **Allow `npm publish`** and **Allow `npm dist-tag`** unchecked: the trusted publisher may
+   only stage. Set the repository variable `NPM_TRUSTED_PUBLISHING` to `true` (Settings → Secrets
+   and variables → Actions → Variables). Later releases are staged by the workflow; approve each
+   one with 2FA to publish it.
 
 3. **Public repository.** Make this repository public, enable private vulnerability reporting
    (Settings → Security), and CodeQL starts running.
