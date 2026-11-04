@@ -108,7 +108,7 @@ claude mcp add usertax -- npx -y @usertax/cli mcp
 
 ## On every pull request
 
-The [GitHub Action](https://github.com/omerozkilic/usertax-action) runs the
+The [GitHub Action](https://github.com/marketplace/actions/usertax-pr-performance-cost) runs the
 same measurement on each pull request and posts the report as one comment, with a `usertax` check
 for the budgets, in a setup that is safe for pull requests from forks.
 

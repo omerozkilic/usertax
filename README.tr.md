@@ -20,7 +20,7 @@ Deterministiktir: **LLM yok, API anahtarı yok, hesap yok, veri yükleme yok.** 
 raporu verir.
 
 **Kullanmak için:** GitHub Action
-[`omerozkilic/usertax-action@v0`](https://github.com/omerozkilic/usertax-action) · CLI ve MCP
+[`omerozkilic/usertax-action@v0`](https://github.com/marketplace/actions/usertax-pr-performance-cost) (Marketplace) · CLI ve MCP
 sunucusu [`npx @usertax/cli`](https://www.npmjs.com/package/@usertax/cli). usertax 0.x
 sürümünde: rapor şeması ve action girdileri küçük sürümler arasında değişebilir.
 

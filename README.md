@@ -5,6 +5,8 @@
 **What does this pull request cost your users?**<br>
 Web and mobile · Explains _why_ · No API keys
 
+[![GitHub Marketplace](https://img.shields.io/badge/Marketplace-usertax-2088FF?logo=github)](https://github.com/marketplace/actions/usertax-pr-performance-cost)
+[![npm](https://img.shields.io/npm/v/@usertax/cli)](https://www.npmjs.com/package/@usertax/cli)
 [![CI](https://github.com/omerozkilic/usertax/actions/workflows/ci.yml/badge.svg)](https://github.com/omerozkilic/usertax/actions/workflows/ci.yml)
 [![CodeQL](https://github.com/omerozkilic/usertax/actions/workflows/codeql.yml/badge.svg)](https://github.com/omerozkilic/usertax/actions/workflows/codeql.yml)
 [![Node.js](https://img.shields.io/badge/node-%E2%89%A522.18-339933)](package.json)
@@ -26,7 +28,7 @@ bundle grew"_.
 It is deterministic: **no LLM, no API key, no account, no upload.** The same build gives the
 same report.
 
-**Get it:** the GitHub Action [`omerozkilic/usertax-action@v0`](https://github.com/omerozkilic/usertax-action) ·
+**Get it:** the GitHub Action [`omerozkilic/usertax-action@v0`](https://github.com/marketplace/actions/usertax-pr-performance-cost) on the Marketplace ·
 the CLI and MCP server [`npx @usertax/cli`](https://www.npmjs.com/package/@usertax/cli). usertax is
 at 0.x: the report schema and the action inputs may still change between minor versions
 ([changelog](CHANGELOG.md)).
@@ -69,21 +71,21 @@ a date, measured on real builds ([full comment](docs/demo/add-moment.md),
 
 ## Status
 
-| Area         | Today                                                                                                                                                   | Planned                       |
-| ------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------- |
-| Web bundles  | Vite and Next.js 16 with Turbopack or webpack (routes), webpack and static output (files)                                                               | –                             |
-| Attribution  | Source maps, lockfiles: pnpm 6 / 9, npm 2 / 3, Yarn 1, Yarn 2+                                                                                          | Bun                           |
-| Budgets      | `max`, `min`, increase / decrease in bytes or percent, warn / fail, from `usertax.config.(json\|ts)`; exit code 1 on failure                            | –                             |
-| Lighthouse   | Runner (`--lighthouse`), every run stored, medians, IQR, noise thresholds calibrated on GitHub-hosted runners ([benchmarks](docs/benchmarks/README.md)) | –                             |
-| Mobile       | Expo and bare React Native bundles (JS and Hermes bytecode, with attribution), APK / AAB / IPA breakdown                                                | Per-device download estimates |
-| Distribution | GitHub Action (fork-safe two-workflow setup, dogfooded in this repository); CLI `npx @usertax/cli`; MCP server (`usertax mcp`); monorepos in one report | GitHub Marketplace listing    |
+| Area         | Today                                                                                                                                                                                                                              | Planned                       |
+| ------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------- |
+| Web bundles  | Vite and Next.js 16 with Turbopack or webpack (routes), webpack and static output (files)                                                                                                                                          | –                             |
+| Attribution  | Source maps, lockfiles: pnpm 6 / 9, npm 2 / 3, Yarn 1, Yarn 2+                                                                                                                                                                     | Bun                           |
+| Budgets      | `max`, `min`, increase / decrease in bytes or percent, warn / fail, from `usertax.config.(json\|ts)`; exit code 1 on failure                                                                                                       | –                             |
+| Lighthouse   | Runner (`--lighthouse`), every run stored, medians, IQR, noise thresholds calibrated on GitHub-hosted runners ([benchmarks](docs/benchmarks/README.md))                                                                            | –                             |
+| Mobile       | Expo and bare React Native bundles (JS and Hermes bytecode, with attribution), APK / AAB / IPA breakdown                                                                                                                           | Per-device download estimates |
+| Distribution | GitHub Action on the [Marketplace](https://github.com/marketplace/actions/usertax-pr-performance-cost) (fork-safe two-workflow setup, dogfooded here); CLI `npx @usertax/cli`; MCP server (`usertax mcp`); monorepos in one report | –                             |
 
 ## GitHub Action
 
 Two workflows: one measures the pull request with a read-only token, the other posts the comment
 from your default branch, so pull requests from forks are safe
 ([setup and inputs](docs/github-action.md)). This repository runs the action on its own pull
-requests. The [action's page](https://github.com/omerozkilic/usertax-action) has both workflows
+requests. The [Marketplace page](https://github.com/marketplace/actions/usertax-pr-performance-cost) has both workflows
 ready to copy, and a one-workflow setup for private repositories.
 
 ## Quickstart (CLI)
