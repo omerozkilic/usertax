@@ -21,7 +21,7 @@
   "dependencies": {
     "@usertax/core": "workspace:*",
     "@usertax/measure": "workspace:*",
-    "usertax": "workspace:*"
+    "@usertax/cli": "workspace:*"
   },
   "files": [
     "action.yml",

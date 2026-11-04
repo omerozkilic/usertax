@@ -27,8 +27,14 @@ Release notes must be accurate without manual bookkeeping.
   first release is 0.1.0 unless the maintainer sets `release-as`). The workflow
   `.github/workflows/release.yml` also publishes the action repository and npm, each only when
   its secret exists; see [docs/releasing.md](../releasing.md).
-- The npm package `usertax` is one bundled file (core and measure inside), built by
+- The npm package `@usertax/cli` is one bundled file (core and measure inside), built by
   `pnpm pack:cli`; the workspace packages stay private for now.
+
+## Implementation notes (npm name)
+
+- The npm registry refused the unscoped name `usertax` as too similar to the existing package
+  `user.tax`. The CLI is published as `@usertax/cli` in the `usertax` npm organization; its
+  command is still `usertax` (`npx @usertax/cli measure`, or `npx usertax` once installed).
 
 ## Consequences
 

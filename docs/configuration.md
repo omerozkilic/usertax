@@ -4,7 +4,7 @@ usertax works without configuration and reads `usertax.config.json` (or `.ts`, `
 with a default export) at the repository root when you need more. The JSON Schema is published
 as [`config.schema.json`](../packages/core/schema/config.schema.json) and ships in the npm package:
 with `usertax` installed as a dev dependency, point `$schema` at
-`./node_modules/usertax/schema/config.schema.json` for completion in your editor (or at
+`./node_modules/@usertax/cli/schema/config.schema.json` for completion in your editor (or at
 `https://raw.githubusercontent.com/omerozkilic/usertax/main/packages/core/schema/config.schema.json`).
 
 ## Without configuration
@@ -23,7 +23,7 @@ bundles or archives to read. Every app must already be built.
 
 ```json
 {
-  "$schema": "./node_modules/usertax/schema/config.schema.json",
+  "$schema": "./node_modules/@usertax/cli/schema/config.schema.json",
   "apps": [
     { "path": "apps/web", "lighthouse": { "pages": ["/", "/pricing"], "runs": 5 } },
     { "path": "apps/docs", "id": "docs", "outDir": "build" },

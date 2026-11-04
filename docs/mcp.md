@@ -10,17 +10,17 @@ network service and no language model; it runs the same code as the CLI.
 Claude Code:
 
 ```bash
-claude mcp add usertax -- npx -y usertax mcp
+claude mcp add usertax -- npx -y @usertax/cli mcp
 ```
 
 Other clients (`mcpServers` configuration):
 
 ```json
-{ "mcpServers": { "usertax": { "command": "npx", "args": ["-y", "usertax", "mcp"] } } }
+{ "mcpServers": { "usertax": { "command": "npx", "args": ["-y", "@usertax/cli", "mcp"] } } }
 ```
 
-Until the npm package is released, use `node /path/to/usertax/packages/cli/bin/usertax.js mcp`
-from a clone after `pnpm install && pnpm build`. Relative paths in tool calls are resolved
+From a clone, `node packages/cli/bin/usertax.js mcp` after `pnpm install && pnpm build` works the
+same. Relative paths in tool calls are resolved
 against the directory the server was started in, normally the project root.
 
 ## Tools

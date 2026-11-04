@@ -4,7 +4,7 @@ import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { parseReport } from '@usertax/core';
-import { main } from 'usertax';
+import { main } from '@usertax/cli';
 
 const fixture = fileURLToPath(new URL('../../measure/test/fixtures/vite-dist/', import.meta.url));
 

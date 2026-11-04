@@ -3,7 +3,7 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { afterEach, beforeAll, describe, expect, it, vi } from 'vitest';
 import { parseReport } from '@usertax/core';
-import { main } from 'usertax';
+import { main } from '@usertax/cli';
 
 const fixture = new URL('../../measure/test/fixtures/vite-dist/', import.meta.url);
 

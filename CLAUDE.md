@@ -10,7 +10,7 @@ Guidance for Claude (and other coding agents) working in this repository.
 
 ## What usertax is
 
-A GitHub Action and CLI (`npx usertax`) that reports, on every pull request, what the change
+A GitHub Action and CLI (`npx @usertax/cli`) that reports, on every pull request, what the change
 costs users on web (Lighthouse, JS per route) and mobile (React Native / Expo JS and Hermes
 bundles, APK / AAB / IPA), and attributes the change to dependencies via lockfile diffs and
 source maps. Read `docs/adr/` before changing a design; update or supersede an ADR when a

@@ -19,10 +19,16 @@ birleştirir; yorum "bundle büyüdü" yerine _"`moment` eklendi, 60 kB getirdi"
 Deterministiktir: **LLM yok, API anahtarı yok, hesap yok, veri yükleme yok.** Aynı build aynı
 raporu verir.
 
-> [!NOTE]
-> usertax aktif geliştirme aşamasında ve henüz yayınlanmadı. Web bundle ölçümü (Vite, Next.js),
-> React Native ve Expo bundle'ları, APK / AAB / IPA analizi, atıf, Lighthouse koşuları, CLI,
-> GitHub Action ve MCP sunucusu bu repoda çalışıyor.
+**Kullanmak için:** GitHub Action
+[`omerozkilic/usertax-action@v0`](https://github.com/omerozkilic/usertax-action) · CLI ve MCP
+sunucusu [`npx @usertax/cli`](https://www.npmjs.com/package/@usertax/cli). usertax 0.x
+sürümünde: rapor şeması ve action girdileri küçük sürümler arasında değişebilir.
+
+```bash
+npx @usertax/cli measure apps/web -o once.json      # değişiklikten önce
+npx @usertax/cli measure apps/web -o sonra.json     # değişiklikten sonra
+npx @usertax/cli diff sonra.json --base once.json
+```
 
 ## Gerçek bir örnek
 

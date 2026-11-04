@@ -7,14 +7,14 @@
 
 ADR 0002 planned a separate `packages/mcp` for an MCP server, so that coding agents can ask
 "what does this change cost users?" and get usertax's numbers instead of guessing. The CLI is
-already published as one bundled npm package (`npx usertax`, ADR 0011), and every tool the
+already published as one bundled npm package (`npx @usertax/cli`, ADR 0011), and every tool the
 server needs (measure, diff, the alternatives data) is in the CLI.
 
 ## Decision
 
 - The server is `usertax mcp`, a command of the CLI (`packages/cli/src/mcp.ts`), using the
   official MCP TypeScript SDK over stdio. One npm package and one binary serve people, CI and
-  agents; MCP clients start it with `npx -y usertax mcp`.
+  agents; MCP clients start it with `npx -y @usertax/cli mcp`.
 - Tools: `measure` (built apps → a saved report and its head values), `compare` (the same output
   as `usertax diff`, budgets included), `explain_package` (bytes per file, lockfile versions and
   `via`, base comparison, alternatives) and `alternatives` (the curated dataset only).
