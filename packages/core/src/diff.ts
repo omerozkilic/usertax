@@ -153,6 +153,8 @@ export interface AppDiff {
   readonly framework: App['framework'];
   /** `added` / `removed` when the app exists on one side only. */
   readonly status: 'added' | 'removed' | 'compared' | 'head-only';
+  /** The base app's id when its id changed and it was matched by its path instead. */
+  readonly previousId?: string;
   readonly metrics: readonly MetricDiff[];
   readonly assets: readonly AssetDiff[];
   readonly packages: readonly PackageDiff[];
@@ -501,6 +503,9 @@ function diffApp(
   else if (head === undefined) status = 'removed';
   return {
     id: app.id,
+    ...(base !== undefined && head !== undefined && base.id !== head.id
+      ? { previousId: base.id }
+      : {}),
     name: app.name,
     path: app.path,
     kind: app.kind,
@@ -521,6 +526,36 @@ function diffApp(
 }
 
 /**
+ * Pairs head apps with base apps by id. An app whose id changed (for example after adding `id`
+ * to the configuration) is paired by its path when exactly one unpaired app of the same kind has
+ * that path on each side.
+ */
+function pairApps(head: readonly App[], base: readonly App[]): Map<App, App> {
+  const byId = new Map(base.map((app) => [app.id, app]));
+  const pairs = new Map<App, App>();
+  for (const app of head) {
+    const match = byId.get(app.id);
+    if (match !== undefined) pairs.set(app, match);
+  }
+  const paired = new Set(pairs.values());
+  const key = (app: App) => `${app.kind}\u0000${app.path}`;
+  const group = (apps: readonly App[]) => {
+    const groups = new Map<string, App[]>();
+    for (const app of apps) groups.set(key(app), [...(groups.get(key(app)) ?? []), app]);
+    return groups;
+  };
+  const headLeft = group(head.filter((app) => !pairs.has(app)));
+  const baseLeft = group(base.filter((app) => !paired.has(app)));
+  for (const [path, apps] of headLeft) {
+    const candidates = baseLeft.get(path);
+    if (apps.length === 1 && candidates?.length === 1) {
+      pairs.set(apps[0] as App, candidates[0] as App);
+    }
+  }
+  return pairs;
+}
+
+/**
  * Compares a head report with a base report. Without a base, the diff lists the head values
  * only (`status: 'head-only'`). Both reports must already be validated.
  */
@@ -530,13 +565,11 @@ export function diffReports(head: Report, base?: Report, options: DiffOptions = 
     rankBy: options.rankBy ?? 'gzip',
     noise: { ...DEFAULT_NOISE_THRESHOLDS, ...options.noise },
   };
-  const baseApps = new Map((base?.apps ?? []).map((app) => [app.id, app]));
-  const apps = head.apps.map((app) =>
-    diffApp(baseApps.get(app.id), app, base !== undefined, resolved),
-  );
-  const headIds = new Set(head.apps.map((app) => app.id));
+  const pairs = pairApps(head.apps, base?.apps ?? []);
+  const apps = head.apps.map((app) => diffApp(pairs.get(app), app, base !== undefined, resolved));
+  const paired = new Set(pairs.values());
   for (const app of base?.apps ?? []) {
-    if (!headIds.has(app.id)) apps.push(diffApp(app, undefined, true, resolved));
+    if (!paired.has(app)) apps.push(diffApp(app, undefined, true, resolved));
   }
   return {
     schemaVersion: DIFF_SCHEMA_VERSION,

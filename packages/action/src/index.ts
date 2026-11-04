@@ -16,3 +16,5 @@ export type { Repo } from './github.js';
 export { resolvePullRequest } from './pr.js';
 export type { PullRequestContext } from './pr.js';
 export { run } from './run.js';
+export { STATUS_CONTEXT, commitStatus, setCommitStatus } from './status.js';
+export type { CommitStatus } from './status.js';

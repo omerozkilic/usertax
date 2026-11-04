@@ -24,8 +24,11 @@ import {
 import type { Runtime } from './env.js';
 import { GitHub } from './github.js';
 import { resolvePullRequest } from './pr.js';
+import { commitStatus, setCommitStatus } from './status.js';
 
 const MAX_REPORT_BYTES = 20_000_000;
+/** Events on the default branch whose report is stored as a base report. */
+const BASE_EVENTS = new Set(['push', 'workflow_dispatch', 'schedule']);
 
 interface Context {
   readonly rt: Runtime;
@@ -73,8 +76,10 @@ async function measure(ctx: Context): Promise<string> {
   if (code !== 0) throw new InputError(`usertax measure failed with exit code ${code}`);
 
   const repository = ctx.event['repository'] as { default_branch?: string } | undefined;
+  // Pushes store the base report; a manual or scheduled run on the default branch can recreate
+  // a missing one (ADR 0014).
   const onDefaultBranch =
-    ctx.eventName === 'push' &&
+    BASE_EVENTS.has(ctx.eventName) &&
     env['GITHUB_REF'] === `refs/heads/${repository?.default_branch ?? 'main'}`;
   const artifact = onDefaultBranch
     ? `${BASE_ARTIFACT_PREFIX}${env['GITHUB_SHA'] ?? ''}`
@@ -143,7 +148,7 @@ async function comment(ctx: Context, headPath: string): Promise<number> {
   }
   if (!base.found) {
     notes.push(
-      `No base report was found for the merge base or its ${base.searched - 1} ancestors, so only head values are shown. Base reports are uploaded by the measure workflow on pushes to the default branch.`,
+      `No base report was found for the merge base or its ${base.searched - 1} ancestors, so only head values are shown. Base reports are uploaded by the measure workflow on pushes to the default branch; to create one now, run that workflow on the default branch and update this pull request's branch.`,
     );
   }
 
@@ -174,7 +179,14 @@ async function comment(ctx: Context, headPath: string): Promise<number> {
   await appendSummary(env, renderMarkdown(diff, { ...options, marker: false }));
   await setOutput(env, 'comment-url', posted.url);
   await setOutput(env, 'status', budgets?.status ?? 'pass');
-  if (budgets?.status === 'fail' && booleanInput(env, 'fail-on-budget', true)) {
+  const failOnBudget = booleanInput(env, 'fail-on-budget', true);
+  if (booleanInput(env, 'commit-status', true)) {
+    const status = commitStatus(budgets, failOnBudget);
+    if (await setCommitStatus(gh, pr.headSha, status, posted.url, ctx.rt.log)) {
+      ctx.rt.log(`commit status ${status.state}: ${status.description}`);
+    }
+  }
+  if (budgets?.status === 'fail' && failOnBudget) {
     ctx.rt.log(
       `::error::${commandMessage('a usertax budget failed; see the pull request comment')}`,
     );

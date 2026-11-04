@@ -49,6 +49,7 @@ permissions:
   contents: read
   actions: read
   pull-requests: write
+  statuses: write # the "usertax" commit status on the pull request
 jobs:
   comment:
     if: github.event.workflow_run.event == 'pull_request' && github.event.workflow_run.conclusion == 'success'
