@@ -30,6 +30,7 @@ pnpm e2e            # measure the built examples with the CLI and check invarian
 pnpm pack:cli       # build the npm package of the CLI into release/npm (see docs/releasing.md)
 pnpm build:action   # bundle the GitHub Action into packages/action/dist
 pnpm demo           # add moment to the Vite example in a worktree; regenerates docs/demo/add-moment.md with --output
+node scripts/render-comment.js docs/demo/add-moment.md docs/assets/comment-add-moment.png [--theme dark]   # README images (Playwright)
 node scripts/update-alternatives.js   # regenerate e18e alternatives after bumping module-replacements
 node scripts/calibrate-lighthouse.js --runs 30   # Lighthouse noise on this machine (see docs/benchmarks)
 ```

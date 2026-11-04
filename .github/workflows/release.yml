@@ -80,6 +80,9 @@ jobs:
           cp packages/action/dist/index.js usertax-action/dist/index.js
           cp packages/action/README.md usertax-action/README.md
           cp LICENSE usertax-action/LICENSE
+          # Images of the README (the Marketplace page).
+          mkdir -p usertax-action/assets
+          cp docs/assets/comment-add-moment.png docs/assets/comment-add-moment-dark.png usertax-action/assets/
           cd usertax-action
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"

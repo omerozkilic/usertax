@@ -35,13 +35,20 @@
   },
   "keywords": [
     "performance",
+    "web-performance",
     "bundle-size",
+    "core-web-vitals",
     "lighthouse",
     "react-native",
     "expo",
     "apk",
     "ipa",
+    "source-map",
+    "lockfile",
+    "monorepo",
     "pull-request",
-    "ci"
+    "github-action",
+    "ci",
+    "mcp"
   ]
 }
