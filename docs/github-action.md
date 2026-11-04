@@ -2,6 +2,7 @@
 
 > [!NOTE]
 > The action is published as [`omerozkilic/usertax-action`](https://github.com/omerozkilic/usertax-action)
+> ([GitHub Marketplace](https://github.com/marketplace/actions/usertax-pr-performance-cost))
 > (ADR 0006). Use `@v0` for the latest 0.x release or pin an exact version such as `@v0.1.3`.
 > This repository runs it on its own pull requests
 > ([`usertax.yml`](../.github/workflows/usertax.yml) and
