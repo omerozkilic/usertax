@@ -5,7 +5,8 @@ import { stableKey } from './hash.js';
 import { scanOutputDir } from './web.js';
 import type { MeasureResult, MeasureWebAppOptions } from './web.js';
 
-const STATIC_PREFIX = '/_next/static/';
+/** Where Next.js serves `.next/static/`, after `basePath` or `assetPrefix` if either is set. */
+const STATIC_SEGMENT = '/_next/static/';
 const SPECIAL = new Set([
   '_not-found',
   '_global-error',
@@ -74,8 +75,12 @@ export function htmlAssets(html: string): string[] {
     const isStylesheet = /\brel="stylesheet"/i.test(text);
     if (!isScript && !isPreload && !isStylesheet) continue;
     const url = /\b(?:src|href)="([^"]+)"/i.exec(text)?.[1];
-    if (url?.startsWith(STATIC_PREFIX) === true)
-      files.push(decodeURI(url.slice(STATIC_PREFIX.length).split('?')[0] ?? ''));
+    // `basePath` (/docs/_next/static/…) and `assetPrefix` (https://cdn.example.com/_next/static/…)
+    // put a prefix before the static directory.
+    const index = url?.indexOf(STATIC_SEGMENT) ?? -1;
+    if (url !== undefined && index !== -1) {
+      files.push(decodeURI(url.slice(index + STATIC_SEGMENT.length).split(/[?#]/)[0] ?? ''));
+    }
   }
   return [...new Set(files)];
 }

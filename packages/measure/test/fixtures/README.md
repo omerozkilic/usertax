@@ -41,6 +41,12 @@ Part of the real `.next-webpack/` output of the same example built with
 `882`, `42cfba27`) and `polyfills` are left out to keep the fixture small, so routes list only
 the files that are present.
 
+## `next-basepath/`
+
+`index.html` is the prerendered `/` page of `examples/next-app` built with
+`basePath: '/omer-website'` (Next.js 16.4.4, Turbopack), so every static URL starts with
+`/omer-website/_next/static/`.
+
 ## `lighthouse-vite.json`
 
 A real Lighthouse 13.6.0 result for `/` of the built `examples/vite-app`, served by usertax's
