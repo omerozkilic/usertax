@@ -2,9 +2,10 @@ name: Release
 
 # release-please opens and updates a release pull request from Conventional Commits. Merging it
 # (a maintainer's decision) creates the tag vX.Y.Z and the GitHub release; the jobs below then
-# publish, each only when its secret is configured (docs/releasing.md):
-#   ACTION_REPO_DEPLOY_KEY  write deploy key of omerozkilic/usertax-action (ADR 0006)
-#   NPM_TOKEN               npm automation token for the usertax package
+# publish, each only when it is configured (docs/releasing.md):
+#   secrets.ACTION_REPO_DEPLOY_KEY  write deploy key of omerozkilic/usertax-action (ADR 0006)
+#   vars.NPM_TRUSTED_PUBLISHING     'true' once this workflow is the package's trusted publisher
+#                                   on npmjs.com (OIDC; no npm token is stored anywhere)
 on:
   push:
     branches: [main]
@@ -90,39 +91,27 @@ jobs:
   npm:
     name: Publish to npm
     needs: release-please
-    if: needs.release-please.outputs.released == 'true'
+    # Trusted publishing (OIDC) works only for a package that exists, so the first version is
+    # published by hand and this job is switched on afterwards (docs/releasing.md).
+    if: needs.release-please.outputs.released == 'true' && vars.NPM_TRUSTED_PUBLISHING == 'true'
     runs-on: ubuntu-latest
     permissions:
       contents: read
-      id-token: write
+      id-token: write # OIDC token for npm trusted publishing and provenance
     steps:
-      - name: Check for the npm token
-        id: token
-        env:
-          TOKEN: ${{ secrets.NPM_TOKEN }}
-        run: |
-          if [ -z "$TOKEN" ]; then
-            echo "::notice::NPM_TOKEN is not set; skipping npm"
-            echo "present=false" >> "$GITHUB_OUTPUT"
-          else
-            echo "present=true" >> "$GITHUB_OUTPUT"
-          fi
-      - if: steps.token.outputs.present == 'true'
-        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
-      - if: steps.token.outputs.present == 'true'
-        uses: pnpm/action-setup@ea17c68df8912ef543352723c149a84f56e3d413 # v6.1.0
-      - if: steps.token.outputs.present == 'true'
-        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+      - uses: pnpm/action-setup@ea17c68df8912ef543352723c149a84f56e3d413 # v6.1.0
+      # No registry-url: an .npmrc with a token placeholder would make npm skip OIDC.
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
           node-version: 24
           cache: pnpm
-          registry-url: https://registry.npmjs.org
-      - if: steps.token.outputs.present == 'true'
-        run: pnpm install --frozen-lockfile && pnpm build && pnpm pack:cli
-      - if: steps.token.outputs.present == 'true'
-        working-directory: release/npm
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-        run: npm publish --provenance --access public
+      - run: pnpm install --frozen-lockfile && pnpm build && pnpm pack:cli
+      - name: Check the npm version (trusted publishing needs npm 11.5.1 or later)
+        run: |
+          npm --version
+          node -e "const [a,b,c]=process.argv[1].split('.').map(Number);process.exit(a>11||(a===11&&(b>5||(b===5&&c>=1)))?0:1)" "$(npm --version)"
+      - working-directory: release/npm
+        run: npm publish --access public
