@@ -9,3 +9,5 @@ packages/core/src/data/
 docs/demo/add-moment.md
 .next/
 docs/benchmarks/data/
+release/
+CHANGELOG.md
