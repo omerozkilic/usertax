@@ -1,4 +1,4 @@
-import { cp, mkdtemp, rm } from 'node:fs/promises';
+import { cp, mkdtemp, readFile, rm } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -36,6 +36,27 @@ describe('htmlRoute', () => {
 });
 
 describe('htmlAssets', () => {
+  it('finds the static files after a basePath, in a real build', async () => {
+    // examples/next-app built with basePath: '/omer-website' (fixtures/README.md).
+    const html = await readFile(
+      new URL('./fixtures/next-basepath/index.html', import.meta.url),
+      'utf8',
+    );
+    const files = htmlAssets(html);
+    expect(files.length).toBeGreaterThan(0);
+    expect(files.every((f) => f.startsWith('chunks/') || f.startsWith('css/'))).toBe(true);
+    expect(htmlAssets(html.replaceAll('/omer-website/_next/', '/_next/'))).toEqual(files);
+  });
+
+  it('finds the static files behind an assetPrefix and ignores query strings and hashes', () => {
+    const html = [
+      '<script src="https://cdn.example.com/_next/static/chunks/a.js?dpl=1" async=""></script>',
+      '<link rel="stylesheet" href="//cdn.example.com/app/_next/static/css/b.css#x"/>',
+      '<script src="/scripts/analytics.js"></script>',
+    ].join('');
+    expect(htmlAssets(html)).toEqual(['chunks/a.js', 'css/b.css']);
+  });
+
   it('collects scripts, script preloads and stylesheets, without legacy polyfills', () => {
     const html = [
       '<link rel="stylesheet" href="/_next/static/css/a.css"/>',

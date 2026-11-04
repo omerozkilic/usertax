@@ -119,7 +119,8 @@ Rules:
 - For Next.js (`.next/`, `productionBrowserSourceMaps: true`), routes come from the script and
   stylesheet tags of the prerendered pages, which is exactly what a browser loads first; legacy
   `noModule` polyfills are excluded. Pages without prerendered HTML use the client reference
-  manifest. Both bundlers are supported:
+  manifest. `basePath` and `assetPrefix` are supported: the static files are found after
+  either prefix. Both bundlers are supported:
   - Turbopack (the default): chunk names are only hashes, so a chunk is identified by its largest
     source module, e.g.
     `chunks/[node_modules/next/dist/compiled/react-dom/cjs/react-dom-client.production.js].js`.
