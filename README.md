@@ -9,7 +9,7 @@ Web and mobile · Explains _why_ · No API keys
 [![npm](https://img.shields.io/npm/v/@usertax/cli)](https://www.npmjs.com/package/@usertax/cli)
 [![CI](https://github.com/omerozkilic/usertax/actions/workflows/ci.yml/badge.svg)](https://github.com/omerozkilic/usertax/actions/workflows/ci.yml)
 [![CodeQL](https://github.com/omerozkilic/usertax/actions/workflows/codeql.yml/badge.svg)](https://github.com/omerozkilic/usertax/actions/workflows/codeql.yml)
-[![Node.js](https://img.shields.io/badge/node-%E2%89%A522.18-339933)](package.json)
+[![Node.js](https://img.shields.io/badge/node-22.23.4%20%7C%2024.22.1%20%7C%2026.12.1-339933)](package.json)
 [![TypeScript](https://img.shields.io/badge/TypeScript-strict-3178c6)](tsconfig.base.json)
 [![License: MIT](https://img.shields.io/badge/license-MIT-green)](LICENSE)
 
@@ -100,8 +100,8 @@ npx @usertax/cli diff head.json --base base.json          # Markdown
 npx @usertax/cli diff head.json --base base.json -f json  # JSON
 ```
 
-Installed as a dev dependency (`npm i -D @usertax/cli`), the command is `usertax`. Node.js 22.18
-or later; `lighthouse` and `chrome-launcher` are optional, for `--lighthouse`.
+Installed as a dev dependency (`npm i -D @usertax/cli`), the command is `usertax`. Node.js 22.23.4, 24.22.1 or
+26.12.1 or later (the releases that fix CVE-2026-111497); `lighthouse` and `chrome-launcher` are optional, for `--lighthouse`.
 
 `usertax measure` reads the build output, the source maps and the nearest lockfile. It never
 builds your app and never needs network access.

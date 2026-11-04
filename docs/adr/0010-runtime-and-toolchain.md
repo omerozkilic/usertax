@@ -32,6 +32,15 @@ The CLI also runs on developers' machines.
   measured repository at run time. The bundle is built in CI and by the dogfooding workflows; it
   is committed only to the thin action repository at release time (ADR 0006).
 
+## Implementation notes (Node.js security releases, October 2026)
+
+- The supported range is `^22.23.4 || ^24.22.1 || >=26.12.1`: the first releases of each line
+  that fix CVE-2026-111497 (Brotli decoder out-of-bounds write, in CISA's Known Exploited
+  Vulnerabilities catalog), CVE-2026-105483 and CVE-2026-106069 (TLS hostname validation) and
+  CVE-2026-105482 (DNS). The action talks to the GitHub API over TLS, and Node's `fetch` decompresses
+  Brotli-encoded responses, so older runtimes are not supported. The CLI warns at start-up on an older
+  runtime; the action runs on the runner's `node24`, which GitHub updates.
+
 ## Consequences
 
 - Modern runtime APIs (`zlib` brotli, `parseArgs`, type stripping) without polyfills.
