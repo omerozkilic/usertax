@@ -11,6 +11,7 @@ import {
   GitHubError,
   booleanInput,
   commandMessage,
+  commitStatus,
   getInput,
   resolvePullRequest,
   run,
@@ -233,8 +234,9 @@ describe('run', () => {
     };
   }
 
-  function routes(zip: Uint8Array | undefined, comments: unknown[] = []) {
+  function routes(zip: Uint8Array | undefined, comments: unknown[] = [], statusCode = 201) {
     return fakeGitHub({
+      'POST /repos/o/r/statuses/': () => ({ status: statusCode, json: {} }),
       'GET /repos/o/r/compare/main...': () => ({
         json: { merge_base_commit: { sha: MERGE_BASE } },
       }),
@@ -269,7 +271,15 @@ describe('run', () => {
     expect(body.startsWith(COMMENT_MARKER)).toBe(true);
     expect(body).toContain(`Base \`${MERGE_BASE.slice(0, 7)}\` → head \`${HEAD_SHA.slice(0, 7)}\``);
     expect(body).toContain('[workflow run](https://github.com/o/r/actions/runs/99)');
-    expect(logs.at(-1)).toBe('created https://github.com/o/r/pull/12#c1');
+    expect(logs).toContain('created https://github.com/o/r/pull/12#c1');
+    const status = calls.find((c) => c.url.includes('/statuses/'));
+    expect(status?.url).toBe(`https://api.github.com/repos/o/r/statuses/${HEAD_SHA}`);
+    expect(status?.body).toEqual({
+      state: 'success',
+      context: 'usertax',
+      description: 'Report posted; no budgets configured',
+      target_url: 'https://github.com/o/r/pull/12#c1',
+    });
     expect(await readFile(join(work, 'summary.md'), 'utf8')).not.toContain(COMMENT_MARKER);
     expect(await readFile(join(work, 'output.txt'), 'utf8')).toMatch(/status<<[^\n]+\npass\n/);
   });
@@ -289,6 +299,11 @@ describe('run', () => {
     expect(await run({ env: env(), fetch: fetchFn, log: (l) => logs.push(l) })).toBe(1);
     expect(calls.find((c) => c.method === 'PATCH')?.url).toContain('/issues/comments/8');
     expect(logs).toContain('::error::a usertax budget failed; see the pull request comment');
+    expect(calls.find((c) => c.url.includes('/statuses/'))?.body).toMatchObject({
+      state: 'failure',
+      description: 'Budgets: 1 failed',
+    });
+    calls.length = 0;
     expect(
       await run({
         env: env({ 'INPUT_FAIL-ON-BUDGET': 'false' }),
@@ -296,6 +311,10 @@ describe('run', () => {
         log: () => undefined,
       }),
     ).toBe(0);
+    expect(calls.find((c) => c.url.includes('/statuses/'))?.body).toMatchObject({
+      state: 'success',
+      description: 'Budgets: 1 failed (not blocking)',
+    });
     await writeFile(join(work, 'usertax.config.json'), '{}');
   });
 
@@ -305,6 +324,24 @@ describe('run', () => {
     const body = (calls.find((c) => c.method === 'POST')?.body as { body: string }).body;
     expect(body).toContain('No base report was found for the merge base or its 1 ancestors');
     expect(body).toContain('no base report to compare with');
+  });
+
+  it('still comments without statuses: write, and can skip the status', async () => {
+    const denied = routes(undefined, [], 403);
+    const logs: string[] = [];
+    expect(await run({ env: env(), fetch: denied.fetchFn, log: (l) => logs.push(l) })).toBe(0);
+    expect(logs).toContainEqual(expect.stringMatching(/^::warning::could not set the usertax/));
+    expect(denied.calls.some((c) => c.url.includes('/issues/12/comments'))).toBe(true);
+
+    const off = routes(undefined);
+    const env2 = env({ 'INPUT_COMMIT-STATUS': 'false' });
+    expect(await run({ env: env2, fetch: off.fetchFn, log: () => undefined })).toBe(0);
+    expect(off.calls.some((c) => c.url.includes('/statuses/'))).toBe(false);
+
+    const broken = routes(undefined, [], 500);
+    const errors: string[] = [];
+    expect(await run({ env: env(), fetch: broken.fetchFn, log: (l) => errors.push(l) })).toBe(1);
+    expect(errors.at(-1)).toMatch(/statuses\/.* failed with 500/);
   });
 
   it('refuses a report measured for another commit, and runs without a PR quietly', async () => {
@@ -383,6 +420,15 @@ describe('run', () => {
     expect(await run({ env: measureEnv, fetch, log: () => undefined })).toBe(0);
     const outputs = await readFile(output, 'utf8');
     expect(outputs).toContain(`usertax-base-${MERGE_BASE}`);
+    // A manual run on the default branch recreates the base report (ADR 0014).
+    await writeFile(output, '');
+    const dispatch = { ...measureEnv, GITHUB_EVENT_NAME: 'workflow_dispatch' };
+    expect(await run({ env: dispatch, fetch, log: () => undefined })).toBe(0);
+    expect(await readFile(output, 'utf8')).toContain(`usertax-base-${MERGE_BASE}`);
+    await writeFile(output, '');
+    const otherBranch = { ...dispatch, GITHUB_REF: 'refs/heads/feature' };
+    expect(await run({ env: otherBranch, fetch, log: () => undefined })).toBe(0);
+    expect(await readFile(output, 'utf8')).toContain('usertax-head');
     expect(JSON.parse(await readFile(join(repo, 'usertax-report.json'), 'utf8'))).toHaveProperty(
       'git.sha',
       MERGE_BASE,
@@ -418,5 +464,35 @@ describe('run', () => {
     const logs: string[] = [];
     expect(await run({ env: broken, fetch, log: (l) => logs.push(l) })).toBe(1);
     expect(logs.join('\n')).toContain('usertax measure failed with exit code 2');
+  });
+});
+
+describe('commitStatus', () => {
+  const result = (status: 'pass' | 'warn' | 'fail' | 'skipped') => ({
+    appId: 'web',
+    metricId: 'js.total.gzip',
+    label: 'JS total',
+    status,
+    limit: 'max',
+    threshold: 1,
+    unit: 'bytes' as const,
+    message: '',
+  });
+
+  it('summarises budget results in the description', () => {
+    expect(
+      commitStatus(
+        {
+          status: 'warn',
+          unmatched: [],
+          results: [result('warn'), result('pass'), result('pass'), result('skipped')],
+        },
+        true,
+      ),
+    ).toEqual({ state: 'success', description: 'Budgets: 1 warned, 2 passed, 1 skipped' });
+    expect(commitStatus({ status: 'pass', unmatched: [], results: [] }, true)).toEqual({
+      state: 'success',
+      description: 'Report posted; no budgets configured',
+    });
   });
 });

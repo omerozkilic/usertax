@@ -286,7 +286,13 @@ interface Block {
 
 function appBlocks(app: AppDiff, headOnly: boolean, compression: Compression): Block[] {
   const status =
-    app.status === 'added' ? ' · new app' : app.status === 'removed' ? ' · removed' : '';
+    app.status === 'added'
+      ? ' · new app'
+      : app.status === 'removed'
+        ? ' · removed'
+        : app.previousId === undefined
+          ? ''
+          : ` · id was ${inlineCode(app.previousId, { table: false })}`;
   const heading = `### ${escapeText(app.name)} <sub>${FRAMEWORK_LABEL[app.framework]} · ${inlineCode(app.path, { table: false })}${status}</sub>`;
   const visible = app.metrics.filter((m) => visibleMetric(m, compression));
   const changed = visible.filter((m) => m.change !== 'unchanged');

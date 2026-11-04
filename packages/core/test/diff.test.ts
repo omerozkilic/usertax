@@ -87,6 +87,30 @@ describe('diffReports', () => {
     });
   });
 
+  it('pairs an app whose id changed by its path', () => {
+    const renamed = report([webApp({ id: 'site', name: 'site' }), mobileApp()]);
+    const diff = diffReports(renamed, base);
+    expect(diff.apps.map((a) => [a.id, a.status, a.previousId])).toEqual([
+      ['site', 'compared', 'web'],
+      ['mobile', 'compared', undefined],
+    ]);
+    expect(metric(diff, 'site', 'js.total.gzip')?.change).toBe('unchanged');
+  });
+
+  it('does not pair by path when the path is ambiguous', () => {
+    const twoAtOnePath = report([
+      webApp({ id: 'a', name: 'a' }),
+      webApp({ id: 'b', name: 'b' }),
+      mobileApp(),
+    ]);
+    expect(diffReports(twoAtOnePath, base).apps.map((a) => [a.id, a.status])).toEqual([
+      ['a', 'added'],
+      ['b', 'added'],
+      ['mobile', 'compared'],
+      ['web', 'removed'],
+    ]);
+  });
+
   it('reports metrics that disappear from an app', () => {
     const head = modify(base, (r) => {
       const app = r.apps[0];
