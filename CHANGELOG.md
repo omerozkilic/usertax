@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.2](https://github.com/omerozkilic/usertax/compare/v0.1.1...v0.1.2) (2026-11-04)
+
+
+### Bug Fixes
+
+* **examples:** export the Expo example one platform at a time for reproducible bundles ([#21](https://github.com/omerozkilic/usertax/issues/21)) ([8ad13b3](https://github.com/omerozkilic/usertax/commit/8ad13b3e457a07c13960d12fb9c11a1a4d436673))
+
 ## [0.1.1](https://github.com/omerozkilic/usertax/compare/v0.1.0...v0.1.1) (2026-11-04)
 
 
