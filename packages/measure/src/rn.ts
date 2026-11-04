@@ -4,14 +4,9 @@ import { decode } from '@jridgewell/sourcemap-codec';
 import type { Dependency, Framework, JsBundle, Platform } from '@usertax/core';
 import { ArchiveError, analyzeArchive, isHermesBytecode } from './archive.js';
 import { compressedSize } from './compressed-size.js';
-import {
-  SourceMapError,
-  attributeBytes,
-  displayPath,
-  packageOf,
-  parseSourceMap,
-} from './sourcemap.js';
-import type { Attribution, RawSourceMap } from './sourcemap.js';
+import { SourceMapError, attributeBytes, classifySources, parseSourceMap } from './sourcemap.js';
+import type { Attribution, ForeignSource, RawSourceMap } from './sourcemap.js';
+import { foreignSources } from './foreign.js';
 import type { MeasureResult, Warning } from './web.js';
 
 /**
@@ -19,7 +14,12 @@ import type { MeasureResult, Warning } from './web.js';
  * offsets, so the bytes from one segment to the next belong to that segment's source. The last
  * segment of each line has no known end and, like headers and string tables, stays unattributed.
  */
-export function attributeHermes(byteLength: number, map: RawSourceMap, mapDir = '.'): Attribution {
+export function attributeHermes(
+  byteLength: number,
+  map: RawSourceMap,
+  mapDir = '.',
+  isForeign?: ForeignSource,
+): Attribution {
   const sourceBytes = new Map<number, number>();
   let attributed = 0;
   for (const line of decode(map.mappings)) {
@@ -34,27 +34,8 @@ export function attributeHermes(byteLength: number, map: RawSourceMap, mapDir = 
       attributed += span;
     }
   }
-  const modules = new Map<string, { package?: string; bytes: number }>();
-  const packages = new Map<string, number>();
-  let firstParty = 0;
-  for (const [index, bytes] of sourceBytes) {
-    const path = displayPath(map.sources[index] as string, map.sourceRoot, mapDir);
-    const pkg = packageOf(path);
-    modules.set(path, {
-      ...(pkg === undefined ? {} : { package: pkg }),
-      bytes: (modules.get(path)?.bytes ?? 0) + bytes,
-    });
-    if (pkg === undefined) firstParty += bytes;
-    else packages.set(pkg, (packages.get(pkg) ?? 0) + bytes);
-  }
-  return {
-    packages,
-    firstPartyBytes: firstParty,
-    unattributedBytes: byteLength - attributed,
-    modules: [...modules.entries()]
-      .map(([path, value]) => ({ path, ...value }))
-      .sort((a, b) => b.bytes - a.bytes || a.path.localeCompare(b.path)),
-  };
+  const { foreignBytes, ...classified } = classifySources(sourceBytes, map, mapDir, isForeign);
+  return { ...classified, unattributedBytes: byteLength - attributed + foreignBytes };
 }
 
 export interface BundleInput {
@@ -70,6 +51,8 @@ export async function measureBundle(
   input: BundleInput,
   appDir: string,
   maxModules = 100,
+  /** App root relative to the repository root; sources outside it count as unattributed. */
+  appPath?: string,
 ): Promise<{ bundle: JsBundle; warnings: Warning[] }> {
   const content = await readFile(input.file);
   const hermes = isHermesBytecode(content);
@@ -98,9 +81,10 @@ export async function measureBundle(
   }
   if (map !== undefined) {
     const mapDir = posix.dirname(relative(appDir, mapFile).split(sep).join('/'));
+    const isForeign = await foreignSources(map, mapDir, appDir, appPath);
     const attribution = hermes
-      ? attributeHermes(content.byteLength, map, mapDir)
-      : attributeBytes(content.toString('utf8'), map, mapDir);
+      ? attributeHermes(content.byteLength, map, mapDir, isForeign)
+      : attributeBytes(content.toString('utf8'), map, mapDir, isForeign);
     bundle.packages = [...attribution.packages.entries()]
       .map(([name, bytes]) => ({ name, bytes }))
       .sort((a, b) => b.bytes - a.bytes || a.name.localeCompare(b.name));
@@ -144,7 +128,7 @@ export async function measureRnApp(options: MeasureRnAppOptions): Promise<Measur
   const warnings: Warning[] = [];
   const bundles: JsBundle[] = [];
   for (const input of options.bundles) {
-    const result = await measureBundle(input, options.appDir);
+    const result = await measureBundle(input, options.appDir, 100, options.path);
     bundles.push(result.bundle);
     warnings.push(...result.warnings);
   }

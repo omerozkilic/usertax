@@ -20,9 +20,12 @@ export interface ModuleBytes {
 export interface Attribution {
   /** Bytes per npm package. */
   readonly packages: ReadonlyMap<string, number>;
-  /** Bytes from sources outside `node_modules` (app code, bundler runtime, virtual modules). */
+  /** Bytes from sources in the repository outside `node_modules` (app code, bundler runtime). */
   readonly firstPartyBytes: number;
-  /** Bytes not covered by any mapping (newlines, wrappers, the source-map comment, …). */
+  /**
+   * Bytes not covered by any mapping (newlines, wrappers, the source-map comment, …) or mapped to
+   * a foreign source: code that no package or repository file can be identified for.
+   */
   readonly unattributedBytes: number;
   /** Bytes per source module, largest first. */
   readonly modules: readonly ModuleBytes[];
@@ -141,12 +144,21 @@ export function displayPath(
 ): string {
   // Bundlers mark virtual modules with a leading NUL byte.
   const virtual = source.startsWith('\0');
-  const clean = source
+  // webpack: `webpack://<namespace>/<path>` is relative to the webpack context (the app root),
+  // not to the map file.
+  const webpack = /^webpack:\/\/[^/]*\/(.*)$/s.exec(source);
+  const clean = (webpack?.[1] ?? source)
     .replace(/^\0/, '')
-    .replace(/^webpack:\/\/[^/]*\//, '')
     .replace(/^[a-z]+:\/\/\/?/i, '')
     .replace(/\?.*$/, '');
   if (virtual) return `(virtual) ${clean}`;
+  if (webpack !== null) {
+    // The webpack runtime, ignored modules (`ignored|…`) and generated loader modules.
+    if (clean === '' || clean.startsWith('webpack/') || clean.includes('|')) {
+      const name = clean.startsWith('webpack/') ? clean.slice('webpack/'.length) : clean;
+      return `(virtual) webpack${name === '' ? '' : `/${name.split('|')[0] ?? ''}`}`;
+    }
+  }
   // Turbopack: `turbopack:///[project]/…` is relative to the project root, `[turbopack]/…` is
   // the bundler runtime.
   if (clean.startsWith('[turbopack]/'))
@@ -159,10 +171,60 @@ export function displayPath(
       .slice(marker)
       .replace(/^node_modules\/\.pnpm\/[^/]+\/node_modules\//, 'node_modules/');
   }
-  const joined = posix.isAbsolute(clean)
-    ? clean
-    : posix.normalize(posix.join(mapDir, sourceRoot ?? '', clean));
-  return joined;
+  if (posix.isAbsolute(clean)) return clean;
+  return posix.normalize(webpack !== null ? clean : posix.join(mapDir, sourceRoot ?? '', clean));
+}
+
+/**
+ * Whether a display path resolves above the repository root.
+ *
+ * @param appPath the app root relative to the repository root
+ */
+export function isOutsideRepository(path: string, appPath: string): boolean {
+  if (path.startsWith('(virtual) ') || posix.isAbsolute(path)) return false;
+  const resolved = posix.normalize(posix.join(appPath, path));
+  return resolved === '..' || resolved.startsWith('../');
+}
+
+/**
+ * Decides whether a source (by display path) is code that no package or file in the repository
+ * can be identified for. Such bytes are counted as unattributed instead of first-party.
+ */
+export type ForeignSource = (path: string) => boolean;
+
+/** Groups attributed bytes per source into packages, first-party code and modules. */
+export function classifySources(
+  sourceBytes: ReadonlyMap<number, number>,
+  map: RawSourceMap,
+  mapDir: string,
+  isForeign: ForeignSource = () => false,
+): Omit<Attribution, 'unattributedBytes'> & { readonly foreignBytes: number } {
+  const modules = new Map<string, { package?: string; bytes: number }>();
+  const packages = new Map<string, number>();
+  let firstParty = 0;
+  let foreign = 0;
+  for (const [sourceIndex, bytes] of sourceBytes) {
+    const path = displayPath(map.sources[sourceIndex] as string, map.sourceRoot, mapDir);
+    const pkg = packageOf(path);
+    if (pkg === undefined && isForeign(path)) {
+      foreign += bytes;
+      continue;
+    }
+    modules.set(path, {
+      ...(pkg === undefined ? {} : { package: pkg }),
+      bytes: (modules.get(path)?.bytes ?? 0) + bytes,
+    });
+    if (pkg === undefined) firstParty += bytes;
+    else packages.set(pkg, (packages.get(pkg) ?? 0) + bytes);
+  }
+  return {
+    packages,
+    firstPartyBytes: firstParty,
+    foreignBytes: foreign,
+    modules: [...modules.entries()]
+      .map(([path, value]) => ({ path, ...value }))
+      .sort((a, b) => b.bytes - a.bytes || a.path.localeCompare(b.path)),
+  };
 }
 
 // eslint-disable-next-line no-control-regex -- matching the whole ASCII range is the point
@@ -178,8 +240,14 @@ function utf8Length(text: string): number {
  *
  * @param code the generated file as shipped
  * @param mapDir directory of the map file relative to the app root, used to resolve sources
+ * @param isForeign sources counted as unattributed instead of first-party
  */
-export function attributeBytes(code: string, map: RawSourceMap, mapDir = '.'): Attribution {
+export function attributeBytes(
+  code: string,
+  map: RawSourceMap,
+  mapDir = '.',
+  isForeign?: ForeignSource,
+): Attribution {
   const lines = code.split('\n');
   const decoded = decode(map.mappings);
   const sourceBytes = new Map<number, number>();
@@ -202,28 +270,6 @@ export function attributeBytes(code: string, map: RawSourceMap, mapDir = '.'): A
     }
   }
 
-  const modules = new Map<string, { package?: string; bytes: number }>();
-  const packages = new Map<string, number>();
-  let firstParty = 0;
-  for (const [sourceIndex, bytes] of sourceBytes) {
-    const source = map.sources[sourceIndex] as string;
-    const path = displayPath(source, map.sourceRoot, mapDir);
-    const pkg = packageOf(path);
-    const existing = modules.get(path);
-    modules.set(path, {
-      ...(pkg === undefined ? {} : { package: pkg }),
-      bytes: (existing?.bytes ?? 0) + bytes,
-    });
-    if (pkg === undefined) firstParty += bytes;
-    else packages.set(pkg, (packages.get(pkg) ?? 0) + bytes);
-  }
-
-  return {
-    packages,
-    firstPartyBytes: firstParty,
-    unattributedBytes: unattributed,
-    modules: [...modules.entries()]
-      .map(([path, value]) => ({ path, ...value }))
-      .sort((a, b) => b.bytes - a.bytes || a.path.localeCompare(b.path)),
-  };
+  const { foreignBytes, ...classified } = classifySources(sourceBytes, map, mapDir, isForeign);
+  return { ...classified, unattributedBytes: unattributed + foreignBytes };
 }

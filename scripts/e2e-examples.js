@@ -9,10 +9,19 @@ import { parseReport } from '../packages/core/dist/index.js';
 
 const cli = new URL('../packages/cli/bin/usertax.js', import.meta.url).pathname;
 // Each example with a package that must show up in its bundles (Next.js vendors React inside
-// `next`, so its React code is attributed to the `next` package).
+// `next`, so its React code is attributed to the `next` package). The Next.js app is also built
+// with webpack; Lighthouse runs once per app, on the default build.
 const examples = [
   { dir: 'examples/vite-app', bundled: 'react-dom' },
   { dir: 'examples/next-app', bundled: 'next' },
+  {
+    dir: 'examples/next-app',
+    name: 'next-app (webpack)',
+    bundled: 'next',
+    args: ['--out-dir', '.next-webpack', '--framework', 'next', '--id', 'next-webpack'],
+    lighthouse: false,
+    keys: ['chunks/framework-[hash].js', 'chunks/main-[hash].js'],
+  },
 ];
 const work = mkdtempSync(join(tmpdir(), 'usertax-e2e-'));
 const failures = [];
@@ -21,10 +30,19 @@ function check(condition, message) {
   if (!condition) failures.push(message);
 }
 
-for (const { dir: example, bundled } of examples) {
-  const output = join(work, `${example.replaceAll('/', '-')}.json`);
+for (const {
+  dir,
+  name,
+  bundled,
+  args: extra = [],
+  lighthouse = true,
+  keys: wanted = [],
+} of examples) {
+  const example = name ?? dir;
+  const output = join(work, `${example.replaceAll(/[^\w.-]+/g, '-')}.json`);
+  const args = [cli, 'measure', dir, '--output', output, ...extra];
   // One real Lighthouse run per example checks the runner end to end (servers, Chrome, parsing).
-  const args = [cli, 'measure', example, '--output', output, '--lighthouse', '/', '--runs', '1'];
+  if (lighthouse) args.push('--lighthouse', '/', '--runs', '1');
   execFileSync(process.execPath, args, { stdio: 'inherit' });
   const report = parseReport(JSON.parse(readFileSync(output, 'utf8')));
   const [app] = report.apps;
@@ -49,6 +67,18 @@ for (const { dir: example, bundled } of examples) {
     );
   }
   const keys = new Set((app.assets ?? []).map((asset) => asset.key));
+  for (const key of wanted) check(keys.has(key), `${example}: no asset with the key ${key}`);
+  check((app.routes ?? []).length > 0, `${example}: no routes`);
+  // No source outside the app directory is reported as first-party code (the examples import
+  // nothing from other workspace packages).
+  for (const asset of js) {
+    for (const module of asset.modules ?? []) {
+      check(
+        module.package !== undefined || !module.path.startsWith('../'),
+        `${example}: ${asset.file} reports ${module.path} as first-party code`,
+      );
+    }
+  }
   for (const route of app.routes ?? []) {
     for (const key of route.assets)
       check(keys.has(key), `${example}: route ${route.route} references unknown asset ${key}`);
@@ -58,12 +88,14 @@ for (const { dir: example, bundled } of examples) {
     `${example}: ${bundled} not found in any chunk`,
   );
 
-  const lighthouse = app.lighthouse?.[0];
-  check(lighthouse?.runs.length === 1, `${example}: expected one Lighthouse run`);
-  check(
-    lighthouse?.runs.every((run) => run.performance > 0 && run.lcp > 0) === true,
-    `${example}: Lighthouse run without a score or LCP`,
-  );
+  if (lighthouse) {
+    const result = app.lighthouse?.[0];
+    check(result?.runs.length === 1, `${example}: expected one Lighthouse run`);
+    check(
+      result?.runs.every((run) => run.performance > 0 && run.lcp > 0) === true,
+      `${example}: Lighthouse run without a score or LCP`,
+    );
+  }
   check(
     (app.dependencies ?? []).some((d) => d.name === 'react-dom' && d.direct),
     `${example}: react-dom missing from the lockfile dependencies`,
