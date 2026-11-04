@@ -5,6 +5,7 @@ import {
   SourceMapError,
   attributeBytes,
   displayPath,
+  isOutsideRepository,
   packageOf,
   parseSourceMap,
 } from '@usertax/measure';
@@ -66,6 +67,54 @@ describe('displayPath', () => {
     expect(displayPath('webpack://my-app/node_modules/lodash/lodash.js', undefined, '.')).toBe(
       'node_modules/lodash/lodash.js',
     );
+  });
+
+  it('resolves webpack sources against the webpack context, not the map file', () => {
+    const chunks = '.next/static/chunks/app/counter';
+    expect(displayPath('webpack://_N_E/./app/counter/Counter.jsx', undefined, chunks)).toBe(
+      'app/counter/Counter.jsx',
+    );
+    expect(displayPath('webpack://_N_E/../../src/client/index.tsx', undefined, chunks)).toBe(
+      '../../src/client/index.tsx',
+    );
+    expect(
+      displayPath(
+        'webpack://_N_E/../../node_modules/.pnpm/next@16.4.4/node_modules/next/dist/x.js',
+        undefined,
+        chunks,
+      ),
+    ).toBe('node_modules/next/dist/x.js');
+  });
+
+  it('marks the webpack runtime, ignored and generated modules as virtual', () => {
+    expect(displayPath('webpack://_N_E/webpack/runtime/load script', undefined, '.')).toBe(
+      '(virtual) webpack/runtime/load script',
+    );
+    expect(displayPath('webpack://_N_E/webpack/bootstrap', undefined, '.')).toBe(
+      '(virtual) webpack/bootstrap',
+    );
+    expect(displayPath('webpack://_N_E/', undefined, '.')).toBe('(virtual) webpack');
+    expect(displayPath('webpack://_N_E/?f7bc', undefined, '.')).toBe('(virtual) webpack');
+    expect(
+      displayPath(
+        'webpack://_N_E/ignored|/repo/node_modules/next/dist/loaders|stub',
+        undefined,
+        '.',
+      ),
+    ).toBe('(virtual) webpack/ignored');
+  });
+});
+
+describe('isOutsideRepository', () => {
+  it('detects paths that climb above the repository root', () => {
+    expect(isOutsideRepository('../../../src/x.ts', 'examples/next-app')).toBe(true);
+    expect(isOutsideRepository('../..', 'examples/next-app/web')).toBe(false);
+    expect(isOutsideRepository('../../..', 'examples/next-app')).toBe(true);
+    expect(isOutsideRepository('../../packages/ui/src/x.ts', 'examples/next-app')).toBe(false);
+    expect(isOutsideRepository('../src/x.ts', '.')).toBe(true);
+    expect(isOutsideRepository('src/x.ts', '.')).toBe(false);
+    expect(isOutsideRepository('/abs/x.ts', '.')).toBe(false);
+    expect(isOutsideRepository('(virtual) ../x', '.')).toBe(false);
   });
 });
 
@@ -144,6 +193,26 @@ describe('attributeBytes', () => {
       { path: 'node_modules/x/a.js', package: 'x', bytes: 6 },
       { path: 'src/b.js', bytes: 3 },
     ]);
+  });
+
+  it('counts foreign sources as unattributed and leaves them out of the modules', () => {
+    const result = attributeBytes(
+      'aaaabbb',
+      map(
+        ['../../src/next-internal.ts', 'src/b.js'],
+        [
+          [
+            [0, 0, 0, 0],
+            [4, 1, 0, 0],
+          ],
+        ],
+      ),
+      '.',
+      (path) => path === '../../src/next-internal.ts',
+    );
+    expect(result.firstPartyBytes).toBe(3);
+    expect(result.unattributedBytes).toBe(4);
+    expect(result.modules).toEqual([{ path: 'src/b.js', bytes: 3 }]);
   });
 
   it('counts unmapped prefixes, source-less segments and null sources as unattributed', () => {

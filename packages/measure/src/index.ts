@@ -46,14 +46,16 @@ export type { RunningServer } from './server.js';
 export type { StaticServer } from './serve.js';
 export { createReport } from './report.js';
 export type { CreateReportOptions } from './report.js';
+export { foreignSources } from './foreign.js';
 export {
   SourceMapError,
   attributeBytes,
   displayPath,
+  isOutsideRepository,
   packageOf,
   parseSourceMap,
 } from './sourcemap.js';
-export type { Attribution, ModuleBytes, RawSourceMap } from './sourcemap.js';
+export type { Attribution, ForeignSource, ModuleBytes, RawSourceMap } from './sourcemap.js';
 export { assetType, entryRoute, measureWebApp, scanOutputDir, viteRoutes } from './web.js';
 export type {
   MeasureResult,

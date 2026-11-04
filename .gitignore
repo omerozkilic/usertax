@@ -8,5 +8,6 @@ coverage/
 .env.*
 /.usertax/
 .next/
+.next-webpack/
 next-env.d.ts
 calibration/
