@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.3](https://github.com/omerozkilic/usertax/compare/v0.1.2...v0.1.3) (2026-11-04)
+
+
+### Bug Fixes
+
+* **cli:** publish to npm as @usertax/cli ([#24](https://github.com/omerozkilic/usertax/issues/24)) ([f2ca445](https://github.com/omerozkilic/usertax/commit/f2ca445729c690cabe9a30da4f0594b1f7ba3ed7))
+
 ## [0.1.2](https://github.com/omerozkilic/usertax/compare/v0.1.1...v0.1.2) (2026-11-04)
 
 
