@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.1](https://github.com/omerozkilic/usertax/compare/v0.1.0...v0.1.1) (2026-11-04)
+
+
+### Bug Fixes
+
+* **action:** inject the version at bundle time so the released action starts ([#18](https://github.com/omerozkilic/usertax/issues/18)) ([a5fe723](https://github.com/omerozkilic/usertax/commit/a5fe723ab0dbc4bbe9dc701e5bf17c3bf876eeab))
+
 ## 0.1.0 (2026-11-04)
 
 

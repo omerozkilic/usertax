@@ -1,6 +1,6 @@
 {
   "name": "usertax",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "What does this pull request cost your users? Web and mobile performance diffs from the command line.",
   "license": "MIT",
   "type": "module",
