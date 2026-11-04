@@ -1,6 +1,6 @@
 {
   "name": "@usertax/action",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "private": true,
   "description": "GitHub Action for usertax: measure pull requests and comment with what they cost users.",
   "license": "MIT",

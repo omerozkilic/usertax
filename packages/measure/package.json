@@ -1,6 +1,6 @@
 {
   "name": "@usertax/measure",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "description": "Collectors for usertax: web bundles, Lighthouse, React Native bundles and mobile app archives.",
   "license": "MIT",
   "type": "module",
