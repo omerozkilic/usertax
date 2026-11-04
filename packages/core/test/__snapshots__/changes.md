@@ -35,7 +35,7 @@ Base `aaaaaaa` → head `aaaaaaa` · 3 apps · ⚠️ 2 budget warnings
 
 </details>
 
-### new\-app <sub>Expo · `apps/mobile` · new app</sub>
+### new\-app <sub>Expo · `apps/new-app` · new app</sub>
 
 | | Metric | Base | Head | Change |
 | :-: | --- | --: | --: | --: |

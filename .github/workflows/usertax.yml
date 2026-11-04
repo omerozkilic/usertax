@@ -7,6 +7,8 @@ on:
   pull_request:
   push:
     branches: [main]
+  # Recreates the base report of the default branch when it is missing or expired (ADR 0014).
+  workflow_dispatch:
 
 permissions:
   contents: read

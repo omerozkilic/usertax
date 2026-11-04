@@ -29,11 +29,17 @@ inputs:
     description: Comment mode. Path of the head report downloaded from the measure workflow.
     required: false
   github-token:
-    description: Token for reading artifacts and writing the comment. Needs actions:read and pull-requests:write.
+    description: Token for reading artifacts, writing the comment and the commit status. Needs actions:read, pull-requests:write and statuses:write.
     required: false
     default: ${{ github.token }}
   fail-on-budget:
-    description: Fail the step when a budget fails.
+    description: Fail the step and the commit status when a budget fails.
+    required: false
+    default: 'true'
+  commit-status:
+    description: >-
+      Comment mode. Set the "usertax" commit status on the pull request head, so the budget result
+      shows among the pull request's checks. Needs statuses:write.
     required: false
     default: 'true'
 

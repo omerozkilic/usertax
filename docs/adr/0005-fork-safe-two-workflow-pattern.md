@@ -49,6 +49,16 @@ No input of the action requires a secret.
 - The sticky comment is the first comment by a bot account that starts with the marker.
 - A check run is not created yet; the job's own status and summary carry the result.
 
+## Implementation notes (budget status on the pull request)
+
+- The comment job's own result is attached to the default branch, not to the pull request, so a
+  failed budget was invisible on the PR. The comment mode now sets a commit status
+  (`context: usertax`) on the PR head with the budget counts and a link to the comment, which
+  branch protection can require. This needs `statuses: write` instead of the `checks: write`
+  planned above: commit statuses are simpler to create from another workflow and attach to the
+  commit regardless of which check suite created them. Without the permission, the action logs
+  a warning and still comments (`commit-status: false` turns it off).
+
 ## Consequences
 
 - Safe by default for public repositories.

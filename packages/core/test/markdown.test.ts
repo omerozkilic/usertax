@@ -109,7 +109,10 @@ describe('renderMarkdown', () => {
       { git: { sha: BASE_SHA } },
     );
     const after = modify(before, (r) => {
-      r.apps = [r.apps[0] as App, mobileApp({ id: 'new-app', name: 'new-app' })];
+      r.apps = [
+        r.apps[0] as App,
+        mobileApp({ id: 'new-app', name: 'new-app', path: 'apps/new-app' }),
+      ];
       const web = r.apps[0] as App;
       web.assets = (web.assets ?? []).filter((a) => a.key !== 'legacy.js');
       web.routes = [...(web.routes ?? []), { route: '/new', assets: ['assets/about-[hash].js'] }];
@@ -140,6 +143,13 @@ describe('renderMarkdown', () => {
       { noise: OFF },
     );
     expect(renderMarkdown(diff)).toContain('-10 (-12.3%) <sub>noise not assessed</sub>');
+  });
+
+  it('names the previous id of an app matched by its path', () => {
+    const renamed = report([webApp({ id: 'site', name: 'site' }), mobileApp()]);
+    expect(renderMarkdown(diffReports(renamed, base))).toContain(
+      '### site <sub>Vite · `apps/web` · id was `web`</sub>',
+    );
   });
 
   it('says so when nothing changed or nothing was measured', () => {

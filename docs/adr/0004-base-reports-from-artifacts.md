@@ -1,6 +1,6 @@
 # 0004. Reuse base reports stored as workflow artifacts
 
-- Status: Accepted
+- Status: Accepted; item 4 superseded by [0014](0014-missing-base-reports.md)
 - Date: 2026-11-03
 
 ## Context
