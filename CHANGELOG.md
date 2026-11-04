@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.4](https://github.com/omerozkilic/usertax/compare/v0.1.3...v0.1.4) (2026-11-04)
+
+
+### Bug Fixes
+
+* **security:** require patched Node.js releases and patch vulnerable dev dependencies ([#28](https://github.com/omerozkilic/usertax/issues/28)) ([252be76](https://github.com/omerozkilic/usertax/commit/252be7669dcc107b3b679a980ad98597c49746ca))
+
 ## [0.1.3](https://github.com/omerozkilic/usertax/compare/v0.1.2...v0.1.3) (2026-11-04)
 
 
