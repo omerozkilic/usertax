@@ -1,17 +1,47 @@
 {
   "$schema": "../packages/core/schema/config.schema.json",
   "apps": [
-    { "path": "examples/vite-app", "lighthouse": { "pages": ["/"], "runs": 3 } },
-    { "path": "examples/next-app", "lighthouse": { "pages": ["/"], "runs": 3 } },
-    { "path": "examples/expo-app" },
+    {
+      "path": "examples/vite-app",
+      "id": "vite",
+      "lighthouse": {
+        "pages": ["/"],
+        "runs": 3
+      }
+    },
+    {
+      "path": "examples/next-app",
+      "id": "next",
+      "lighthouse": {
+        "pages": ["/"],
+        "runs": 3
+      }
+    },
+    {
+      "path": "examples/expo-app",
+      "id": "expo"
+    },
     {
       "path": "examples/bare-rn-app",
+      "id": "bare-rn",
       "framework": "react-native",
       "bundles": [
-        { "platform": "android", "file": "dist/android/index.android.bundle" },
-        { "platform": "ios", "file": "dist/ios/main.jsbundle" }
+        {
+          "platform": "android",
+          "file": "dist/android/index.android.bundle"
+        },
+        {
+          "platform": "ios",
+          "file": "dist/ios/main.jsbundle"
+        }
       ]
     }
   ],
-  "budgets": [{ "metric": "route[*].js.gzip", "maxIncrease": "10 kB", "level": "warn" }]
+  "budgets": [
+    {
+      "metric": "route[*].js.gzip",
+      "maxIncrease": "10 kB",
+      "level": "warn"
+    }
+  ]
 }
