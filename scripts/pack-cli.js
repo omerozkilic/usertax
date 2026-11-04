@@ -33,12 +33,19 @@ execFileSync(
 );
 copyFileSync(join(root, 'packages/cli/bin/usertax.js'), join(out, 'bin/usertax.js'));
 copyFileSync(join(root, 'LICENSE'), join(out, 'LICENSE'));
-copyFileSync(join(root, 'README.md'), join(out, 'README.md'));
+// The npm page has its own README with absolute links (packages/cli/README.md).
+copyFileSync(join(root, 'packages/cli/README.md'), join(out, 'README.md'));
+// JSON Schemas for editors: "$schema": "./node_modules/usertax/schema/config.schema.json".
+mkdirSync(join(out, 'schema'));
+for (const file of ['config.schema.json', 'report.v1.schema.json']) {
+  copyFileSync(join(root, 'packages/core/schema', file), join(out, 'schema', file));
+}
 const pkg = {
   name: 'usertax',
   version: cli.version,
   description: cli.description,
   license: 'MIT',
+  author: 'Omer Ozkilic',
   type: 'module',
   repository: { type: 'git', url: 'git+https://github.com/omerozkilic/usertax.git' },
   homepage: 'https://github.com/omerozkilic/usertax#readme',
@@ -46,7 +53,7 @@ const pkg = {
   keywords: cli.keywords,
   engines: cli.engines,
   bin: { usertax: './bin/usertax.js' },
-  files: ['bin', 'dist', 'README.md', 'LICENSE'],
+  files: ['bin', 'dist', 'schema', 'README.md', 'LICENSE'],
   peerDependencies: measure.peerDependencies,
   peerDependenciesMeta: measure.peerDependenciesMeta,
 };

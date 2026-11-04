@@ -34,25 +34,16 @@ same report.
 ## What it looks like
 
 A real pull request against [`examples/vite-app`](examples/vite-app) that adds `moment` to show
-a date. This is usertax's output, measured on real builds
-([full comment](docs/demo/add-moment.md), [how to reproduce](docs/demo/README.md)):
+a date, measured on real builds ([full comment](docs/demo/add-moment.md),
+[how to reproduce](docs/demo/README.md)):
 
-> |     | Metric                |    Base |    Head |            Change |
-> | :-: | --------------------- | ------: | ------: | ----------------: |
-> | 🔴  | JS total (gzip)       | 69.4 kB | 89.0 kB | +19.6 kB (+28.2%) |
-> | 🔴  | JS for / (gzip)       | 68.9 kB | 88.5 kB | +19.6 kB (+28.4%) |
-> | 🔴  | JS for /about/ (gzip) | 67.9 kB | 68.1 kB |    +169 B (+0.2%) |
->
-> **Packages with the largest change** <sub>minified bytes from source maps</sub>
->
-> | Package            | Bundle |   Base |    Head |   Change | Why                     |
-> | ------------------ | ------ | -----: | ------: | -------: | ----------------------- |
-> | `moment`           | web    |      – | 60.1 kB | +60.1 kB | added `2.30.1` (direct) |
-> | _first-party code_ | web    | 1.3 kB |  1.3 kB |    +64 B | –                       |
->
-> **Alternatives** suggested by [e18e module-replacements](https://github.com/e18e/module-replacements) 3.4.0:
->
-> - `moment`: day.js, date-fns, luxon, Date, Temporal ([guide](https://e18e.dev/docs/replacements/moment))
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="docs/assets/comment-add-moment-dark.png">
+  <img alt="usertax comment: JS for / grows by 19.6 kB gzip (+28.4%); moment 2.30.1 was added as a direct dependency and brings 60.1 kB; e18e suggests day.js, date-fns, luxon, Date or Temporal" src="docs/assets/comment-add-moment.png" width="760">
+</picture>
+
+<sub>Rendered from the Markdown usertax posted, with GitHub's stylesheet
+([`scripts/render-comment.js`](scripts/render-comment.js)).</sub>
 
 ## Why usertax?
 
