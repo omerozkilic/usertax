@@ -67,7 +67,8 @@ npx usertax measure -o report.json
 # Lighthouse: 5 recorded runs of two pages (needs lighthouse and chrome-launcher installed)
 npx usertax measure apps/web --lighthouse / --lighthouse /pricing -o report.json
 
-# Expo: finds the bundles of `npx expo export --platform all --source-maps` in dist/
+# Expo: finds the bundles of `npx expo export --source-maps` in dist/
+# (export one platform at a time: --platform all is not byte-for-byte reproducible)
 npx usertax measure apps/mobile -o report.json
 
 # Bare React Native: your bundles (with .map files) and a release archive
