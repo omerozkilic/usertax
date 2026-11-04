@@ -223,8 +223,11 @@ function packagesBlock(app: AppDiff): string | undefined {
   const header = withCause
     ? ['| Package | Bundle | Base | Head | Change | Why |', '| --- | --- | --: | --: | --: | --- |']
     : ['| Package | Bundle | Base | Head | Change |', '| --- | --- | --: | --: | --: |'];
+  // A package can appear once per bundle (Android and iOS); suggest its alternatives once.
+  const suggested = new Set<string>();
   const suggestions = app.packages.flatMap((pkg) => {
-    if (pkg.name === null || pkg.alternatives === undefined) return [];
+    if (pkg.name === null || pkg.alternatives === undefined || suggested.has(pkg.name)) return [];
+    suggested.add(pkg.name);
     const url = safeUrl(pkg.alternatives.url);
     const link = url === undefined ? '' : ` ([guide](${url}))`;
     return [

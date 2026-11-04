@@ -1,5 +1,6 @@
 {
   "name": "usertax-monorepo",
+  "version": "0.0.0",
   "private": true,
   "description": "What does this pull request cost your users? Web and mobile performance diffs on every PR.",
   "license": "MIT",
@@ -22,7 +23,8 @@
     "build:examples": "pnpm --filter \"./examples/*\" run build",
     "e2e": "node scripts/e2e-examples.js",
     "demo": "node scripts/demo-add-dependency.js",
-    "build:action": "pnpm --filter @usertax/action run bundle"
+    "build:action": "pnpm --filter @usertax/action run bundle",
+    "pack:cli": "node scripts/pack-cli.js"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",

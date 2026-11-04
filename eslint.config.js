@@ -13,6 +13,7 @@ export default defineConfig(
       '**/node_modules/**',
       '**/test/fixtures/**',
       'examples/**',
+      'release/**',
     ],
   },
   js.configs.recommended,
