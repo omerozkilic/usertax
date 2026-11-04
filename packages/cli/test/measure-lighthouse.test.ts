@@ -67,7 +67,15 @@ describe('usertax measure --lighthouse', () => {
       c.io,
     );
     expect(code).toBe(0);
-    expect(audited.map((url) => new URL(url).pathname)).toEqual(['/', '/about/', '/', '/about/']);
+    // One warm-up run per page (not recorded), then two recorded runs.
+    expect(audited.map((url) => new URL(url).pathname)).toEqual([
+      '/',
+      '/about/',
+      '/',
+      '/about/',
+      '/',
+      '/about/',
+    ]);
     expect(c.err()).toContain(
       'lighthouse / run 2/2: performance 100, LCP 756 ms, TBT 0 ms, CLS 0.000',
     );
@@ -94,6 +102,8 @@ describe('usertax measure --lighthouse', () => {
           '/',
           '--runs',
           '1',
+          '--warmup',
+          '0',
           '--base-url',
           `${server.url}/`,
         ],
@@ -129,6 +139,7 @@ describe('usertax measure --lighthouse', () => {
 
   it.each([
     [['--runs', '0'], '--runs must be an integer between 1 and 100'],
+    [['--warmup', '11'], '--warmup must be an integer between 0 and 10'],
     [['--form-factor', 'tablet'], '--form-factor must be mobile or desktop'],
     [['--start', 'pnpm start'], '--start needs --base-url'],
   ])('rejects %j', async (args, expected) => {

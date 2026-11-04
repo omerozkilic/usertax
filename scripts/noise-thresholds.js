@@ -6,30 +6,41 @@
 // Since nothing changed, every significant result is a false positive. The script prints the
 // false-positive rate for candidate floors. Deterministic (seeded).
 //
-// Usage: node scripts/noise-thresholds.js docs/benchmarks/data/2026-11-03-lighthouse [--runs 5] [--k 1.5]
-import { readFileSync } from 'node:fs';
+// Usage: node scripts/noise-thresholds.js docs/benchmarks/data/2026-11-03-lighthouse docs/benchmarks/data/2026-11-04-lighthouse [--runs 5] [--k 1.5] [--warmup 1]
+import { readFileSync, readdirSync } from 'node:fs';
 import { join } from 'node:path';
 
-const dir = process.argv[2];
-if (dir === undefined) {
-  process.stderr.write('usage: noise-thresholds.js <calibration dir> [--runs n] [--k k]\n');
+const args = process.argv.slice(2);
+const option = (name, fallback) => {
+  const index = args.indexOf(name);
+  return index === -1 ? fallback : Number(args[index + 1]);
+};
+const dirs = args.filter((a, i) => !a.startsWith('--') && !args[i - 1]?.startsWith('--'));
+if (dirs.length === 0) {
+  process.stderr.write(
+    'usage: noise-thresholds.js <calibration dir>... [--runs n] [--k k] [--warmup n]\n',
+  );
   process.exit(2);
 }
-const arg = (name, fallback) => {
-  const index = process.argv.indexOf(name);
-  return index === -1 ? fallback : Number(process.argv[index + 1]);
-};
-const RUNS = arg('--runs', 5);
-const K = arg('--k', 1.5);
+const RUNS = option('--runs', 5);
+const K = option('--k', 1.5);
+// Runs dropped at the start of each machine's series, like usertax's warm-up run.
+const WARMUP = option('--warmup', 0);
 const TRIALS = 20000;
 const CANDIDATES = {
-  performance: [0, 0.5, 1, 2],
-  lcp: [0, 10, 25, 50],
-  tbt: [0, 10, 25, 50],
+  performance: [0, 1, 2],
+  lcp: [0, 10, 25, 40, 50],
+  tbt: [0, 25, 50, 100, 130],
   cls: [0, 0.005, 0.01],
 };
 
-const shards = [1, 2, 3].map((i) => JSON.parse(readFileSync(join(dir, `shard-${i}.json`), 'utf8')));
+// Every shard-*.json in the given directories is one machine.
+const shards = dirs.flatMap((dir) =>
+  readdirSync(dir)
+    .filter((f) => /^shard-\d+\.json$/.test(f))
+    .sort()
+    .map((f) => JSON.parse(readFileSync(join(dir, f), 'utf8'))),
+);
 
 // mulberry32: small seeded PRNG so the output is reproducible.
 let seed = 20261103;
@@ -63,12 +74,15 @@ const lines = [
 ];
 for (const [page, result] of shards[0].results.entries()) {
   for (const [metric, floors] of Object.entries(CANDIDATES)) {
-    const runs = shards.map((shard) => shard.results[page].runs.map((run) => run[metric]));
+    const runs = shards.map((shard) =>
+      shard.results[page].runs.slice(WARMUP).map((run) => run[metric]),
+    );
     const rates = floors.map((floor) => {
       let positives = 0;
       for (let t = 0; t < TRIALS; t += 1) {
-        const a = Math.floor(random() * 3);
-        const b = (a + 1 + Math.floor(random() * 2)) % 3;
+        // Two different machines: base and head were measured on different runners.
+        const a = Math.floor(random() * runs.length);
+        const b = (a + 1 + Math.floor(random() * (runs.length - 1))) % runs.length;
         const base = sample(runs[a], RUNS);
         const head = sample(runs[b], RUNS);
         const threshold = Math.max(floor, (K * (iqr(base) + iqr(head))) / 2);

@@ -44,20 +44,20 @@ bundles or archives to read. Every app must already be built.
 }
 ```
 
-| Field               | Meaning                                                                                                                          |
-| ------------------- | -------------------------------------------------------------------------------------------------------------------------------- |
-| `apps`              | Apps to measure. Without it, usertax discovers them (above).                                                                     |
-| `apps[].path`       | App directory relative to the repository root. Required.                                                                         |
-| `apps[].id`, `name` | Identity in reports and comments. Default: the package name.                                                                     |
-| `apps[].framework`  | `vite`, `next`, `webpack`, `static`, `expo`, `react-native`. Default: detected.                                                  |
-| `apps[].outDir`     | Build output, relative to the app. Default: `dist` (`.next` for Next.js).                                                        |
-| `apps[].bundles`    | React Native bundles (`platform`, `file`, optional `map`), relative to the app. Expo apps default to their `expo export` output. |
-| `apps[].archives`   | APK, AAB or IPA files (`file`, optional `key`), relative to the app.                                                             |
-| `apps[].lighthouse` | `pages` (paths), `runs` (default 5), `formFactor` (`mobile` or `desktop`), and optionally `baseUrl` with `startCommand`.         |
-| `budgets`           | See [metrics and budgets](metrics.md#budgets).                                                                                   |
-| `noise`             | Lighthouse noise thresholds per metric (`performance`, `lcp`, `tbt`, `cls`): `{ "floor": …, "k": … }`. See ADR 0007.             |
-| `compression`       | Size shown for web assets in comments: `gzip` (default), `brotli` or `raw`.                                                      |
-| `top`               | Files, packages and archive entries listed per app (default 10).                                                                 |
+| Field               | Meaning                                                                                                                                                               |
+| ------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `apps`              | Apps to measure. Without it, usertax discovers them (above).                                                                                                          |
+| `apps[].path`       | App directory relative to the repository root. Required.                                                                                                              |
+| `apps[].id`, `name` | Identity in reports and comments. Default: the package name.                                                                                                          |
+| `apps[].framework`  | `vite`, `next`, `webpack`, `static`, `expo`, `react-native`. Default: detected.                                                                                       |
+| `apps[].outDir`     | Build output, relative to the app. Default: `dist` (`.next` for Next.js).                                                                                             |
+| `apps[].bundles`    | React Native bundles (`platform`, `file`, optional `map`), relative to the app. Expo apps default to their `expo export` output.                                      |
+| `apps[].archives`   | APK, AAB or IPA files (`file`, optional `key`), relative to the app.                                                                                                  |
+| `apps[].lighthouse` | `pages` (paths), `runs` (default 5), `warmup` (unrecorded runs first, default 1), `formFactor` (`mobile` or `desktop`), and optionally `baseUrl` with `startCommand`. |
+| `budgets`           | See [metrics and budgets](metrics.md#budgets).                                                                                                                        |
+| `noise`             | Lighthouse noise thresholds per metric (`performance`, `lcp`, `tbt`, `cls`): `{ "floor": …, "k": … }`. See ADR 0007.                                                  |
+| `compression`       | Size shown for web assets in comments: `gzip` (default), `brotli` or `raw`.                                                                                           |
+| `top`               | Files, packages and archive entries listed per app (default 10).                                                                                                      |
 
 Unknown keys are errors, so typos do not pass silently.
 

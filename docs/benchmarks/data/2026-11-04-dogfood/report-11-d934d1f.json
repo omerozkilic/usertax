@@ -1,0 +1,92 @@
+{
+ "schemaVersion": 1,
+ "tool": {
+  "name": "usertax",
+  "version": "0.0.0"
+ },
+ "createdAt": "2026-11-04T10:59:47.294Z",
+ "git": {
+  "sha": "d934d1f1e10081e526a9ce4652b5ff374844bbdf",
+  "ref": "refs/pull/15/head"
+ },
+ "settings": {
+  "compression": {
+   "gzipLevel": 9,
+   "brotliQuality": 11
+  }
+ },
+ "environment": {
+  "os": "linux 7.0.0-1017-azure x64",
+  "node": "v24.22.1"
+ },
+ "apps": [
+  {
+   "id": "examples/vite-app",
+   "name": "examples/vite-app",
+   "path": "examples/vite-app",
+   "kind": "web",
+   "framework": "vite",
+   "lighthouse": [
+    {
+     "url": "/",
+     "formFactor": "mobile",
+     "lighthouseVersion": "13.6.0",
+     "runs": [
+      {
+       "performance": 100,
+       "lcp": 758.2616,
+       "tbt": 12.5,
+       "cls": 0
+      },
+      {
+       "performance": 100,
+       "lcp": 757.6168,
+       "tbt": 0,
+       "cls": 0
+      },
+      {
+       "performance": 100,
+       "lcp": 756.4303,
+       "tbt": 0,
+       "cls": 0
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "examples/next-app",
+   "name": "examples/next-app",
+   "path": "examples/next-app",
+   "kind": "web",
+   "framework": "next",
+   "lighthouse": [
+    {
+     "url": "/",
+     "formFactor": "mobile",
+     "lighthouseVersion": "13.6.0",
+     "runs": [
+      {
+       "performance": 98,
+       "lcp": 656.63715,
+       "tbt": 159,
+       "cls": 0
+      },
+      {
+       "performance": 99,
+       "lcp": 639.88645,
+       "tbt": 99,
+       "cls": 0
+      },
+      {
+       "performance": 99,
+       "lcp": 641.9138,
+       "tbt": 97,
+       "cls": 0
+      }
+     ]
+    }
+   ]
+  }
+ ]
+}

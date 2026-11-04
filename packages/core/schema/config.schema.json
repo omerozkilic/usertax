@@ -108,6 +108,12 @@
                 "minimum": 1,
                 "maximum": 100
               },
+              "warmup": {
+                "default": 1,
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 10
+              },
               "formFactor": {
                 "default": "mobile",
                 "type": "string",

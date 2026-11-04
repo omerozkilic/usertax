@@ -46,10 +46,15 @@ export type NoiseThresholds = Partial<
  * rate at or below 0.5 % for every metric of both pages. CLS showed no variation, so it has no
  * floor; the k × IQR term scales the threshold for noisier pages.
  */
+/**
+ * Calibrated on GitHub-hosted runners (ADR 0007, docs/benchmarks): each floor is the smallest of
+ * the tested ones that gave no false positive on 14 real reports of unchanged pages from
+ * different runners (182 pairs) and in the simulation from two calibration runs (6 runners).
+ */
 export const DEFAULT_NOISE_THRESHOLDS: Readonly<Record<LighthouseMetricName, NoiseThreshold>> = {
-  performance: { floor: 1, k: 1.5 },
-  lcp: { floor: 25, k: 1.5 },
-  tbt: { floor: 25, k: 1.5 },
+  performance: { floor: 2, k: 1.5 },
+  lcp: { floor: 40, k: 1.5 },
+  tbt: { floor: 130, k: 1.5 },
   cls: { floor: 0, k: 1.5 },
 };
 
