@@ -24,6 +24,9 @@ raporu verir.
 sunucusu [`npx @usertax/cli`](https://www.npmjs.com/package/@usertax/cli). usertax 0.x
 sürümünde: rapor şeması ve action girdileri küçük sürümler arasında değişebilir.
 
+Kurulum tek komut: deponda `npx @usertax/cli init` çalıştır; workflow'ları paket yöneticine ve
+build script'ine göre yazar.
+
 ```bash
 npx @usertax/cli measure apps/web -o once.json      # değişiklikten önce
 npx @usertax/cli measure apps/web -o sonra.json     # değişiklikten sonra

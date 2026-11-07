@@ -88,6 +88,16 @@ from your default branch, so pull requests from forks are safe
 requests. The [Marketplace page](https://github.com/marketplace/actions/usertax-pr-performance-cost) has both workflows
 ready to copy, and a one-workflow setup for private repositories.
 
+Or let usertax write them: in your repository, run
+
+```bash
+npx @usertax/cli init
+```
+
+It detects the package manager, the build script and the apps, writes both workflows
+(`--single` for one), and says what each app's build needs (source maps, for example).
+`--budget` adds a starter `usertax.config.json`.
+
 ## Quickstart (CLI)
 
 ```bash
