@@ -10,6 +10,11 @@
 
 ## Fork-safe setup (recommended)
 
+`npx @usertax/cli init` writes these two workflows for your repository: it picks the package
+manager and build script, pins the third-party actions by commit SHA, and lists what each app's
+build needs. `--single` writes the one-workflow variant, `--budget` a starter configuration,
+`--dry-run` prints the files instead.
+
 Two workflows (ADR 0005). The first builds and measures the pull request with a read-only token
 and no secrets; the second runs the action from your default branch, never the pull request's
 code, and posts the comment.
