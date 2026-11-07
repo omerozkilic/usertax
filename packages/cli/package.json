@@ -50,5 +50,8 @@
     "github-action",
     "ci",
     "mcp"
-  ]
+  ],
+  "devDependencies": {
+    "yaml": "^2.9.1"
+  }
 }

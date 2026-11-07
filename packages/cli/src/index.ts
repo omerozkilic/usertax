@@ -1,5 +1,6 @@
 import { parseArgs } from 'node:util';
 import { diffCommand } from './commands/diff.js';
+import { initCommand } from './commands/init.js';
 import { measureCommand } from './commands/measure.js';
 import { EXIT, UsageError, defaultIo } from './io.js';
 import { mcpCommand } from './mcp.js';
@@ -24,6 +25,7 @@ Usage:
 Commands:
   measure   Measure built apps (web, React Native, Expo) and write a report
   diff      Compare a head report with a base report, with budgets (Markdown or JSON)
+  init      Set up usertax in this repository (GitHub Actions workflows, configuration)
   mcp       Start the MCP server for AI assistants (standard input and output)
 
 Options:
@@ -37,6 +39,7 @@ type Command = (argv: readonly string[], io: Io) => Promise<number>;
 
 const COMMANDS: ReadonlyMap<string, Command> = new Map([
   ['diff', diffCommand],
+  ['init', (argv, io) => initCommand(argv, io, { cwd: process.cwd() })],
   [
     'measure',
     (argv, io) => measureCommand(argv, io, { version, env: process.env, cwd: process.cwd() }),

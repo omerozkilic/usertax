@@ -43,6 +43,9 @@ usertax measures what your workflow already builds. Build your apps **with sourc
 Vite: `build.sourcemap: 'hidden'` and `build.manifest: true`; for Next.js:
 `productionBrowserSourceMaps: true`), then add the action.
 
+**Fastest:** run `npx @usertax/cli init` in your repository. It writes the workflows below for
+your package manager and build script, and checks each app's build configuration.
+
 ### Private repositories: one workflow
 
 ```yaml

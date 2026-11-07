@@ -118,6 +118,7 @@ for the budgets, in a setup that is safe for pull requests from forks.
 | ------------------------------------- | -------------------------------------------------------------------------- |
 | `usertax measure [app-dir]`           | Measure built apps and write a report (JSON). `--help` lists every option. |
 | `usertax diff <head> [--base <base>]` | Compare two reports: Markdown or JSON, with budgets.                       |
+| `usertax init`                        | Write the GitHub Actions workflows (and a starter config) for this repo.   |
 | `usertax mcp`                         | Start the MCP server on standard input and output.                         |
 
 Exit codes: `0` success, `1` a budget failed, `2` invalid usage or input, `3` internal error.
