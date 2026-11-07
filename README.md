@@ -49,7 +49,7 @@ a date, measured on real builds ([full comment](docs/demo/add-moment.md),
 
 ## Why usertax?
 
-- **Explains the change.** Lockfile diffs (pnpm, npm, Yarn 1 and Yarn 2+) are joined with
+- **Explains the change.** Lockfile diffs (pnpm, npm, Yarn 1, Yarn 2+ and Bun) are joined with
   byte-exact source-map attribution: added, upgraded, or "same version, more of it imported" —
   including transitive packages and the dependency that pulled them in
   ([ADR 0008](docs/adr/0008-attribution-lockfile-and-source-maps.md)).
@@ -74,7 +74,7 @@ a date, measured on real builds ([full comment](docs/demo/add-moment.md),
 | Area         | Today                                                                                                                                                                                                                              | Planned                       |
 | ------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------- |
 | Web bundles  | Vite and Next.js 16 with Turbopack or webpack (routes), webpack and static output (files)                                                                                                                                          | –                             |
-| Attribution  | Source maps, lockfiles: pnpm 6 / 9, npm 2 / 3, Yarn 1, Yarn 2+                                                                                                                                                                     | Bun                           |
+| Attribution  | Source maps, lockfiles: pnpm 6 / 9, npm 2 / 3, Yarn 1, Yarn 2+, Bun                                                                                                                                                                | –                             |
 | Budgets      | `max`, `min`, increase / decrease in bytes or percent, warn / fail, from `usertax.config.(json\|ts)`; exit code 1 on failure                                                                                                       | –                             |
 | Lighthouse   | Runner (`--lighthouse`), every run stored, medians, IQR, noise thresholds calibrated on GitHub-hosted runners ([benchmarks](docs/benchmarks/README.md))                                                                            | –                             |
 | Mobile       | Expo and bare React Native bundles (JS and Hermes bytecode, with attribution), APK / AAB / IPA breakdown                                                                                                                           | Per-device download estimates |

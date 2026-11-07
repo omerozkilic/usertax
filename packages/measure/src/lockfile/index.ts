@@ -2,6 +2,7 @@ import { readFile, readdir } from 'node:fs/promises';
 import { dirname, join, relative, resolve, sep } from 'node:path';
 import type { Dependency } from '@usertax/core';
 import { readPackageJson } from '../detect.js';
+import { parseBunLock } from './bun.js';
 import { LockfileError, dependenciesOf } from './graph.js';
 import type { LockGraph } from './graph.js';
 import { parseNpmLock } from './npm.js';
@@ -9,6 +10,7 @@ import { parsePnpmLock } from './pnpm.js';
 import { parseYarnLock } from './yarn.js';
 import type { YarnWorkspace } from './yarn.js';
 
+export { parseBunLock } from './bun.js';
 export { LockfileError, dependenciesOf } from './graph.js';
 export type { DirectDependency, Importer, LockGraph, LockNode } from './graph.js';
 export { parseNpmLock } from './npm.js';
@@ -21,6 +23,8 @@ const LOCKFILES = [
   'package-lock.json',
   'npm-shrinkwrap.json',
   'yarn.lock',
+  'bun.lock',
+  'bun.lockb',
 ] as const;
 
 export interface LockfileLocation {
@@ -82,7 +86,7 @@ async function yarnWorkspaces(root: string): Promise<YarnWorkspace[]> {
 
 /** Parses a lockfile into a graph. */
 export async function readLockGraph(location: LockfileLocation): Promise<LockGraph> {
-  const text = await readFile(location.path, 'utf8');
+  const text = location.name === 'bun.lockb' ? '' : await readFile(location.path, 'utf8');
   switch (location.name) {
     case 'pnpm-lock.yaml':
       return parsePnpmLock(text);
@@ -91,6 +95,13 @@ export async function readLockGraph(location: LockfileLocation): Promise<LockGra
       return parseNpmLock(text);
     case 'yarn.lock':
       return parseYarnLock(text, await yarnWorkspaces(dirname(location.path)));
+    case 'bun.lock':
+      return parseBunLock(text);
+    case 'bun.lockb':
+      throw new LockfileError(
+        `${location.path} is Bun's binary lockfile, which usertax cannot read: ` +
+          'run `bun install --save-text-lockfile` to write bun.lock (the default since Bun 1.2)',
+      );
   }
 }
 
