@@ -1,5 +1,18 @@
 # Changelog
 
+## [0.2.0](https://github.com/omerozkilic/usertax/compare/v0.1.4...v0.2.0) (2026-11-07)
+
+
+### Features
+
+* **cli:** `usertax init` writes the workflows and configuration for a repository ([#37](https://github.com/omerozkilic/usertax/issues/37)) ([f2be100](https://github.com/omerozkilic/usertax/commit/f2be1000eae1241d8db014f0eb3d56b83de7782e))
+* **measure:** read Bun lockfiles (bun.lock) ([#38](https://github.com/omerozkilic/usertax/issues/38)) ([89986f9](https://github.com/omerozkilic/usertax/commit/89986f93520231a7fbfa37bb286c67fcb70786ac))
+
+
+### Bug Fixes
+
+* **measure:** find Next.js static files behind basePath and assetPrefix ([#31](https://github.com/omerozkilic/usertax/issues/31)) ([5b38a45](https://github.com/omerozkilic/usertax/commit/5b38a45f3c3778d9c9f692a9c808557fe5011982))
+
 ## [0.1.4](https://github.com/omerozkilic/usertax/compare/v0.1.3...v0.1.4) (2026-11-04)
 
 
