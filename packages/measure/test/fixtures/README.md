@@ -14,7 +14,7 @@ files, so they keep working after a refresh.
 
 The same small workspace (root depends on `ms`; `packages/web` depends on `react`, `react-dom`,
 the workspace package `lib` and, as a dev dependency, `is-number`; `packages/lib` depends on
-`moment`) installed with four package managers on 2026-11-03:
+`moment`) installed with five package managers (Bun on 2026-11-07, the others on 2026-11-03):
 
 | Directory | Generated with |
 | --- | --- |
@@ -22,8 +22,14 @@ the workspace package `lib` and, as a dev dependency, `is-number`; `packages/lib
 | `npm/` | `npm install --package-lock-only` (npm 10.9.9, lockfile v3) |
 | `yarn1/` | `yarn install` (Yarn 1.22.22, lockfile v1) |
 | `berry/` | `yarn install --mode=update-lockfile` (Yarn 4.18.1, lockfile v10) |
+| `bun/` | `bun install --lockfile-only` (Bun 1.4.4, `bun.lock` v2) |
 
 Only the manifests and lockfiles are kept.
+
+`bun-nested/` is a single package whose dependencies need two versions of `ms` and of the scoped
+`@nodelib/fs.stat`, so that Bun nests one of each (`debug/ms`,
+`@nodelib/fs.scandir/@nodelib/fs.stat`); generated with `bun install --lockfile-only` (Bun 1.4.4)
+on 2026-11-07.
 
 ## `next-dist/`
 

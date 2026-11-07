@@ -7,10 +7,12 @@ import {
   LockfileError,
   dependenciesOf,
   findLockfile,
+  parseBunLock,
   parseNpmLock,
   parsePnpmLock,
   parseYarnLock,
   readAppDependencies,
+  readLockGraph,
 } from '@usertax/measure';
 
 const fixtures = fileURLToPath(new URL('./fixtures/lockfiles/', import.meta.url));
@@ -29,6 +31,7 @@ describe.each([
   ['npm', 'npm'],
   ['yarn1', 'yarn-classic'],
   ['berry', 'yarn-berry'],
+  ['bun', 'bun'],
 ])('%s lockfile', (dir, format) => {
   it('resolves the dependencies of a workspace app, through workspace links', async () => {
     const result = await readAppDependencies(
@@ -159,5 +162,58 @@ describe('parseYarnLock', () => {
       { name: '@scope/a', version: '1.2.0', direct: true },
       { name: 'b', version: '2.1.0', direct: false, via: ['@scope/a'] },
     ]);
+  });
+});
+
+describe('parseBunLock', () => {
+  it('resolves nested and scoped packages before hoisted ones', async () => {
+    const result = await readAppDependencies(join(fixtures, 'bun-nested'));
+    expect(result?.format).toBe('bun');
+    expect(result?.dependencies).toEqual([
+      { name: '@nodelib/fs.scandir', version: '2.1.5', direct: true },
+      { name: '@nodelib/fs.stat', version: '1.1.3', direct: true },
+      { name: '@nodelib/fs.stat', version: '2.0.5', direct: false, via: ['@nodelib/fs.scandir'] },
+      { name: 'debug', version: '4.4.3', direct: true },
+      { name: 'ms', version: '2.0.0', direct: true },
+      { name: 'ms', version: '2.1.3', direct: false, via: ['debug'] },
+      { name: 'queue-microtask', version: '1.2.3', direct: false, via: ['@nodelib/fs.scandir'] },
+      { name: 'run-parallel', version: '1.2.0', direct: false, via: ['@nodelib/fs.scandir'] },
+    ]);
+  });
+
+  it('prefers a version nested under a workspace', () => {
+    const graph = parseBunLock(`{
+      "lockfileVersion": 1,
+      "workspaces": {
+        "": { "name": "root", "dependencies": { "a": "1" } },
+        "apps/web": { "name": "web", "dependencies": { "a": "2" } },
+      },
+      "packages": {
+        "a": ["a@1.0.0", "", {}, "sha512-"],
+        "web": ["web@workspace:apps/web"],
+        "web/a": ["a@2.0.0", "", {}, "sha512-"],
+      },
+    }`);
+    expect(dependenciesOf(graph, '.')).toEqual([{ name: 'a', version: '1.0.0', direct: true }]);
+    expect(dependenciesOf(graph, 'apps/web')).toEqual([
+      { name: 'a', version: '2.0.0', direct: true },
+    ]);
+  });
+
+  it('keeps commas and brackets inside strings', () => {
+    const graph = parseBunLock(
+      '{"workspaces":{"":{"name":"x, ]","dependencies":{"a":"1",},},},' +
+        '"packages":{"a":["a@1.0.0","",{},"\\\\\\",}"],},}',
+    );
+    expect(graph.nodes.get('workspace:')?.name).toBe('x, ]');
+    expect(dependenciesOf(graph, '.')).toEqual([{ name: 'a', version: '1.0.0', direct: true }]);
+  });
+
+  it('rejects invalid and unsupported lockfiles', async () => {
+    expect(() => parseBunLock('{')).toThrow(/not valid JSON/);
+    expect(() => parseBunLock('{"lockfileVersion": 1}')).toThrow(/"workspaces" and "packages"/);
+    await expect(readLockGraph({ path: '/repo/bun.lockb', name: 'bun.lockb' })).rejects.toThrow(
+      /bun install --save-text-lockfile/,
+    );
   });
 });

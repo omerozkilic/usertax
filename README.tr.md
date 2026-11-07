@@ -47,7 +47,7 @@ PR. Gerçek build'lerde ölçüldü ([yorumun tamamı](docs/demo/add-moment.md),
 
 ## Neden usertax?
 
-- **Değişimi açıklar:** pnpm, npm, Yarn 1 ve Yarn 2+ lockfile farkları byte düzeyinde source map
+- **Değişimi açıklar:** pnpm, npm, Yarn 1, Yarn 2+ ve Bun lockfile farkları byte düzeyinde source map
   atfıyla birleştirilir; dolaylı paketler ve onları getiren bağımlılık da gösterilir.
 - **Dürüst rakamlar:** Her JavaScript byte'ı bir pakete, sizin kodunuza ya da açıkça
   "atfedilmemiş"e yazılır; toplam dosya boyutuna eşittir. Lighthouse değişimleri ölçülmüş

@@ -38,7 +38,7 @@ changed, but not why the change happened in this PR.
 - Parsers turn each lockfile into one graph of importers and resolved nodes; real lockfiles of
   the same workspace from pnpm 10, npm 10, Yarn 1 and Yarn 4 are test fixtures, and all four must
   produce the same dependency list.
-- Bun lockfiles are not supported yet.
+- Bun lockfiles were not supported at first; see the notes on Bun below.
 - The alternatives data is generated from module-replacements 3.4.0 (`preferred`, `native` and
   `micro-utilities` manifests); suggestions link to the dataset's own guides.
 
@@ -61,3 +61,13 @@ changed, but not why the change happened in this PR.
 
 - Package size from the npm registry (e.g. unpacked size): not what ends up in the bundle.
 - Bundler stats files only: differ per bundler and do not exist for Metro.
+
+## Implementation notes (Bun)
+
+- `bun.lock` (Bun 1.2 and later) is JSON with trailing commas. Its `workspaces` section gives the
+  importers and their direct dependencies; `packages` is keyed like a `node_modules` tree
+  (`debug/ms` is the `ms` nested under `debug`), so a dependency resolves to the deepest key on
+  its path, as in Node's resolution. The same workspace fixture installed with Bun 1.4.4 must
+  give the same dependency list as the other four package managers.
+- The binary `bun.lockb` is not read: its format is undocumented. Measuring an app with one
+  fails with a message that names `bun install --save-text-lockfile`.

@@ -23,7 +23,7 @@ export interface Importer {
 
 /** A lockfile reduced to a graph: importers (workspace paths) and resolved nodes. */
 export interface LockGraph {
-  readonly format: 'pnpm' | 'npm' | 'yarn-classic' | 'yarn-berry';
+  readonly format: 'pnpm' | 'npm' | 'yarn-classic' | 'yarn-berry' | 'bun';
   readonly importers: ReadonlyMap<string, Importer>;
   readonly nodes: ReadonlyMap<string, LockNode>;
 }

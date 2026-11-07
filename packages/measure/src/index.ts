@@ -21,6 +21,7 @@ export {
   LockfileError,
   dependenciesOf,
   findLockfile,
+  parseBunLock,
   parseNpmLock,
   parsePnpmLock,
   parseYarnLock,

@@ -203,11 +203,13 @@ the comment gets a reason:
 Lockfile changes that do not change any bundle (dev tooling, packages that are not bundled) are
 listed separately in a collapsed section.
 
-Supported lockfiles: pnpm 6.x and 9.x, npm lockfile versions 2 and 3, Yarn 1 and Yarn 2+.
+Supported lockfiles: pnpm 6.x and 9.x, npm lockfile versions 2 and 3, Yarn 1, Yarn 2+ and Bun's
+text lockfile (`bun.lock`).
 Workspace links are followed, so a dependency of a workspace package used by the app is reported
 as coming "via" that package. Yarn 1 lockfiles do not record workspaces; usertax reads the
-`workspaces` field of the root `package.json` and supports `dir` and `dir/*` patterns. Bun
-lockfiles are not supported yet.
+`workspaces` field of the root `package.json` and supports `dir` and `dir/*` patterns. Bun's
+binary `bun.lockb` cannot be read: run `bun install --save-text-lockfile` once to write
+`bun.lock`, the default since Bun 1.2.
 
 Alternatives are shown for packages that were added or grew, only when the
 [e18e module-replacements](https://github.com/e18e/module-replacements) dataset has an entry for

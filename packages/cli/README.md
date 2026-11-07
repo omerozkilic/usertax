@@ -46,14 +46,14 @@ never needs network access: it reads the build output, its source maps and your 
 
 ## What it measures
 
-| Area             | What usertax reports                                                                                                                                                                  |
-| ---------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Web**          | Every shipped file (raw, gzip, brotli), JavaScript per route for Vite and Next.js (Turbopack and webpack), webpack and static output                                                  |
-| **Lighthouse**   | Performance score, LCP, TBT, CLS: several runs per page, medians and spread, judged against measured noise                                                                            |
-| **React Native** | Expo and bare React Native bundles, JavaScript or Hermes bytecode, attributed to packages                                                                                             |
-| **App archives** | APK, AAB and IPA broken down into code, native libraries, resources, assets and the JS bundle                                                                                         |
-| **Why**          | Lockfile diffs (pnpm, npm, Yarn 1, Yarn 2+) joined with source-map attribution: added, upgraded, or "same version, more of it imported", with the dependency that pulled a package in |
-| **Alternatives** | Lighter or native replacements from the curated [e18e module-replacements](https://github.com/e18e/module-replacements) dataset, never generated                                      |
+| Area             | What usertax reports                                                                                                                                                                       |
+| ---------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| **Web**          | Every shipped file (raw, gzip, brotli), JavaScript per route for Vite and Next.js (Turbopack and webpack), webpack and static output                                                       |
+| **Lighthouse**   | Performance score, LCP, TBT, CLS: several runs per page, medians and spread, judged against measured noise                                                                                 |
+| **React Native** | Expo and bare React Native bundles, JavaScript or Hermes bytecode, attributed to packages                                                                                                  |
+| **App archives** | APK, AAB and IPA broken down into code, native libraries, resources, assets and the JS bundle                                                                                              |
+| **Why**          | Lockfile diffs (pnpm, npm, Yarn 1, Yarn 2+, Bun) joined with source-map attribution: added, upgraded, or "same version, more of it imported", with the dependency that pulled a package in |
+| **Alternatives** | Lighter or native replacements from the curated [e18e module-replacements](https://github.com/e18e/module-replacements) dataset, never generated                                           |
 
 Every byte of a JavaScript file is attributed to a package, to your code or explicitly to
 "unattributed", and the three add up to the file size.
