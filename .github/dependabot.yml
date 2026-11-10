@@ -19,3 +19,7 @@ updates:
       interval: weekly
     commit-message:
       prefix: ci
+    groups:
+      # CodeQL's init and analyze steps must run the same version, so update them together.
+      codeql:
+        patterns: ['github/codeql-action*']

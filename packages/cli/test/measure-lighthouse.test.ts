@@ -5,6 +5,10 @@ import { beforeAll, describe, expect, it, vi } from 'vitest';
 import { parseReport } from '@usertax/core';
 
 const audited: string[] = [];
+// These tests start a real build, server and multi-run audit. On a loaded CI runner
+// the default 5 s limit is hit; a test that is abandoned keeps pushing into `audited`
+// and breaks the next test, so the limit is raised instead of the test being skipped.
+const SLOW_TEST_MS = 30_000;
 
 vi.mock('chrome-launcher', () => ({
   launch: () => Promise.resolve({ port: 9222, kill: () => undefined }),
@@ -48,51 +52,12 @@ describe('usertax measure --lighthouse', () => {
     await writeFile(join(app, 'package.json'), '{"devDependencies":{"vite":"8"}}');
   });
 
-  it('serves the build output and records every run', async () => {
-    audited.length = 0;
-    const c = capture();
-    const code = await main(
-      [
-        'measure',
-        app,
-        '--sha',
-        'a'.repeat(40),
-        '--lighthouse',
-        '/',
-        '--lighthouse',
-        '/about/',
-        '--runs',
-        '2',
-      ],
-      c.io,
-    );
-    expect(code).toBe(0);
-    // One warm-up run per page (not recorded), then two recorded runs.
-    expect(audited.map((url) => new URL(url).pathname)).toEqual([
-      '/',
-      '/about/',
-      '/',
-      '/about/',
-      '/',
-      '/about/',
-    ]);
-    expect(c.err()).toContain(
-      'lighthouse / run 2/2: performance 100, LCP 756 ms, TBT 0 ms, CLS 0.000',
-    );
-    const lighthouse = parseReport(JSON.parse(c.out())).apps[0]?.lighthouse;
-    expect(lighthouse?.map((l) => [l.url, l.formFactor, l.runs.length])).toEqual([
-      ['/', 'mobile', 2],
-      ['/about/', 'mobile', 2],
-    ]);
-  });
-
-  it('audits an already running server', async () => {
-    const { serveStatic } = await import('@usertax/measure');
-    const server = await serveStatic(join(app, 'dist'));
-    audited.length = 0;
-    const c = capture();
-    expect(
-      await main(
+  it(
+    'serves the build output and records every run',
+    async () => {
+      audited.length = 0;
+      const c = capture();
+      const code = await main(
         [
           'measure',
           app,
@@ -100,42 +65,93 @@ describe('usertax measure --lighthouse', () => {
           'a'.repeat(40),
           '--lighthouse',
           '/',
+          '--lighthouse',
+          '/about/',
           '--runs',
-          '1',
-          '--warmup',
-          '0',
-          '--base-url',
-          `${server.url}/`,
+          '2',
         ],
         c.io,
-      ),
-    ).toBe(0);
-    expect(audited).toEqual([`${server.url}/`]);
-    await server.close();
-  });
+      );
+      expect(code).toBe(0);
+      // One warm-up run per page (not recorded), then two recorded runs.
+      expect(audited.map((url) => new URL(url).pathname)).toEqual([
+        '/',
+        '/about/',
+        '/',
+        '/about/',
+        '/',
+        '/about/',
+      ]);
+      expect(c.err()).toContain(
+        'lighthouse / run 2/2: performance 100, LCP 756 ms, TBT 0 ms, CLS 0.000',
+      );
+      const lighthouse = parseReport(JSON.parse(c.out())).apps[0]?.lighthouse;
+      expect(lighthouse?.map((l) => [l.url, l.formFactor, l.runs.length])).toEqual([
+        ['/', 'mobile', 2],
+        ['/about/', 'mobile', 2],
+      ]);
+    },
+    SLOW_TEST_MS,
+  );
 
-  it('starts a server command', async () => {
-    const { freePort } = await import('@usertax/measure');
-    const port = await freePort();
-    const script = `require('http').createServer((q,s)=>s.end('<html></html>')).listen(${port},'127.0.0.1')`;
-    const c = capture();
-    const args = [
-      'measure',
-      app,
-      '--sha',
-      'a'.repeat(40),
-      '--lighthouse',
-      '/',
-      '--runs',
-      '1',
-      '--start',
-      `"${process.execPath}" -e "${script}"`,
-      '--base-url',
-      `http://127.0.0.1:${port}`,
-    ];
-    expect(await main(args, c.io)).toBe(0);
-    expect(parseReport(JSON.parse(c.out())).apps[0]?.lighthouse?.[0]?.runs).toHaveLength(1);
-  });
+  it(
+    'audits an already running server',
+    async () => {
+      const { serveStatic } = await import('@usertax/measure');
+      const server = await serveStatic(join(app, 'dist'));
+      audited.length = 0;
+      const c = capture();
+      expect(
+        await main(
+          [
+            'measure',
+            app,
+            '--sha',
+            'a'.repeat(40),
+            '--lighthouse',
+            '/',
+            '--runs',
+            '1',
+            '--warmup',
+            '0',
+            '--base-url',
+            `${server.url}/`,
+          ],
+          c.io,
+        ),
+      ).toBe(0);
+      expect(audited).toEqual([`${server.url}/`]);
+      await server.close();
+    },
+    SLOW_TEST_MS,
+  );
+
+  it(
+    'starts a server command',
+    async () => {
+      const { freePort } = await import('@usertax/measure');
+      const port = await freePort();
+      const script = `require('http').createServer((q,s)=>s.end('<html></html>')).listen(${port},'127.0.0.1')`;
+      const c = capture();
+      const args = [
+        'measure',
+        app,
+        '--sha',
+        'a'.repeat(40),
+        '--lighthouse',
+        '/',
+        '--runs',
+        '1',
+        '--start',
+        `"${process.execPath}" -e "${script}"`,
+        '--base-url',
+        `http://127.0.0.1:${port}`,
+      ];
+      expect(await main(args, c.io)).toBe(0);
+      expect(parseReport(JSON.parse(c.out())).apps[0]?.lighthouse?.[0]?.runs).toHaveLength(1);
+    },
+    SLOW_TEST_MS,
+  );
 
   it.each([
     [['--runs', '0'], '--runs must be an integer between 1 and 100'],
