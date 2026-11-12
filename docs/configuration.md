@@ -16,7 +16,7 @@ with `usertax` installed as a dev dependency, point `$schema` at
 2. or the root package of a single-package repository.
 
 A package is measured when its dependencies name a supported framework: Vite, Astro, SvelteKit,
-Nuxt, React Router, Next.js, webpack or Expo. Bare React Native apps are skipped with a message, because usertax needs to know which
+Nuxt, React Router, Next.js, Rsbuild, Rspack, webpack or Expo. Bare React Native apps are skipped with a message, because usertax needs to know which
 bundles or archives to read. Every app must already be built.
 
 ## Example

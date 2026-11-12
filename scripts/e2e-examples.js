@@ -14,6 +14,7 @@ const cli = new URL('../packages/cli/bin/usertax.js', import.meta.url).pathname;
 const examples = [
   { dir: 'examples/vite-app', bundled: 'react-dom' },
   { dir: 'examples/next-app', bundled: 'next' },
+  { dir: 'examples/rsbuild-app', bundled: 'react-dom', lighthouse: false },
   {
     dir: 'examples/next-app',
     name: 'next-app (webpack)',

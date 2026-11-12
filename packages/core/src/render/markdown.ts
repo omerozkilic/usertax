@@ -33,6 +33,8 @@ const FRAMEWORK_LABEL: Record<Framework, string> = {
   astro: 'Astro',
   sveltekit: 'SvelteKit',
   webpack: 'webpack',
+  rsbuild: 'Rsbuild',
+  rspack: 'Rspack',
   expo: 'Expo',
   'react-native': 'React Native',
   static: 'Static site',

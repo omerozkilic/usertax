@@ -94,6 +94,10 @@ describe('displayPath', () => {
       '(virtual) webpack/bootstrap',
     );
     expect(displayPath('webpack://_N_E/', undefined, '.')).toBe('(virtual) webpack');
+    // Rspack (Rsbuild) writes its runtime with `webpack` as the namespace.
+    expect(displayPath('webpack://webpack/runtime/load_script', undefined, 'dist/static/js')).toBe(
+      '(virtual) webpack/runtime/load_script',
+    );
     expect(displayPath('webpack://_N_E/?f7bc', undefined, '.')).toBe('(virtual) webpack');
     expect(
       displayPath(

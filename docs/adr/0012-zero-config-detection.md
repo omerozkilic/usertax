@@ -19,6 +19,8 @@ output folders and their own budgets.
     library, a Vite app with a router). All build with Vite and depend on it, so they are checked
     before Vite.
   - Vite: `vite` dependency or `vite.config.*`.
+  - Rsbuild: `@rsbuild/core` dependency; Rspack: `@rspack/core` or `@rspack/cli` dependency.
+    Rsbuild builds with Rspack and depends on it, so it is checked first; both before webpack.
   - webpack: `webpack` dependency or `webpack.config.*`.
   - Expo: `expo` dependency.
   - Bare React Native: `react-native` dependency without `expo`.
@@ -40,7 +42,7 @@ output folders and their own budgets.
 - `usertax diff` reads budgets, noise thresholds, compression and `top` from the configuration
   and exits with code 1 when a budget fails.
 
-## Implementation notes (Astro, SvelteKit, Nuxt and React Router)
+## Implementation notes (Astro, SvelteKit, Nuxt, React Router, Rsbuild and Rspack)
 
 - Neither framework writes a Vite manifest of its own, so routes are read from the prerendered
   HTML, the same source of truth the browser has: the files a page references and the modules
@@ -65,6 +67,12 @@ output folders and their own budgets.
   that does not fit gives no routes (the prerendered pages are then tried). Verified on real
   React Router 7.18.5 builds in both modes and on a 8.5.1 build (prerendered), which writes the
   same manifest.
+
+- Rsbuild and Rspack write webpack-compatible output and source maps, so the webpack paths
+  apply, with two differences found in a real Rsbuild 2.2 build: content hashes are 10 hex
+  characters (`[contenthash:10]`), and runtime modules are written as
+  `webpack://webpack/runtime/<name>`. Routes come from the HTML page of each entry, read like
+  Astro's.
 
 ## Consequences
 

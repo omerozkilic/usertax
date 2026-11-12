@@ -10,7 +10,8 @@
  *   base64url hash fails this only when it is all lower-case or all upper-case letters,
  *   2 × (26/64)^8 ≈ 0.15 % of the time; such a file keeps its full name as key.
  * - 16 to 64 lower-case hex characters containing a digit (webpack, Next.js), either after a
- *   `-` or `.` or as the whole name.
+ *   `-` or `.` or as the whole name, and 10 to 15 after a `.` or `-` (Rsbuild's default
+ *   `[contenthash:10]`).
  *
  * Real names that happen to match (e.g. `user-Settings.js`) also get `[hash]`; that is harmless
  * because the replacement is stable between builds.
@@ -22,8 +23,8 @@ function isBase64UrlHash(segment: string): boolean {
   return /[\d_-]/.test(segment) || (/[a-z]/.test(segment) && /[A-Z]/.test(segment));
 }
 
-function isHexHash(segment: string): boolean {
-  return /^[0-9a-f]{16,64}$/.test(segment) && /\d/.test(segment);
+function isHexHash(segment: string, min = 16): boolean {
+  return segment.length >= min && /^[0-9a-f]{10,64}$/.test(segment) && /\d/.test(segment);
 }
 
 export function stableKey(path: string): string {
@@ -34,8 +35,10 @@ export function stableKey(path: string): string {
   if (extension === undefined) return path;
   const stem = base.slice(0, -extension.length);
   if (isHexHash(stem)) return `${dir}[hash]${extension}`;
-  const hex = /^(.*[-.])([0-9a-f]{16,64})$/.exec(stem);
-  if (hex?.[2] !== undefined && isHexHash(hex[2])) return `${dir}${hex[1] ?? ''}[hash]${extension}`;
+  const hex = /^(.*[-.])([0-9a-f]{10,64})$/.exec(stem);
+  if (hex?.[2] !== undefined && isHexHash(hex[2], 10)) {
+    return `${dir}${hex[1] ?? ''}[hash]${extension}`;
+  }
   const prefix = stem.slice(0, -9);
   const separator = stem.at(-9);
   const candidate = stem.slice(-8);

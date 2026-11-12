@@ -7,6 +7,7 @@ the commands to reproduce them.
 | ----------------------------- | ---------------------------------------------------------------------------------- | ------------------------------- |
 | [`vite-app`](vite-app/)       | Vite + React, two HTML entries, a lazy chunk, an image and the Inter font          | Measured in CI, with Lighthouse |
 | [`next-app`](next-app/)       | Next.js 16 App Router (Turbopack), CSS, the Geist font and an image                | Measured in CI, with Lighthouse |
+| [`rsbuild-app`](rsbuild-app/) | Rsbuild + React, two HTML entries and a lazy chunk                                 | Measured in CI                  |
 | [`expo-app`](expo-app/)       | Expo 58 (Hermes bundles from `expo export`; release APK in the `android` workflow) | Measured in CI                  |
 | [`bare-rn-app`](bare-rn-app/) | Bare React Native 0.88 (JavaScript bundles from `react-native bundle`)             | Measured in CI                  |
 

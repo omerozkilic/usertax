@@ -50,8 +50,8 @@ Options:
       --out-dir <dir>       Build output directory (default: dist; .next for Next.js; build for SvelteKit,
                             or .svelte-kit/output/client without adapter-static; .output/public for Nuxt;
                             build/client for React Router)
-      --framework <name>    vite, next, react-router, nuxt, astro, sveltekit, webpack, static, expo or
-                            react-native (default: detected from package.json)
+      --framework <name>    vite, next, react-router, nuxt, astro, sveltekit, webpack, rsbuild, rspack,
+                            static, expo or react-native (default: detected from package.json)
       --id <id>             App id in the report (default: package name or folder name)
       --name <name>         Display name (default: the id)
       --sha <sha>           Commit SHA (default: $GITHUB_SHA or git rev-parse HEAD)
@@ -91,6 +91,8 @@ const SUPPORTED: ReadonlySet<Framework> = new Set([
   'astro',
   'sveltekit',
   'webpack',
+  'rsbuild',
+  'rspack',
   'static',
   'expo',
   'react-native',
@@ -102,6 +104,8 @@ const FRAMEWORKS: ReadonlySet<string> = new Set([
   'astro',
   'sveltekit',
   'webpack',
+  'rsbuild',
+  'rspack',
   'static',
   'next',
   'expo',

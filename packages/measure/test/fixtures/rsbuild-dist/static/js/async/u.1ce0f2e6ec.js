@@ -1,0 +1,1 @@
+"use strict";(self.rspackChunk_usertax_examples_rsbuild_app=self.rspackChunk_usertax_examples_rsbuild_app||[]).push([["u"],{I(e,s,r){r.r(s);var u=r("H");function a(){return(0,u.jsx)("p",{children:"These details live in a chunk of their own."})}r.d(s,{default:()=>a})}}]);

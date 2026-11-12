@@ -295,7 +295,10 @@ export async function measureWebApp(options: MeasureWebAppOptions): Promise<Meas
           (await htmlRoutes(options.outDir, scan.keys)))
         : options.framework === 'astro' ||
             options.framework === 'sveltekit' ||
-            options.framework === 'nuxt'
+            options.framework === 'nuxt' ||
+            // One HTML page per entry (html-rspack-plugin); without HTML there are no routes.
+            options.framework === 'rsbuild' ||
+            options.framework === 'rspack'
           ? await htmlRoutes(options.outDir, scan.keys)
           : undefined;
   // Prerendered pages by route, to read the images and fonts their HTML references.
