@@ -139,6 +139,31 @@ export interface PackageDiff {
   readonly alternatives?: Alternatives;
 }
 
+/** One installed version of a duplicated package. */
+export interface DuplicateVersion {
+  readonly version: string;
+  readonly bytes: number;
+  /** Declared in the app's own package.json. Set when the report has a dependency snapshot. */
+  readonly direct?: boolean;
+  /** For transitive copies: up to three direct dependencies that pull this version in. */
+  readonly via?: readonly string[];
+}
+
+/**
+ * A package that one bundle contains in more than one version, so users download it more than
+ * once. Only the versions the source map could tell apart are listed.
+ */
+export interface DuplicateDiff {
+  readonly scope: PackageDiff['scope'];
+  readonly name: string;
+  /** Bytes of each copy, largest first. */
+  readonly versions: readonly DuplicateVersion[];
+  /** Sum of `versions`. */
+  readonly bytes: number;
+  /** Whether this pull request introduced the duplicate. Absent without a base report. */
+  readonly introduced?: boolean;
+}
+
 export interface ArchiveEntryDiff {
   readonly archive: string;
   readonly path: string;
@@ -163,6 +188,8 @@ export interface AppDiff {
   readonly metrics: readonly MetricDiff[];
   readonly assets: readonly AssetDiff[];
   readonly packages: readonly PackageDiff[];
+  /** Packages bundled in more than one version at head, new ones first. */
+  readonly duplicates: readonly DuplicateDiff[];
   readonly archiveEntries: readonly ArchiveEntryDiff[];
   /**
    * Lockfile changes not explained by the package list above (dev tooling, packages that are
@@ -173,6 +200,7 @@ export interface AppDiff {
   readonly omitted: {
     readonly assets: number;
     readonly packages: number;
+    readonly duplicates: number;
     readonly archiveEntries: number;
     readonly dependencies: number;
   };
@@ -363,6 +391,14 @@ function diffAssets(
 
 type PackageTotals = Map<string, Map<string | null, number>>;
 
+/** The files of an app that carry source-map attribution, with the bundle they belong to. */
+function attributedFiles(app: App | undefined) {
+  return [
+    ...(app?.assets ?? []).filter((a) => a.type === 'js').map((a) => ({ scope: 'web', item: a })),
+    ...(app?.bundles ?? []).map((b) => ({ scope: b.platform, item: b })),
+  ];
+}
+
 function packageTotals(app: App | undefined): PackageTotals {
   const totals: PackageTotals = new Map();
   const add = (scope: string, name: string | null, bytes: number) => {
@@ -373,11 +409,7 @@ function packageTotals(app: App | undefined): PackageTotals {
     }
     byName.set(name, (byName.get(name) ?? 0) + bytes);
   };
-  const sources = [
-    ...(app?.assets ?? []).filter((a) => a.type === 'js').map((a) => ({ scope: 'web', item: a })),
-    ...(app?.bundles ?? []).map((b) => ({ scope: b.platform, item: b })),
-  ];
-  for (const { scope, item } of sources) {
+  for (const { scope, item } of attributedFiles(app)) {
     for (const pkg of item.packages ?? []) add(scope, pkg.name, pkg.bytes);
     if (item.firstPartyBytes !== undefined) add(scope, null, item.firstPartyBytes);
   }
@@ -405,6 +437,66 @@ function diffPackages(base: App | undefined, head: App | undefined, limit: numbe
     }
   }
   return top(diffs, limit, (d) => Math.abs(d.delta));
+}
+
+/** Bytes per version of the packages that a file holds in more than one version. */
+function versionTotals(app: App | undefined): Map<string, Map<string, Map<string, number>>> {
+  const totals = new Map<string, Map<string, Map<string, number>>>();
+  for (const { scope, item } of attributedFiles(app)) {
+    for (const pkg of item.packages ?? []) {
+      if (pkg.versions === undefined) continue;
+      const byName = totals.get(scope) ?? new Map<string, Map<string, number>>();
+      const byVersion = byName.get(pkg.name) ?? new Map<string, number>();
+      for (const { version, bytes } of pkg.versions) {
+        byVersion.set(version, (byVersion.get(version) ?? 0) + bytes);
+      }
+      byName.set(pkg.name, byVersion);
+      totals.set(scope, byName);
+    }
+  }
+  return totals;
+}
+
+function diffDuplicates(
+  base: App | undefined,
+  head: App | undefined,
+  hasBase: boolean,
+  limit: number,
+) {
+  const baseTotals = versionTotals(base);
+  const duplicates: DuplicateDiff[] = [];
+  for (const [scope, byName] of versionTotals(head)) {
+    for (const [name, byVersion] of byName) {
+      if (byVersion.size < 2) continue;
+      const versions = [...byVersion]
+        .map(([version, bytes]): DuplicateVersion => {
+          const dependency = head?.dependencies?.find(
+            (d) => d.name === name && d.version === version,
+          );
+          return {
+            version,
+            bytes,
+            ...(dependency === undefined ? {} : { direct: dependency.direct }),
+            ...(dependency?.via === undefined ? {} : { via: dependency.via }),
+          };
+        })
+        .sort((a, b) => b.bytes - a.bytes || a.version.localeCompare(b.version));
+      duplicates.push({
+        scope: scope as DuplicateDiff['scope'],
+        name,
+        versions,
+        bytes: versions.reduce((sum, v) => sum + v.bytes, 0),
+        ...(hasBase ? { introduced: (baseTotals.get(scope)?.get(name)?.size ?? 0) < 2 } : {}),
+      });
+    }
+  }
+  duplicates.sort(
+    (a, b) =>
+      Number(b.introduced === true) - Number(a.introduced === true) ||
+      b.bytes - a.bytes ||
+      a.name.localeCompare(b.name),
+  );
+  return { list: duplicates.slice(0, limit), omitted: Math.max(0, duplicates.length - limit) };
 }
 
 function diffArchiveEntries(base: App | undefined, head: App | undefined, limit: number) {
@@ -500,6 +592,7 @@ function diffApp(
   const app = (head ?? base) as App;
   const assets = diffAssets(base, head, options.top, options.rankBy);
   const packages = diffPackages(base, head, options.top);
+  const duplicates = diffDuplicates(base, head, hasBase, options.top);
   const archiveEntries = diffArchiveEntries(base, head, options.top);
   const explained = explain(packages.list, base, head);
   let status: AppDiff['status'] = 'compared';
@@ -519,11 +612,13 @@ function diffApp(
     metrics: diffMetrics(base, head, options.noise),
     assets: hasBase ? assets.list : [],
     packages: hasBase ? explained.packages : [],
+    duplicates: duplicates.list,
     archiveEntries: archiveEntries.list,
     dependencies: hasBase ? explained.dependencies.slice(0, DEPENDENCY_LIMIT) : [],
     omitted: {
       assets: hasBase ? assets.omitted : 0,
       packages: hasBase ? packages.omitted : 0,
+      duplicates: duplicates.omitted,
       archiveEntries: archiveEntries.omitted,
       dependencies: hasBase ? Math.max(0, explained.dependencies.length - DEPENDENCY_LIMIT) : 0,
     },

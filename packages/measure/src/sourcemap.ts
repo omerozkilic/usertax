@@ -20,6 +20,12 @@ export interface ModuleBytes {
 export interface Attribution {
   /** Bytes per npm package. */
   readonly packages: ReadonlyMap<string, number>;
+  /**
+   * Bytes per installed version, only for packages that the bundle contains in more than one
+   * version (package name → version → bytes). Copies whose version could not be determined are
+   * left out, so the versions of a package may add up to less than its total.
+   */
+  readonly versions: ReadonlyMap<string, ReadonlyMap<string, number>>;
   /** Bytes from sources in the repository outside `node_modules` (app code, bundler runtime). */
   readonly firstPartyBytes: number;
   /**
@@ -132,6 +138,79 @@ export function packageOf(path: string): string | undefined {
   return first;
 }
 
+/** One installed copy of a package, as the path where a bundler found it. */
+export interface InstallRoot {
+  readonly name: string;
+  /**
+   * Directory of the installed copy, relative to the app root (or absolute), for example
+   * `node_modules/.pnpm/lodash@4.17.20/node_modules/lodash`, `node_modules/a/node_modules/lodash`
+   * or `../../node_modules/lodash` for a copy hoisted above the app. Two sources share a root
+   * exactly when they come from the same installed copy.
+   */
+  readonly root: string;
+}
+
+/**
+ * Finds the installed copy a source belongs to, or `undefined` for code outside `node_modules`.
+ *
+ * @param mapDir directory of the map file, relative to the app root (posix)
+ */
+export function installRoot(
+  source: string,
+  sourceRoot: string | undefined,
+  mapDir: string,
+): InstallRoot | undefined {
+  // Resolve the source the way a bundler wrote it: webpack and Turbopack paths are relative to the
+  // app root, everything else to the map file.
+  const webpack = /^webpack:\/\/[^/]*\/(.*)$/s.exec(source);
+  const clean = (webpack?.[1] ?? source)
+    .replace(/^\0/, '')
+    .replace(/^[a-z]+:\/\/\/?/i, '')
+    .replace(/\?.*$/, '');
+  const project = clean.startsWith('[project]/') ? clean.slice('[project]/'.length) : undefined;
+  const full = project ?? (posix.isAbsolute(clean) ? clean : undefined);
+  const path = posix.normalize(
+    full ?? (webpack !== null ? clean : posix.join(mapDir, sourceRoot ?? '', clean)),
+  );
+  const marker = '/node_modules/';
+  const name = packageOf(path);
+  if (name === undefined) return undefined;
+  const root = path.slice(0, `/${path}`.lastIndexOf(marker) + marker.length + name.length - 1);
+  // The source map is untrusted input and a root is later used to find a `package.json`: allow
+  // `..` only as a prefix (a copy hoisted above the app).
+  const segments = root.replace(/^(\.\.\/)+/, '').split('/');
+  const absolute = root.startsWith('/');
+  if (
+    segments.slice(absolute ? 1 : 0).some((s) => s === '' || s === '.' || s === '..') ||
+    root.includes('\\')
+  ) {
+    return undefined;
+  }
+  return { name, root };
+}
+
+const VERSION_TEXT = /^[0-9A-Za-z][0-9A-Za-z.+_~-]{0,63}$/;
+
+/** Whether text can be reported as a package version (bounded, no markup). */
+export function isVersionText(text: unknown): text is string {
+  return typeof text === 'string' && VERSION_TEXT.test(text);
+}
+
+/**
+ * The version in pnpm's virtual store folder name (`.pnpm/<name>@<version>[_<peers>]/…`), which is
+ * the only layout that records it in the path.
+ */
+export function pnpmVersion({ name, root }: InstallRoot): string | undefined {
+  const folder = /(?:^|\/)node_modules\/\.pnpm\/([^/]+)\/node_modules\//.exec(`${root}/`)?.[1];
+  const prefix = `${name.replaceAll('/', '+')}@`;
+  if (folder?.startsWith(prefix) !== true) return undefined;
+  const version = folder.slice(prefix.length).split(/[_(]/)[0];
+  return isVersionText(version) ? version : undefined;
+}
+
+/** Resolves the version of an installed copy that the path does not name (npm, Yarn, Bun). */
+export type VersionOf = (copy: InstallRoot) => string | undefined;
+
 /**
  * Turns a source entry into a display path.
  *
@@ -198,13 +277,16 @@ export function classifySources(
   map: RawSourceMap,
   mapDir: string,
   isForeign: ForeignSource = () => false,
+  versionOf?: VersionOf,
 ): Omit<Attribution, 'unattributedBytes'> & { readonly foreignBytes: number } {
   const modules = new Map<string, { package?: string; bytes: number }>();
   const packages = new Map<string, number>();
+  const perVersion = new Map<string, Map<string, number>>();
   let firstParty = 0;
   let foreign = 0;
   for (const [sourceIndex, bytes] of sourceBytes) {
-    const path = displayPath(map.sources[sourceIndex] as string, map.sourceRoot, mapDir);
+    const source = map.sources[sourceIndex] as string;
+    const path = displayPath(source, map.sourceRoot, mapDir);
     const pkg = packageOf(path);
     if (pkg === undefined && isForeign(path)) {
       foreign += bytes;
@@ -214,11 +296,22 @@ export function classifySources(
       ...(pkg === undefined ? {} : { package: pkg }),
       bytes: (modules.get(path)?.bytes ?? 0) + bytes,
     });
-    if (pkg === undefined) firstParty += bytes;
-    else packages.set(pkg, (packages.get(pkg) ?? 0) + bytes);
+    if (pkg === undefined) {
+      firstParty += bytes;
+      continue;
+    }
+    packages.set(pkg, (packages.get(pkg) ?? 0) + bytes);
+    const copy = installRoot(source, map.sourceRoot, mapDir);
+    const version = copy === undefined ? undefined : (pnpmVersion(copy) ?? versionOf?.(copy));
+    if (copy?.name === pkg && version !== undefined) {
+      const byVersion = perVersion.get(pkg) ?? new Map<string, number>();
+      byVersion.set(version, (byVersion.get(version) ?? 0) + bytes);
+      perVersion.set(pkg, byVersion);
+    }
   }
   return {
     packages,
+    versions: new Map([...perVersion].filter(([, byVersion]) => byVersion.size > 1)),
     firstPartyBytes: firstParty,
     foreignBytes: foreign,
     modules: [...modules.entries()]
@@ -241,12 +334,14 @@ function utf8Length(text: string): number {
  * @param code the generated file as shipped
  * @param mapDir directory of the map file relative to the app root, used to resolve sources
  * @param isForeign sources counted as unattributed instead of first-party
+ * @param versionOf resolves the version of installed copies that the path does not name
  */
 export function attributeBytes(
   code: string,
   map: RawSourceMap,
   mapDir = '.',
   isForeign?: ForeignSource,
+  versionOf?: VersionOf,
 ): Attribution {
   const lines = code.split('\n');
   const decoded = decode(map.mappings);
@@ -270,6 +365,33 @@ export function attributeBytes(
     }
   }
 
-  const { foreignBytes, ...classified } = classifySources(sourceBytes, map, mapDir, isForeign);
+  const { foreignBytes, ...classified } = classifySources(
+    sourceBytes,
+    map,
+    mapDir,
+    isForeign,
+    versionOf,
+  );
   return { ...classified, unattributedBytes: unattributed + foreignBytes };
+}
+
+/** A package's bytes as reported, with the per-version split when the bundle holds several. */
+export interface PackageBytes {
+  readonly name: string;
+  readonly bytes: number;
+  versions?: { version: string; bytes: number }[];
+}
+
+/** Lists the packages of an attribution, largest first. */
+export function packageBytes(attribution: Attribution): PackageBytes[] {
+  return [...attribution.packages.entries()]
+    .map(([name, bytes]): PackageBytes => {
+      const byVersion = attribution.versions.get(name);
+      if (byVersion === undefined) return { name, bytes };
+      const versions = [...byVersion.entries()]
+        .map(([version, versionBytes]) => ({ version, bytes: versionBytes }))
+        .sort((a, b) => b.bytes - a.bytes || a.version.localeCompare(b.version));
+      return { name, bytes, versions };
+    })
+    .sort((a, b) => b.bytes - a.bytes || a.name.localeCompare(b.name));
 }

@@ -21,6 +21,15 @@ export const packageContributionSchema = z.object({
   name: z.string().min(1).max(214),
   /** Minified bytes attributed to the package by the source map. */
   bytes,
+  /**
+   * Bytes per installed version, only when this file contains more than one version of the
+   * package (a duplicate). Copies whose version could not be read are left out.
+   */
+  versions: z
+    .array(z.object({ version: z.string().min(1).max(256), bytes }))
+    .min(2)
+    .max(50)
+    .optional(),
 });
 
 export const moduleContributionSchema = z.object({

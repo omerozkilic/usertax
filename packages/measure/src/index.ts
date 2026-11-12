@@ -52,11 +52,23 @@ export {
   SourceMapError,
   attributeBytes,
   displayPath,
+  installRoot,
   isOutsideRepository,
+  packageBytes,
   packageOf,
   parseSourceMap,
+  pnpmVersion,
 } from './sourcemap.js';
-export type { Attribution, ForeignSource, ModuleBytes, RawSourceMap } from './sourcemap.js';
+export type {
+  Attribution,
+  ForeignSource,
+  InstallRoot,
+  ModuleBytes,
+  PackageBytes,
+  RawSourceMap,
+  VersionOf,
+} from './sourcemap.js';
+export { installedVersions } from './versions.js';
 export { assetType, entryRoute, measureWebApp, scanOutputDir, viteRoutes } from './web.js';
 export type {
   MeasureResult,

@@ -21,6 +21,8 @@ export type { DependencyChange, DependencyChangeKind } from './dependencies.js';
 export { DEFAULT_NOISE_THRESHOLDS, DIFF_SCHEMA_VERSION, diffReports } from './diff.js';
 export type {
   AppDiff,
+  DuplicateDiff,
+  DuplicateVersion,
   ArchiveEntryDiff,
   AssetDiff,
   Change,
