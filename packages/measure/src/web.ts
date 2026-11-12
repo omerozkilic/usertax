@@ -5,7 +5,8 @@ import { compressedSize } from './compressed-size.js';
 import { assignKeys } from './hash.js';
 import { foreignSources } from './foreign.js';
 import { SourceMapError, attributeBytes, packageBytes, parseSourceMap } from './sourcemap.js';
-import { htmlRoutes } from './html-routes.js';
+import { htmlRoutes, pageRoute } from './html-routes.js';
+import { addRouteMedia } from './route-media.js';
 import { MANIFEST_PREFIX, reactRouterRoutes } from './react-router.js';
 import { installedVersions } from './versions.js';
 import type { RawSourceMap } from './sourcemap.js';
@@ -183,6 +184,8 @@ interface ManifestChunk {
   isEntry?: boolean;
   imports?: string[];
   css?: string[];
+  /** Static files the chunk imports: images, fonts and other assets. */
+  assets?: string[];
 }
 
 /** Route name of a Vite entry: `index.html` → `/`, `about/index.html` → `/about/`. */
@@ -220,6 +223,9 @@ export async function viteRoutes(
       if (current === undefined || files.has(current.file)) return;
       files.add(current.file);
       for (const css of current.css ?? []) files.add(css);
+      // Images the code imports. Fonts come from the stylesheets' @font-face rules instead: the
+      // manifest lists every format, of which a browser downloads one.
+      for (const asset of current.assets ?? []) if (assetType(asset) === 'image') files.add(asset);
       for (const imported of current.imports ?? []) visit(imported);
     };
     visit(id);
@@ -259,7 +265,7 @@ export async function measureWebApp(options: MeasureWebAppOptions): Promise<Meas
     appDir: options.appDir,
     appPath: options.path,
   });
-  const routes =
+  const found =
     options.framework === 'vite'
       ? await viteRoutes(options.outDir, scan.keys)
       : options.framework === 'react-router'
@@ -273,6 +279,23 @@ export async function measureWebApp(options: MeasureWebAppOptions): Promise<Meas
             options.framework === 'rspack'
           ? await htmlRoutes(options.outDir, scan.keys)
           : undefined;
+  // Prerendered pages by route, to read the images and fonts their HTML references.
+  const pages = new Map<string, string>();
+  for (const file of scan.keys.keys()) {
+    if (!file.endsWith('.html')) continue;
+    pages.set(options.framework === 'vite' ? entryRoute(file) : pageRoute(file), file);
+  }
+  const routes =
+    found === undefined
+      ? undefined
+      : await addRouteMedia(found, {
+          outDir: options.outDir,
+          keys: scan.keys,
+          pageOf: (route) => {
+            const file = pages.get(route);
+            return file === undefined ? undefined : join(options.outDir, file);
+          },
+        });
   return {
     app: {
       id: options.id,

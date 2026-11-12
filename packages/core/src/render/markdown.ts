@@ -128,6 +128,8 @@ function changeCell(metric: MetricDiff): string {
 }
 
 function visibleMetric(metric: MetricDiff, compression: Compression): boolean {
+  // Package bytes have their own table; their metrics exist for budgets.
+  if (metric.group === 'package') return false;
   if (metric.compression === undefined) return true;
   // Mobile JS bundles ship inside the app archive: their raw size is what matters.
   if (metric.group === 'bundle') return metric.compression === 'raw';
@@ -394,9 +396,18 @@ function budgetValue(result: BudgetResult, value: number): string {
   return formatDelta(value, result.unit);
 }
 
+/** Above this many checks, passed and skipped ones are counted instead of listed. */
+const MAX_BUDGET_ROWS = 20;
+
 function budgetsBlock(evaluation: BudgetEvaluation): string | undefined {
   if (evaluation.results.length === 0 && evaluation.unmatched.length === 0) return undefined;
-  const rows = evaluation.results.map(
+  // A glob such as `package[*].bytes` checks every package; only the ones that need attention
+  // are listed then.
+  const listed =
+    evaluation.results.length <= MAX_BUDGET_ROWS
+      ? evaluation.results
+      : evaluation.results.filter((r) => r.status === 'fail' || r.status === 'warn');
+  const rows = listed.map(
     (r) =>
       `| ${BUDGET_ICON[r.status]} | ${inlineCode(r.appId)} | ${escapeText(r.label)} | ${r.limit} ${budgetValue(r, r.threshold)} | ${r.actual === undefined ? '–' : budgetValue(r, r.actual)} | ${escapeText(r.message)} |`,
   );
@@ -408,6 +419,16 @@ function budgetsBlock(evaluation: BudgetEvaluation): string | undefined {
       '| :-: | --- | --- | --- | --: | --- |',
       ...rows,
     );
+  }
+  if (listed.length < evaluation.results.length) {
+    const passed = evaluation.results.filter((r) => r.status === 'pass').length;
+    const skipped = evaluation.results.length - listed.length - passed;
+    const counts = [
+      ...(passed > 0 ? [`${passed} passed`] : []),
+      ...(skipped > 0 ? [`${skipped} skipped`] : []),
+    ].join(', ');
+    const lead = rows.length === 0 ? `${evaluation.results.length} budget checks` : 'Not listed';
+    lines.push('', `${lead}: ${counts}.`);
   }
   if (evaluation.unmatched.length > 0) {
     const patterns = evaluation.unmatched

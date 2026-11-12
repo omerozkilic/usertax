@@ -85,6 +85,9 @@ describe('referencedUrls', () => {
     referencedUrls(`component-url="${'x'.repeat(300_000)}`);
     referencedUrls(`import(\`${'x'.repeat(300_000)}`);
     referencedUrls(`<script src="${'y'.repeat(300_000)}`);
+    // Many short unclosed tags: a pattern bounded per match would still read each one 4000 times.
+    referencedUrls('<script '.repeat(200_000));
+    referencedUrls('<link '.repeat(200_000));
     expect(performance.now() - started).toBeLessThan(2000);
   });
 });

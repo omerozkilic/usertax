@@ -28,7 +28,11 @@ archive keys) are wrapped in brackets.
 | `css.total.{raw,gzip,brotli}`                      | All CSS files of a web app                                                                                             | bytes    |
 | `route[<route>].js.{raw,gzip,brotli}`              | JavaScript loaded for one route                                                                                        | bytes    |
 | `route[<route>].css.{raw,gzip,brotli}`             | Stylesheets loaded for one route; only for routes that load at least one CSS file                                      | bytes    |
+| `route[<route>].images.bytes`                      | Images a route's HTML, stylesheets or (Vite) code reference, file size; only for routes that reference one             | bytes    |
+| `route[<route>].fonts.bytes`                       | Web fonts a route's stylesheets or HTML reference, file size; only for routes that reference one                       | bytes    |
 | `bundle[<ios\|android>].raw`                       | React Native JS or Hermes bundle                                                                                       | bytes    |
+| `package[<name>].bytes`                            | Minified bytes of one package in a web app's JavaScript, from source maps                                              | bytes    |
+| `package[<name>][<ios\|android>].bytes`            | Minified bytes of one package in a React Native bundle                                                                 | bytes    |
 | `archive[<key>].file`                              | APK / AAB / IPA file size                                                                                              | bytes    |
 | `archive[<key>].category.<category>`               | Compressed size of one category (`js-bundle`, `dex`, `native`, `resources`, `assets`, `binary`, `frameworks`, `other`) | bytes    |
 | `lighthouse[<url>][<mobile\|desktop>].performance` | Lighthouse performance score, 0–100                                                                                    | score    |
@@ -70,6 +74,8 @@ one or more limits. Values can be numbers in the metric's unit or strings with a
     { "metric": "js.total.gzip", "max": "200 kB" },
     { "metric": "route[*].js.gzip", "maxIncrease": "10 kB", "level": "warn" },
     { "metric": "route[*].css.gzip", "max": "20 kB" },
+    { "metric": "package[*].bytes", "maxIncrease": "20 kB" },
+    { "metric": "package[lodash].bytes", "maxIncrease": 0 },
     { "app": "mobile", "metric": "archive[android].file", "maxIncreasePercent": 2 },
     { "metric": "lighthouse[*][mobile].performance", "min": 80, "maxDecrease": 5 }
   ]
@@ -94,6 +100,14 @@ Rules:
   change skips them. `max` and `min` always apply to the median.
 - A budget whose patterns match no metric is listed in the comment, because it is usually a
   typo.
+- Package budgets use the minified bytes of the package table (ADR 0008); compressed sizes per
+  package do not add up and have no metric. `package[*].bytes` also matches the per-platform ids
+  of mobile bundles. A package that is in only one of the two builds has 0 bytes in the other,
+  so `"maxIncrease": "20 kB"` catches a new package too, as long as that build's bundle was
+  attributed from source maps (otherwise the check is skipped). Package metrics are only used by
+  budgets; the comment shows packages in their own table.
+- When more than 20 checks match, the comment lists only the ones that fail or warn and counts
+  the rest.
 - The overall status is `fail` if any budget fails, otherwise `warn` if any warns, otherwise
   `pass`.
 
@@ -125,6 +139,23 @@ Rules:
   shows as removed. Stylesheets inlined into the HTML (`<style>`, such as the small stylesheets
   Astro inlines or Next.js `inlined` entries) are part of the HTML file's size, not of the route's
   CSS.
+- A route's images and fonts are the files in the build output that it references, counted once
+  each at their file size (they are compressed formats already):
+  - from its stylesheets: the first source of each `@font-face` rule (a browser downloads the
+    first format it supports; later ones are fallbacks) and every other `url()`;
+  - from its prerendered HTML: `<img src>` (for responsive images the `src` fallback, or the
+    first `srcset` candidate without one; the `<source>` alternatives of a `<picture>` are not
+    counted), `<video poster>`, icons, `<link rel="preload">` of images and fonts, and `url()` in
+    inline `<style>` blocks;
+  - for Vite, also the images the route's code imports (the `assets` of its chunks in the
+    manifest).
+
+  These are the files a route _can_ load, an upper bound: a browser downloads a font only when
+  text uses it, and only the `unicode-range` subsets it needs (`@fontsource/inter` declares
+  seven), and a background image only when its selector matches. Images created at run time,
+  `style` attributes, other hosts and `data:` URLs are not counted, nor are images that
+  `next/image` optimises per request (they are not in the build output).
+
 - For Astro (`dist/`), SvelteKit with adapter-static (`build/`) and Nuxt (`.output/public/`),
   routes come from the prerendered HTML of each page: the scripts, stylesheets and module preloads it references,
   Astro's `component-url` and `renderer-url` island attributes, the `import("…")` calls of

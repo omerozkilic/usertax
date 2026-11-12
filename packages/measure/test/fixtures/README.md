@@ -2,9 +2,11 @@
 
 ## `vite-dist/`
 
-Real output of `pnpm --filter @usertax-examples/vite-app build` (Vite 8.3.5, React 19.3.1),
-copied unchanged except that `sourcesContent` was removed from the source maps to keep the
-fixture small. usertax does not read `sourcesContent`.
+Real output of `pnpm --filter @usertax-examples/vite-app build` (Vite 8.3.6, React 19.3.1,
+`@fontsource/inter` 5.3.0), copied unchanged except that `sourcesContent` was removed from the
+source maps to keep the fixture small. usertax does not read `sourcesContent`. The home page
+imports `src/hero.png` and the Inter font, whose stylesheet declares seven subsets in woff2 and
+woff.
 
 To refresh it, build the example and copy `examples/vite-app/dist/` here, then strip
 `sourcesContent` from `assets/*.map`. Tests that depend on exact byte counts read them from the
@@ -52,7 +54,8 @@ Part of the real `.next/` output of `pnpm --filter @usertax-examples/next-app bu
 `build-manifest.json`, `static/` (with `sourcesContent` removed from the maps), the prerendered
 HTML pages and the client reference manifest of `/counter`. The app has a global stylesheet
 imported by the layout and a CSS module used by the `/counter` client component, so `/counter`
-loads two stylesheets and the other pages one.
+loads two stylesheets and the other pages one. The layout uses the Geist font (`geist` 1.8.2,
+through `next/font`) and `/about` shows `app/hero.png` in a plain `<img>`.
 
 ## `next-webpack-dist/`
 

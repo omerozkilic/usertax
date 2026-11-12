@@ -9,6 +9,7 @@ Web and mobile · Explains _why_ · No API keys
 [![npm](https://img.shields.io/npm/v/@usertax/cli)](https://www.npmjs.com/package/@usertax/cli)
 [![CI](https://github.com/omerozkilic/usertax/actions/workflows/ci.yml/badge.svg)](https://github.com/omerozkilic/usertax/actions/workflows/ci.yml)
 [![CodeQL](https://github.com/omerozkilic/usertax/actions/workflows/codeql.yml/badge.svg)](https://github.com/omerozkilic/usertax/actions/workflows/codeql.yml)
+[![OpenSSF Scorecard](https://api.scorecard.dev/projects/github.com/omerozkilic/usertax/badge)](https://scorecard.dev/viewer/?uri=github.com/omerozkilic/usertax)
 [![Node.js](https://img.shields.io/badge/node-22.23.4%20%7C%2024.22.1%20%7C%2026.12.1-339933)](package.json)
 [![TypeScript](https://img.shields.io/badge/TypeScript-strict-3178c6)](tsconfig.base.json)
 [![License: MIT](https://img.shields.io/badge/license-MIT-green)](LICENSE)

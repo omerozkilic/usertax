@@ -40,6 +40,52 @@ describe('extractMetrics', () => {
     expect([...metrics.keys()].filter((id) => id.startsWith('route[/about].css'))).toEqual([]);
   });
 
+  it('sums the file bytes of the images and fonts a route references', () => {
+    const app = webApp();
+    app.assets?.push(
+      { key: 'hero.png', file: 'hero.png', type: 'image', raw: 48_000, gzip: 47_000 },
+      { key: 'logo.svg', file: 'logo.svg', type: 'image', raw: 2_000 },
+      { key: 'inter.woff2', file: 'inter.woff2', type: 'font', raw: 23_000 },
+    );
+    app.routes = [
+      { route: '/', assets: ['hero.png', 'logo.svg', 'inter.woff2', 'hero.png'] },
+      { route: '/about', assets: ['logo.svg'] },
+    ];
+    const metrics = byId(app);
+    expect(metrics.get('route[/].images.bytes')).toMatchObject({
+      value: 50_000,
+      label: 'Images for /',
+      group: 'route',
+      unit: 'bytes',
+    });
+    expect(metrics.get('route[/].images.bytes')?.compression).toBeUndefined();
+    expect(metrics.get('route[/].fonts.bytes')?.value).toBe(23_000);
+    expect(metrics.get('route[/about].fonts.bytes')).toBeUndefined();
+  });
+
+  it('sums minified package bytes per app, and per platform for mobile bundles', () => {
+    const web = webApp();
+    const second = web.assets?.[1];
+    if (second) second.packages = [{ name: 'react', bytes: 1_000 }];
+    const metrics = byId(web);
+    expect(metrics.get('package[react-dom].bytes')).toMatchObject({
+      value: 60_000,
+      group: 'package',
+      unit: 'bytes',
+      label: 'Package react-dom (minified)',
+      packageScope: 'web',
+    });
+    expect(metrics.get('package[react].bytes')?.value).toBe(6_000);
+    expect(metrics.get('package[react].bytes')?.compression).toBeUndefined();
+    // First-party code is not a package.
+    expect([...metrics.keys()].filter((id) => id.startsWith('package[null]'))).toEqual([]);
+    const mobile = byId(mobileApp());
+    expect(mobile.get('package[react-native][android].bytes')).toMatchObject({
+      value: 500_000,
+      label: 'Package react-native (Android, minified)',
+    });
+  });
+
   it('ignores unknown and duplicate asset keys in routes', () => {
     const metrics = byId(
       webApp({
