@@ -95,6 +95,13 @@ describe('evaluateBudgets', () => {
     expect(evaluate({ app: 'mobile', metric: 'js.total.gzip', max: 1 }).unmatched).toHaveLength(1);
   });
 
+  it('applies route CSS budgets to routes that load CSS', () => {
+    const result = evaluate({ app: 'web', metric: 'route[*].css.gzip', max: '1kB' });
+    expect(result.results.map((r) => [r.metricId, r.status])).toEqual([
+      ['route[/].css.gzip', 'fail'],
+    ]);
+  });
+
   it('skips change limits without a base', () => {
     const headOnly = diffReports(head);
     const result = evaluateBudgets(headOnly, [

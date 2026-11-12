@@ -105,7 +105,25 @@ async function listRelative(root: string, suffix: string): Promise<string[]> {
 }
 
 interface ClientManifest {
-  entryJSFiles?: Record<string, string[]>;
+  entryJSFiles?: Record<string, unknown>;
+  /** Next.js 15+: `{ path, inlined }` objects; older releases list paths. */
+  entryCSSFiles?: Record<string, unknown>;
+}
+
+/** Paths of the files a manifest lists per entry; inlined CSS ships in the HTML, not as a file. */
+function manifestFiles(entries: Record<string, unknown> | undefined): string[] {
+  const files: string[] = [];
+  for (const list of Object.values(entries ?? {})) {
+    if (!Array.isArray(list)) continue;
+    for (const item of list as unknown[]) {
+      if (typeof item === 'string') files.push(item);
+      else if (typeof item === 'object' && item !== null) {
+        const { path, inlined } = item as { path?: unknown; inlined?: unknown };
+        if (typeof path === 'string' && inlined !== true) files.push(path);
+      }
+    }
+  }
+  return files;
 }
 
 /** Routes of an App Router build without prerendered HTML, from client reference manifests. */
@@ -127,7 +145,10 @@ async function manifestRoutes(
     }
     const route = htmlRoute(file.replace(/\/?page_client-reference-manifest\.js$/, '') || 'index');
     if (route === undefined || skip.has(route)) continue;
-    const entries = Object.values(manifest.entryJSFiles ?? {}).flat();
+    const entries = [
+      ...manifestFiles(manifest.entryJSFiles),
+      ...manifestFiles(manifest.entryCSSFiles),
+    ];
     const files = [...rootMainFiles, ...entries].map((f) =>
       f.replace(/^\/?(?:_next\/)?static\//, ''),
     );

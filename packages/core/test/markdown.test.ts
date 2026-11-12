@@ -189,6 +189,9 @@ describe('renderMarkdown', () => {
       web.path = 'a`b|c\n<!-- usertax:report -->';
       const asset = web.assets?.[0];
       if (asset) asset.file = '`](javascript:alert(1))';
+      // Route names come from build manifests and HTML; this route has JS and CSS rows.
+      const route = web.routes?.[0];
+      if (route) route.route = '/<img src=x onerror=alert(1)>|`x';
       r.tool.version = '1.0.0 <script>';
     });
     const markdown = renderMarkdown(diffReports(hostile, base), { runUrl: 'javascript:alert(1)' });
@@ -225,6 +228,7 @@ describe('renderMarkdown', () => {
     expect(hrefs.length).toBeGreaterThan(0);
     for (const href of hrefs) expect(href).toMatch(/^https:\/\/(e18e\.dev|github\.com\/e18e)\//);
     expect(markdown).not.toContain('@everyone');
+    expect(markdown).toContain('CSS for /');
     // The only HTML comment is our marker at the very start; a marker inside a code span is
     // shown as text and cannot be mistaken for the sticky-comment marker by `startsWith`.
     expect(markdown.startsWith(COMMENT_MARKER)).toBe(true);

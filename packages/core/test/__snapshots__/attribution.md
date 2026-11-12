@@ -6,13 +6,14 @@ Base `aaaaaaa` → head `aaaaaaa` · 1 app
 
 _No changes._
 
-<details><summary>4 unchanged</summary>
+<details><summary>5 unchanged</summary>
 
 | | Metric | Base | Head | Change |
 | :-: | --- | --: | --: | --: |
 | ⚪ | JS total (gzip) | 34.0 kB | 34.0 kB | ±0 B (±0.0%) |
 | ⚪ | CSS total (gzip) | 2.0 kB | 2.0 kB | ±0 B (±0.0%) |
 | ⚪ | JS for / (gzip) | 30.0 kB | 30.0 kB | ±0 B (±0.0%) |
+| ⚪ | CSS for / (gzip) | 2.0 kB | 2.0 kB | ±0 B (±0.0%) |
 | ⚪ | JS for /about (gzip) | 34.0 kB | 34.0 kB | ±0 B (±0.0%) |
 
 </details>

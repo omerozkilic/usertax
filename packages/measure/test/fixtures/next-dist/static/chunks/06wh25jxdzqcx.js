@@ -1,0 +1,3 @@
+(globalThis.TURBOPACK||(globalThis.TURBOPACK=[])).push(["object"==typeof document?document.currentScript:void 0,61214,t=>{"use strict";var e=t.i(87293),o=t.i(79272),u=t.i(20317);t.s(["Counter",0,function(){let[t,n]=(0,o.useState)(0);return(0,e.jsxs)("button",{type:"button",className:u.default.button,onClick:()=>n(t=>t+1),children:["Clicked ",t," times"]})}])},20317,t=>{t.v({button:"Yp304q_button"})}]);
+
+//# sourceMappingURL=3ml_b75rib1xc.js.map

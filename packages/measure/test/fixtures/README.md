@@ -41,9 +41,11 @@ generated in the environment that made these fixtures.
 ## `next-dist/`
 
 Part of the real `.next/` output of `pnpm --filter @usertax-examples/next-app build` (Next.js
-16.4.4 with Turbopack, React 19.3.1, `productionBrowserSourceMaps: true`): `BUILD_ID`,
+16.4.5 with Turbopack, React 19.3.1, `productionBrowserSourceMaps: true`): `BUILD_ID`,
 `build-manifest.json`, `static/` (with `sourcesContent` removed from the maps), the prerendered
-HTML pages and the client reference manifest of `/counter`.
+HTML pages and the client reference manifest of `/counter`. The app has a global stylesheet
+imported by the layout and a CSS module used by the `/counter` client component, so `/counter`
+loads two stylesheets and the other pages one.
 
 ## `next-webpack-dist/`
 

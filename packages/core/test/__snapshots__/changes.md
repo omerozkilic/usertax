@@ -10,6 +10,7 @@ Base `aaaaaaa` → head `aaaaaaa` · 3 apps · ⚠️ 2 budget warnings
 | 🟢 | CSS total (gzip) | 2.0 kB | 1.5 kB | -500 B (-25.0%) |
 | 🆕 | JS for /new (gzip) | – | 4.0 kB | new |
 | ➖ | JS for / (gzip) | 30.0 kB | – | removed |
+| ➖ | CSS for / (gzip) | 2.0 kB | – | removed |
 
 <details><summary>1 unchanged</summary>
 

@@ -28,6 +28,18 @@ describe('extractMetrics', () => {
     expect(metrics.get('route[/about].js.gzip')?.label).toBe('JS for /about');
   });
 
+  it('computes CSS per route only for routes that load a stylesheet', () => {
+    const metrics = byId(webApp());
+    expect(metrics.get('route[/].css.gzip')).toMatchObject({
+      value: 2_000,
+      label: 'CSS for /',
+      group: 'route',
+      compression: 'gzip',
+    });
+    // /about loads no stylesheet: no CSS rows, so reports of apps without CSS do not change.
+    expect([...metrics.keys()].filter((id) => id.startsWith('route[/about].css'))).toEqual([]);
+  });
+
   it('ignores unknown and duplicate asset keys in routes', () => {
     const metrics = byId(
       webApp({
