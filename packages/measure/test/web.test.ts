@@ -8,6 +8,7 @@ import {
   assetType,
   createReport,
   entryRoute,
+  isPrecompressed,
   measureWebApp,
   scanOutputDir,
   viteRoutes,
@@ -28,6 +29,21 @@ describe('assetType', () => {
     ['LICENSE', 'other'],
   ])('%s is %s', (path, type) => {
     expect(assetType(path)).toBe(type);
+  });
+});
+
+describe('isPrecompressed', () => {
+  it.each([
+    ['hero.png', true],
+    ['photo.JPEG', true],
+    ['inter.woff2', true],
+    ['inter.woff', true],
+    ['logo.svg', false],
+    ['font.ttf', false],
+    ['main.js', false],
+    ['png', false],
+  ])('%s → %s', (path, expected) => {
+    expect(isPrecompressed(path)).toBe(expected);
   });
 });
 
@@ -63,6 +79,12 @@ describe('scanOutputDir on a real Vite build', () => {
     ]);
     expect(media.filter((a) => a.file.endsWith('.woff2'))).toHaveLength(7);
     expect(media.filter((a) => a.file.endsWith('.woff'))).toHaveLength(7);
+    // Compressed formats are sent as they are: no gzip or brotli size, only the file size.
+    for (const asset of media) {
+      expect(asset).not.toHaveProperty('gzip');
+      expect(asset).not.toHaveProperty('brotli');
+    }
+    expect(assets.find((a) => a.type === 'css')).toHaveProperty('brotli');
     for (const asset of assets) {
       const bytes = await readFile(join(outDir, asset.file));
       expect(asset.raw).toBe(bytes.byteLength);
