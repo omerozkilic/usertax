@@ -16,7 +16,7 @@ with `usertax` installed as a dev dependency, point `$schema` at
 2. or the root package of a single-package repository.
 
 A package is measured when its dependencies name a supported framework: Vite, Astro, SvelteKit,
-Next.js, webpack or Expo. Bare React Native apps are skipped with a message, because usertax needs to know which
+Nuxt, Next.js, webpack or Expo. Bare React Native apps are skipped with a message, because usertax needs to know which
 bundles or archives to read. Every app must already be built.
 
 ## Example
@@ -51,8 +51,8 @@ bundles or archives to read. Every app must already be built.
 | `apps`              | Apps to measure. Without it, usertax discovers them (above).                                                                                                          |
 | `apps[].path`       | App directory relative to the repository root. Required.                                                                                                              |
 | `apps[].id`, `name` | Identity in reports and comments. Default: the package name.                                                                                                          |
-| `apps[].framework`  | `vite`, `next`, `astro`, `sveltekit`, `webpack`, `static`, `expo`, `react-native`. Default: detected.                                                                 |
-| `apps[].outDir`     | Build output, relative to the app. Default: `dist` (`.next` for Next.js, `build` for SvelteKit).                                                                      |
+| `apps[].framework`  | `vite`, `next`, `nuxt`, `astro`, `sveltekit`, `webpack`, `static`, `expo`, `react-native`. Default: detected.                                                         |
+| `apps[].outDir`     | Build output, relative to the app. Default: `dist` (`.next` for Next.js, `build` for SvelteKit, `.output/public` for Nuxt).                                           |
 | `apps[].bundles`    | React Native bundles (`platform`, `file`, optional `map`), relative to the app. Expo apps default to their `expo export` output.                                      |
 | `apps[].archives`   | APK, AAB or IPA files (`file`, optional `key`), relative to the app.                                                                                                  |
 | `apps[].lighthouse` | `pages` (paths), `runs` (default 5), `warmup` (unrecorded runs first, default 1), `formFactor` (`mobile` or `desktop`), and optionally `baseUrl` with `startCommand`. |

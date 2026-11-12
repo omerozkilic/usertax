@@ -44,6 +44,13 @@ describe('usertax measure for Vite-based frameworks', () => {
     expect(measured?.routes?.map((r) => r.route)).toEqual(['/', '/about/']);
   });
 
+  it('measures a Nuxt app from .output/public, without its fallback pages', async () => {
+    const dir = await app({ nuxt: '4', vite: '8' }, '.output/public', 'nuxt-dist/');
+    const measured = await measure([dir]);
+    expect(measured?.framework).toBe('nuxt');
+    expect(measured?.routes?.map((r) => r.route)).toEqual(['/', '/about/']);
+  });
+
   it('measures a SvelteKit app from the adapter-static output in build', async () => {
     const dir = await app({ '@sveltejs/kit': '3', vite: '8' }, 'build', 'sveltekit-dist/');
     const measured = await measure([dir]);

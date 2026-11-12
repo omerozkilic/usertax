@@ -14,8 +14,8 @@ output folders and their own budgets.
   `package.json` (npm, Yarn). Every workspace package and the root are candidate apps.
 - **App detection** from dependencies and config files:
   - Next.js: `next` dependency or `next.config.*`.
-  - Astro: `astro` dependency; SvelteKit: `@sveltejs/kit` dependency. Both build with Vite and
-    depend on it, so they are checked before Vite.
+  - Astro: `astro` dependency; SvelteKit: `@sveltejs/kit` dependency; Nuxt: `nuxt` dependency.
+    All build with Vite and depend on it, so they are checked before Vite.
   - Vite: `vite` dependency or `vite.config.*`.
   - webpack: `webpack` dependency or `webpack.config.*`.
   - Expo: `expo` dependency.
@@ -38,7 +38,7 @@ output folders and their own budgets.
 - `usertax diff` reads budgets, noise thresholds, compression and `top` from the configuration
   and exits with code 1 when a budget fails.
 
-## Implementation notes (Astro and SvelteKit)
+## Implementation notes (Astro, SvelteKit and Nuxt)
 
 - Neither framework writes a Vite manifest of its own, so routes are read from the prerendered
   HTML, the same source of truth the browser has: the files a page references and the modules
@@ -51,6 +51,11 @@ output folders and their own budgets.
   writes the whole site there). When `build/` does not exist, SvelteKit's
   `.svelte-kit/output/client` is used: the assets are measured, but there are no pages to read
   routes from.
+
+- Nuxt writes the client files and the prerendered pages to `.output/public`, for `nuxt generate`
+  and `nuxt build` alike. The same reader serves it, with two lessons from the real build:
+  `data-src` must not read as `src` (attribute names are matched whole), and `200.html` and
+  `404.html` are host fallbacks, not routes.
 
 ## Consequences
 

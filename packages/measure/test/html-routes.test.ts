@@ -12,6 +12,7 @@ import {
 
 const astro = new URL('./fixtures/astro-dist/', import.meta.url);
 const sveltekit = new URL('./fixtures/sveltekit-dist/', import.meta.url);
+const nuxt = new URL('./fixtures/nuxt-dist/', import.meta.url);
 const path = (url: URL) => url.pathname.replace(/\/$/, '');
 
 describe('pageRoute', () => {
@@ -46,6 +47,15 @@ describe('referencedUrls', () => {
       '/f.js',
       '/g.css',
     ]);
+  });
+
+  it('ignores prefetches, data attributes and JSON payloads, which are not loaded with the page', () => {
+    const html = `<link rel="prefetch" as="script" href="/lazy.js">
+      <link rel="preload" as="fetch" crossorigin href="/_payload.json">
+      <script type="application/json" data-src="/_payload.json" data-nuxt-data="nuxt-app"></script>
+      <script type="module" src="/entry.js"></script>
+      <x-island data-component-url="/not-an-island.js" component-url="/island.js"></x-island>`;
+    expect(referencedUrls(html)).toEqual(['/entry.js', '/island.js']);
   });
 
   it('ignores icons, fonts, images and scripts without a source', () => {
@@ -186,6 +196,15 @@ describe('htmlRoutes on real builds', () => {
     expect(own(about?.assets, home?.assets)).toEqual(['_app/immutable/nodes/3.[hash].js']);
   });
 
+  it('lists the entry and page chunk of a Nuxt page, not its prefetched lazy chunks', async () => {
+    const found = await routes(nuxt);
+    // 200.html and 404.html are the fallback pages of a static host, not routes.
+    expect(found?.map((r) => r.route)).toEqual(['/', '/about/']);
+    const [home, about] = found ?? [];
+    expect(home?.assets).toEqual(['_nuxt/IBdXmKL5.js', '_nuxt/BxnytY3l.js']);
+    expect(about?.assets).toEqual(['_nuxt/IBdXmKL5.js', '_nuxt/lBV859Qk.js']);
+  });
+
   it('finds no routes without HTML pages', async () => {
     const scan = await scanOutputDir({
       outDir: path(new URL('_astro/', astro)),
@@ -197,6 +216,7 @@ describe('htmlRoutes on real builds', () => {
   it.each([
     ['astro', astro, ['preact', '@astrojs/preact-renderer', '@preact/signals']],
     ['sveltekit', sveltekit, ['svelte', '@sveltejs/kit', 'devalue']],
+    ['nuxt', nuxt, ['nuxt', 'vue-router', '@vue/runtime-core']],
   ] as const)('measures a %s app with routes and packages', async (framework, dir, packages) => {
     const { app } = await measureWebApp({
       id: framework,

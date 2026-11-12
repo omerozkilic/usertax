@@ -1,0 +1,1 @@
+import{a as e,c as t,d as n,f as r,i,l as a,p as o}from"#entry";var s=t({__name:`index`,setup(t){let s=n(0);return(t,n)=>(a(),e(`main`,null,[n[1]||=i(`h1`,null,`Home`,-1),i(`button`,{onClick:n[0]||=e=>s.value++},`Clicked `+o(r(s))+` times`,1)]))}});export{s as default};

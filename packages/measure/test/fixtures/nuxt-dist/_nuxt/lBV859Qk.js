@@ -1,0 +1,1 @@
+import{a as e,i as t,l as n,t as r}from"#entry";var i={};function a(r,i){return n(),e(`main`,null,[...i[0]||=[t(`h1`,null,`About`,-1)]])}var o=r(i,[[`render`,a]]);export{o as default};

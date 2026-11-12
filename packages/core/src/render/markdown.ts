@@ -28,6 +28,7 @@ export interface RenderOptions {
 const FRAMEWORK_LABEL: Record<Framework, string> = {
   vite: 'Vite',
   next: 'Next.js',
+  nuxt: 'Nuxt',
   astro: 'Astro',
   sveltekit: 'SvelteKit',
   webpack: 'webpack',

@@ -6,6 +6,9 @@ import type { Route } from '@usertax/core';
 const MAX_FILES = 5000;
 const MAX_IMPORTS = 5000;
 
+/** Pages that static hosts serve for unknown paths. They are not routes. */
+const FALLBACK_PAGES = new Set(['200.html', '404.html']);
+
 /** Route of a prerendered page: `index.html` → `/`, `a/index.html` → `/a/`, `a.html` → `/a`. */
 export function pageRoute(file: string): string {
   if (file === 'index.html') return '/';
@@ -17,12 +20,12 @@ export function pageRoute(file: string): string {
 // pattern below is anchored or bounded and cannot backtrack on long input.
 const TAG = /<(script|link)\b([^>]{0,4000})>/gi;
 const ISLAND_ATTRIBUTE =
-  /\b(?:component-url|renderer-url|before-hydration-url)\s*=\s*"([^"]{1,1000})"/g;
+  /(?<![\w-])(?:component-url|renderer-url|before-hydration-url)\s*=\s*"([^"]{1,1000})"/g;
 const DYNAMIC_IMPORT = /\bimport\(\s*(["'`])([^"'`\\\n]{1,1000})\1\s*\)/g;
 
 function attribute(tag: string, name: string): string | undefined {
   const match = new RegExp(
-    `\\b${name}\\s*=\\s*(?:"([^"]{0,1000})"|'([^']{0,1000})'|([^\\s"'>]{1,1000}))`,
+    `(?<![\\w-])${name}\\s*=\\s*(?:"([^"]{0,1000})"|'([^']{0,1000})'|([^\\s"'>]{1,1000}))`,
     'i',
   ).exec(tag);
   return match?.[1] ?? match?.[2] ?? match?.[3];
@@ -131,7 +134,8 @@ const isScript = (file: string) => file.endsWith('.js') || file.endsWith('.mjs')
  * references plus the modules those import statically. Used for frameworks that write one HTML
  * file per route and no Vite manifest of their own (Astro, SvelteKit with adapter-static).
  *
- * Inline scripts are part of the HTML file, not of a route's JavaScript.
+ * Inline scripts are part of the HTML file, not of a route's JavaScript. `200.html` and
+ * `404.html`, the fallback pages of static hosts, are not routes.
  *
  * @param keys output file → asset key, from `scanOutputDir`
  */
@@ -140,7 +144,9 @@ export async function htmlRoutes(
   keys: ReadonlyMap<string, string>,
 ): Promise<Route[] | undefined> {
   const files = new Set(keys.keys());
-  const pages = [...files].filter((file) => file.endsWith('.html')).sort();
+  const pages = [...files]
+    .filter((file) => file.endsWith('.html') && !FALLBACK_PAGES.has(file))
+    .sort();
   if (pages.length === 0) return undefined;
   const imports = new Map<string, string[]>();
   const importsOf = async (file: string): Promise<string[]> => {

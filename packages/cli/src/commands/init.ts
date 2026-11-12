@@ -192,7 +192,14 @@ export function commentWorkflow(): string {
   ].join('\n');
 }
 
-const WEB: ReadonlySet<Framework> = new Set(['vite', 'next', 'astro', 'sveltekit', 'webpack']);
+const WEB: ReadonlySet<Framework> = new Set([
+  'vite',
+  'next',
+  'nuxt',
+  'astro',
+  'sveltekit',
+  'webpack',
+]);
 const MOBILE: ReadonlySet<Framework> = new Set(['expo', 'react-native']);
 
 /** A starter configuration: route budgets for web apps, a warning budget for mobile bundles. */
@@ -237,6 +244,13 @@ export async function appNotes(root: string, apps: readonly DiscoveredApp[]): Pr
       if (!text.includes('productionBrowserSourceMaps')) {
         notes.push(
           `${where} (Next.js): set productionBrowserSourceMaps: true in next.config, for packages.`,
+        );
+      }
+    } else if (app.framework === 'nuxt') {
+      const text = (await config(app.path, 'nuxt.config.')) ?? '';
+      if (!text.includes('sourcemap')) {
+        notes.push(
+          `${where} (Nuxt): set sourcemap: { client: 'hidden' } in nuxt.config, for packages. Routes come from the prerendered pages (nuxt generate, or routeRules / nitro.prerender).`,
         );
       }
     } else if (app.framework === 'astro') {

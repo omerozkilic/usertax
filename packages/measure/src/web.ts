@@ -256,7 +256,9 @@ export async function measureWebApp(options: MeasureWebAppOptions): Promise<Meas
   const routes =
     options.framework === 'vite'
       ? await viteRoutes(options.outDir, scan.keys)
-      : options.framework === 'astro' || options.framework === 'sveltekit'
+      : options.framework === 'astro' ||
+          options.framework === 'sveltekit' ||
+          options.framework === 'nuxt'
         ? await htmlRoutes(options.outDir, scan.keys)
         : undefined;
   return {
