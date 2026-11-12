@@ -23,6 +23,9 @@ describe('detectFramework', () => {
     [{ dependencies: { next: '16' }, devDependencies: { astro: '7' } }, 'next'],
     [{ devDependencies: { vite: '8' } }, 'vite'],
     [{ devDependencies: { webpack: '5' } }, 'webpack'],
+    [{ devDependencies: { '@rsbuild/core': '2', '@rspack/core': '2' } }, 'rsbuild'],
+    [{ devDependencies: { '@rspack/core': '2', webpack: '5' } }, 'rspack'],
+    [{ devDependencies: { '@rspack/cli': '2' } }, 'rspack'],
     [{}, 'static'],
     [undefined, 'static'],
   ] as const)('%j → %s', (pkg, framework) => {

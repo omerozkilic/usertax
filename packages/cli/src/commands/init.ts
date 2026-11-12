@@ -200,6 +200,8 @@ const WEB: ReadonlySet<Framework> = new Set([
   'astro',
   'sveltekit',
   'webpack',
+  'rsbuild',
+  'rspack',
 ]);
 const MOBILE: ReadonlySet<Framework> = new Set(['expo', 'react-native']);
 
@@ -277,6 +279,15 @@ export async function appNotes(root: string, apps: readonly DiscoveredApp[]): Pr
       }
     } else if (app.framework === 'webpack') {
       notes.push(`${where} (webpack): emit source maps (devtool: 'hidden-source-map').`);
+    } else if (app.framework === 'rsbuild') {
+      const text = (await config(app.path, 'rsbuild.config.')) ?? '';
+      if (!text.includes('sourceMap')) {
+        notes.push(
+          `${where} (Rsbuild): set output.sourceMap to { js: 'hidden-source-map' } in rsbuild.config, for packages.`,
+        );
+      }
+    } else if (app.framework === 'rspack') {
+      notes.push(`${where} (Rspack): emit source maps (devtool: 'hidden-source-map').`);
     } else if (app.framework === 'expo') {
       notes.push(
         `${where} (Expo): the build must run \`npx expo export --source-maps\`, one platform at a time for reproducible bundles (--platform android, then ios).`,

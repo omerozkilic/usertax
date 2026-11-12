@@ -10,6 +10,13 @@ To refresh it, build the example and copy `examples/vite-app/dist/` here, then s
 `sourcesContent` from `assets/*.map`. Tests that depend on exact byte counts read them from the
 files, so they keep working after a refresh.
 
+## `rsbuild-dist/`
+
+Real output of `pnpm --filter @usertax-examples/rsbuild-app build` (Rsbuild 2.2.14 with
+`@rsbuild/plugin-react` 2.1.1, React 19.3.1, `output.sourceMap.js: 'hidden-source-map'`): two
+HTML entries, the shared `lib-react` chunk, a lazy chunk and the `.LICENSE.txt` file Rspack
+extracts, copied unchanged except that `sourcesContent` was removed from the source maps.
+
 ## `lockfiles/`
 
 The same small workspace (root depends on `ms`; `packages/web` depends on `react`, `react-dom`,

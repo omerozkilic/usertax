@@ -32,6 +32,9 @@ export function detectFramework(pkg: PackageJson | undefined): Framework {
   if ('astro' in deps) return 'astro';
   if ('@sveltejs/kit' in deps) return 'sveltekit';
   if ('vite' in deps) return 'vite';
+  // Rsbuild builds with Rspack and depends on it, so it comes first.
+  if ('@rsbuild/core' in deps) return 'rsbuild';
+  if ('@rspack/core' in deps || '@rspack/cli' in deps) return 'rspack';
   if ('webpack' in deps) return 'webpack';
   return 'static';
 }
@@ -49,6 +52,8 @@ export const DEFAULT_OUT_DIR: Partial<Record<Framework, string>> = {
   sveltekit: 'build',
   vite: 'dist',
   webpack: 'dist',
+  rsbuild: 'dist',
+  rspack: 'dist',
   static: 'dist',
 };
 

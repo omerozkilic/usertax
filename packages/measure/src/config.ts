@@ -118,6 +118,8 @@ const MEASURABLE: ReadonlySet<Framework> = new Set([
   'astro',
   'sveltekit',
   'webpack',
+  'rsbuild',
+  'rspack',
   'expo',
   'react-native',
 ]);

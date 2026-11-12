@@ -171,6 +171,12 @@ Rules:
     original TypeScript sources (`../../src/client/…`), which are foreign sources: those bytes are
     reported as unattributed, not as `next` and not as your code. Packages in `node_modules`
     (React in `framework-[hash].js`, your dependencies) are attributed as usual.
+- For Rsbuild and Rspack (`dist/`), routes come from the HTML page of each entry
+  (`index.html` → `/`, `about.html` → `/about`), read like Astro's; a build without HTML pages
+  has files but no routes. Source maps are needed for packages: set `output.sourceMap` to
+  `{ js: 'hidden-source-map' }` in `rsbuild.config`, or `devtool: 'hidden-source-map'` for
+  Rspack. Rsbuild's 10-character content hashes (`static/js/index.[hash].js`) are replaced in
+  keys like Vite's, and Rspack's runtime (`webpack://webpack/runtime/…`) is shown as `(virtual)`.
 
 ## React Native and Expo
 

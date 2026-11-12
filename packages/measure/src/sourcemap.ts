@@ -238,6 +238,8 @@ export function displayPath(
     (webpack?.[1] ?? source).replace(/^\0/, '').replace(/^[a-z]+:\/\/\/?/i, ''),
   );
   if (virtual) return `(virtual) ${clean}`;
+  // Rspack writes its runtime modules as `webpack://webpack/runtime/<name>`.
+  if (source.startsWith('webpack://webpack/runtime/')) return `(virtual) webpack/${clean}`;
   if (webpack !== null) {
     // The webpack runtime, ignored modules (`ignored|…`) and generated loader modules.
     if (clean === '' || clean.startsWith('webpack/') || clean.includes('|')) {

@@ -204,6 +204,8 @@ export const frameworkSchema = z.enum([
   'astro',
   'sveltekit',
   'webpack',
+  'rsbuild',
+  'rspack',
   'expo',
   'react-native',
   'static',

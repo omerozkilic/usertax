@@ -1,0 +1,18 @@
+{
+  "name": "@usertax-examples/rsbuild-app",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "description": "Example Rsbuild + React app with two pages, measured by usertax in CI.",
+  "scripts": {
+    "build": "rsbuild build"
+  },
+  "dependencies": {
+    "react": "19.3.1",
+    "react-dom": "19.3.1"
+  },
+  "devDependencies": {
+    "@rsbuild/core": "2.2.14",
+    "@rsbuild/plugin-react": "2.1.1"
+  }
+}

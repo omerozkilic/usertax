@@ -118,6 +118,8 @@ export function createMcpServer(options: McpOptions): McpServer {
             'astro',
             'sveltekit',
             'webpack',
+            'rsbuild',
+            'rspack',
             'static',
             'expo',
             'react-native',
