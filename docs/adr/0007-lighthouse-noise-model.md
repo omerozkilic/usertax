@@ -66,6 +66,18 @@ the first run on a runner is consistently slow
 - The thresholds are re-checked with `scripts/cross-runner-noise.js` when new reports or another
   calibration run disagree with them.
 
+## Implementation notes (runs with browser extensions)
+
+- The noise model assumes that repeated runs differ only by measurement noise. A Chrome profile
+  with extensions breaks that: an extension's scripts and requests are charged to the page, and
+  they differ between machines, so a change between two reports can be the extensions alone.
+- A run records `contamination` when the URL lists of the Lighthouse result contain an extension
+  scheme. The metrics of that page become `unreliable` in the diff: the change is shown, but it
+  gets no verdict, and budgets on it are skipped instead of passing or failing on a value that is
+  not the app's. This is separate from `within-noise`, which says the change is too small to
+  trust; `unreliable` says the measurement itself is not comparable.
+- Only extension schemes count. Other non-web URLs (`chrome://`, `data:`, `blob:`) do not.
+
 ## Consequences
 
 - Fewer false alarms, at the cost of more Lighthouse runs.

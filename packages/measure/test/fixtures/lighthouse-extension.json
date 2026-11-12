@@ -1,0 +1,70 @@
+{
+  "lighthouseVersion": "13.6.0",
+  "fetchTime": "2026-11-12T13:20:57.886Z",
+  "requestedUrl": "/",
+  "configSettings": {
+    "formFactor": "mobile",
+    "throttlingMethod": "simulate"
+  },
+  "categories": {
+    "performance": {
+      "score": 1
+    }
+  },
+  "audits": {
+    "largest-contentful-paint": {
+      "id": "largest-contentful-paint",
+      "numericValue": 627.50935,
+      "numericUnit": "millisecond"
+    },
+    "total-blocking-time": {
+      "id": "total-blocking-time",
+      "numericValue": 0,
+      "numericUnit": "millisecond"
+    },
+    "cumulative-layout-shift": {
+      "id": "cumulative-layout-shift",
+      "numericValue": 0,
+      "numericUnit": "unitless"
+    },
+    "first-contentful-paint": {
+      "id": "first-contentful-paint",
+      "numericValue": 627.50935,
+      "numericUnit": "millisecond"
+    },
+    "speed-index": {
+      "id": "speed-index",
+      "numericValue": 627.50935,
+      "numericUnit": "millisecond"
+    },
+    "network-requests": {
+      "id": "network-requests",
+      "details": {
+        "type": "table",
+        "items": [
+          {
+            "url": "http://127.0.0.1:PORT/",
+            "protocol": "http/1.1",
+            "resourceType": "Document",
+            "statusCode": 200,
+            "transferSize": 282
+          },
+          {
+            "url": "chrome-extension://nojlinpnfpblhnlcjpgaeankkhjbnean/data.json",
+            "protocol": "chrome-extension",
+            "resourceType": "Fetch",
+            "statusCode": 200,
+            "transferSize": 18
+          },
+          {
+            "url": "http://127.0.0.1:PORT/favicon.ico",
+            "protocol": "http/1.1",
+            "resourceType": "Other",
+            "statusCode": 200,
+            "transferSize": 282
+          }
+        ]
+      }
+    }
+  }
+}

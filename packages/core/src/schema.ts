@@ -143,6 +143,17 @@ export const archiveSchema = z.object({
 });
 export type Archive = z.infer<typeof archiveSchema>;
 
+export const lighthouseContaminationSchema = z.object({
+  /**
+   * Origins of browser extensions whose requests or scripts appeared in the run, such as
+   * `chrome-extension://<id>`. Their code is attributed to the page, so the run is not comparable.
+   */
+  origins: z.array(z.string().min(1).max(200)).min(1).max(20),
+  /** Distinct extension URLs seen in the run (requests and scripts). */
+  requestCount: z.number().int().nonnegative(),
+});
+export type LighthouseContamination = z.infer<typeof lighthouseContaminationSchema>;
+
 export const lighthouseRunSchema = z.object({
   /** Performance score, 0–100. */
   performance: z.number().min(0).max(100),
@@ -152,6 +163,8 @@ export const lighthouseRunSchema = z.object({
   tbt: z.number().nonnegative(),
   /** Cumulative Layout Shift (unitless). */
   cls: z.number().nonnegative(),
+  /** Present when browser extensions were active in the run; see {@link lighthouseContaminationSchema}. */
+  contamination: lighthouseContaminationSchema.optional(),
 });
 export type LighthouseRun = z.infer<typeof lighthouseRunSchema>;
 

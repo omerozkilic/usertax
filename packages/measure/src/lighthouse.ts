@@ -1,7 +1,7 @@
 import { createRequire } from 'node:module';
 import { join } from 'node:path';
 import { pathToFileURL } from 'node:url';
-import type { Lighthouse, LighthouseRun } from '@usertax/core';
+import type { Lighthouse, LighthouseContamination, LighthouseRun } from '@usertax/core';
 
 export class LighthouseError extends Error {
   override readonly name = 'LighthouseError';
@@ -12,7 +12,48 @@ export interface LighthouseResultLike {
   readonly lighthouseVersion: string;
   readonly runtimeError?: { readonly code?: string; readonly message?: string };
   readonly categories: { readonly performance?: { readonly score: number | null } };
-  readonly audits: Record<string, { readonly numericValue?: number } | undefined>;
+  readonly audits: Record<
+    string,
+    | {
+        readonly numericValue?: number;
+        readonly details?: { readonly items?: readonly { readonly url?: unknown }[] };
+      }
+    | undefined
+  >;
+}
+
+/** Audits that list the URLs of requests and scripts, where an extension's code shows up. */
+const URL_AUDITS = [
+  'network-requests',
+  'bootup-time',
+  'unused-javascript',
+  'unminified-javascript',
+];
+
+/** `chrome-extension://<id>`, `moz-extension://<id>`, `safari-web-extension://<id>`, … */
+const EXTENSION_URL = /^([a-z][a-z-]*-extension):\/\/([^/?#\s]{1,100})/i;
+
+/**
+ * Finds browser extensions that were active during a run. Lighthouse attributes their requests
+ * and scripts to the page (a wallet's 800 kB script is reported as "unused JavaScript of the
+ * page"), so a run with extensions measures the extensions as much as the app.
+ */
+export function extensionContamination(
+  lhr: LighthouseResultLike,
+): LighthouseContamination | undefined {
+  const origins = new Set<string>();
+  const urls = new Set<string>();
+  for (const id of URL_AUDITS) {
+    for (const item of lhr.audits[id]?.details?.items ?? []) {
+      if (typeof item.url !== 'string') continue;
+      const match = EXTENSION_URL.exec(item.url);
+      if (match === null) continue;
+      origins.add(`${(match[1] as string).toLowerCase()}://${match[2] as string}`);
+      urls.add(item.url);
+    }
+  }
+  if (origins.size === 0) return undefined;
+  return { origins: [...origins].sort().slice(0, 20), requestCount: urls.size };
 }
 
 /** Extracts one usertax run from a Lighthouse result. Throws when the run failed. */
@@ -31,11 +72,13 @@ export function runFromResult(lhr: LighthouseResultLike): LighthouseRun {
   };
   if (score === undefined || score === null)
     throw new LighthouseError('Lighthouse result has no performance score');
+  const contamination = extensionContamination(lhr);
   return {
     performance: Math.round(score * 100 * 10) / 10,
     lcp: value('largest-contentful-paint'),
     tbt: value('total-blocking-time'),
     cls: value('cumulative-layout-shift'),
+    ...(contamination === undefined ? {} : { contamination }),
   };
 }
 

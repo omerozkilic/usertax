@@ -36,7 +36,13 @@ export type {
   LockfileLocation,
   YarnWorkspace,
 } from './lockfile/index.js';
-export { LighthouseError, pageKey, runFromResult, runLighthouse } from './lighthouse.js';
+export {
+  LighthouseError,
+  extensionContamination,
+  pageKey,
+  runFromResult,
+  runLighthouse,
+} from './lighthouse.js';
 export type { LighthouseResultLike, RunLighthouseOptions } from './lighthouse.js';
 export { htmlAssets, htmlRoute, measureNextApp, nextKeys } from './next.js';
 export { attributeHermes, findExpoBundles, measureBundle, measureRnApp } from './rn.js';
