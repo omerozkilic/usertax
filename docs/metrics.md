@@ -27,6 +27,7 @@ archive keys) are wrapped in brackets.
 | `js.total.{raw,gzip,brotli}`                       | All JavaScript files of a web app                                                                                      | bytes    |
 | `css.total.{raw,gzip,brotli}`                      | All CSS files of a web app                                                                                             | bytes    |
 | `route[<route>].js.{raw,gzip,brotli}`              | JavaScript loaded for one route                                                                                        | bytes    |
+| `route[<route>].css.{raw,gzip,brotli}`             | Stylesheets loaded for one route; only for routes that load at least one CSS file                                      | bytes    |
 | `bundle[<ios\|android>].raw`                       | React Native JS or Hermes bundle                                                                                       | bytes    |
 | `archive[<key>].file`                              | APK / AAB / IPA file size                                                                                              | bytes    |
 | `archive[<key>].category.<category>`               | Compressed size of one category (`js-bundle`, `dex`, `native`, `resources`, `assets`, `binary`, `frameworks`, `other`) | bytes    |
@@ -68,6 +69,7 @@ one or more limits. Values can be numbers in the metric's unit or strings with a
   "budgets": [
     { "metric": "js.total.gzip", "max": "200 kB" },
     { "metric": "route[*].js.gzip", "maxIncrease": "10 kB", "level": "warn" },
+    { "metric": "route[*].css.gzip", "max": "20 kB" },
     { "app": "mobile", "metric": "archive[android].file", "maxIncreasePercent": 2 },
     { "metric": "lighthouse[*][mobile].performance", "min": 80, "maxDecrease": 5 }
   ]
@@ -116,6 +118,13 @@ Rules:
 - For Vite, `.vite/manifest.json` (`build.manifest: true`) maps each HTML entry to the files it
   loads initially. Those become routes: `index.html` → `/`, `about/index.html` → `/about/`.
   Dynamic imports are not part of a route's initial JS.
+- A route's CSS is the stylesheets it loads initially, from the same source as its JavaScript:
+  the `css` of each chunk in the Vite and React Router manifests, `<link rel="stylesheet">` in
+  prerendered HTML, and `entryCSSFiles` in the Next.js client reference manifest. Routes that
+  load no CSS file have no `route[<route>].css.*` metrics, so a route that stops loading CSS
+  shows as removed. Stylesheets inlined into the HTML (`<style>`, such as the small stylesheets
+  Astro inlines or Next.js `inlined` entries) are part of the HTML file's size, not of the route's
+  CSS.
 - For Astro (`dist/`), SvelteKit with adapter-static (`build/`) and Nuxt (`.output/public/`),
   routes come from the prerendered HTML of each page: the scripts, stylesheets and module preloads it references,
   Astro's `component-url` and `renderer-url` island attributes, the `import("…")` calls of

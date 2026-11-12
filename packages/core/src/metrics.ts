@@ -11,7 +11,7 @@ export type LighthouseMetricName = 'performance' | 'lcp' | 'tbt' | 'cls';
  * free-text parts (routes, URLs, keys) are wrapped in brackets:
  *
  * - `js.total.gzip`, `css.total.brotli`
- * - `route[/pricing].js.gzip`
+ * - `route[/pricing].js.gzip`, `route[/pricing].css.gzip`
  * - `bundle[ios].raw`
  * - `archive[android].file`, `archive[android].category.dex`
  * - `lighthouse[/][mobile].lcp`
@@ -98,10 +98,18 @@ function assetMetrics(assets: readonly Asset[]): Metric[] {
 function routeMetrics(app: App): Metric[] {
   const byKey = new Map((app.assets ?? []).map((asset) => [asset.key, asset]));
   return (app.routes ?? []).flatMap((route) => {
-    const js = [...new Set(route.assets)]
+    const loaded = [...new Set(route.assets)]
       .map((key) => byKey.get(key))
-      .filter((asset): asset is Asset => asset?.type === 'js');
-    return sizeMetrics(`route[${route.route}].js`, `JS for ${route.route}`, 'route', sumSizes(js));
+      .filter((asset): asset is Asset => asset !== undefined);
+    const js = loaded.filter((asset) => asset.type === 'js');
+    // Only routes that load a stylesheet get CSS rows, so reports without CSS do not change.
+    const css = loaded.filter((asset) => asset.type === 'css');
+    return [
+      ...sizeMetrics(`route[${route.route}].js`, `JS for ${route.route}`, 'route', sumSizes(js)),
+      ...(css.length > 0
+        ? sizeMetrics(`route[${route.route}].css`, `CSS for ${route.route}`, 'route', sumSizes(css))
+        : []),
+    ];
   });
 }
 

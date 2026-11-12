@@ -1,10 +1,11 @@
-import { cp, mkdtemp, readFile, rm } from 'node:fs/promises';
+import { cp, mkdtemp, readFile, rm, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { describe, expect, it } from 'vitest';
 import { htmlAssets, htmlRoute, measureNextApp, nextKeys } from '@usertax/measure';
-import type { Asset } from '@usertax/core';
+import { extractMetrics } from '@usertax/core';
+import type { App, Asset } from '@usertax/core';
 
 const outDir = fileURLToPath(new URL('./fixtures/next-dist/', import.meta.url));
 const options = (dir: string) => ({
@@ -15,6 +16,13 @@ const options = (dir: string) => ({
   outDir: dir,
   framework: 'next' as const,
 });
+
+/** Keys of the stylesheets a route loads. */
+function cssKeys(app: App, route: string): string[] {
+  const css = new Set(app.assets?.filter((a) => a.type === 'css').map((a) => a.key));
+  const keys = app.routes?.find((r) => r.route === route)?.assets ?? [];
+  return keys.filter((key) => css.has(key)).sort();
+}
 
 describe('htmlRoute', () => {
   it.each([
@@ -168,6 +176,53 @@ describe('measureNextApp on a real Next.js 16 build', () => {
     const counter = app.routes?.find((r) => r.route === '/counter');
     expect(counter?.assets).toContain('chunks/[examples/next-app/app/counter/Counter.jsx].js');
     expect(counter?.assets).toContain('chunks/[turbopack-runtime].js');
+  });
+
+  it('records the stylesheets of each route: the layout CSS, plus a CSS module on /counter', async () => {
+    const { app } = await measureNextApp(options(outDir));
+    const cssOf = (route: string) => cssKeys(app, route);
+    expect(cssOf('/')).toHaveLength(1);
+    expect(cssOf('/about')).toEqual(cssOf('/'));
+    expect(cssOf('/counter')).toHaveLength(2);
+    expect(cssOf('/counter')).toEqual(expect.arrayContaining(cssOf('/')));
+    const metrics = new Map(extractMetrics(app).map((m) => [m.id, m.value]));
+    const raw = (keys: string[]) =>
+      keys.reduce((sum, key) => sum + (app.assets?.find((a) => a.key === key)?.raw ?? 0), 0);
+    expect(metrics.get('route[/counter].css.raw')).toBe(raw(cssOf('/counter')));
+    expect(metrics.get('route[/counter].css.raw')).toBeGreaterThan(
+      metrics.get('route[/].css.raw') ?? Infinity,
+    );
+  });
+
+  it('reads the stylesheets of pages without HTML from the client reference manifest', async () => {
+    const withHtml = cssKeys((await measureNextApp(options(outDir))).app, '/counter');
+    const dir = await mkdtemp(join(tmpdir(), 'usertax-next-'));
+    await cp(outDir, dir, { recursive: true });
+    await rm(join(dir, 'server/app/counter.html'));
+    const { app } = await measureNextApp(options(dir));
+    expect(cssKeys(app, '/counter')).toEqual(withHtml);
+  });
+
+  it('skips inlined and malformed stylesheet entries in a client reference manifest', async () => {
+    const dir = await mkdtemp(join(tmpdir(), 'usertax-next-'));
+    await cp(outDir, dir, { recursive: true });
+    await rm(join(dir, 'server/app/counter.html'));
+    const file = join(dir, 'server/app/counter/page_client-reference-manifest.js');
+    const text = await readFile(file, 'utf8');
+    const [layoutCss, moduleCss] = [...new Set(text.match(/static\/chunks\/[\w-]+\.css/g))];
+    const json = JSON.parse(/=\s*(\{[\s\S]*\});?\s*$/.exec(text)?.[1] ?? '{}') as {
+      entryCSSFiles: Record<string, unknown>;
+    };
+    json.entryCSSFiles = {
+      // Next.js 14 listed plain paths.
+      a: [layoutCss],
+      b: [{ path: moduleCss, inlined: true }, { path: 42 }, null, 'static/chunks/missing.css'],
+      c: 'not a list',
+    };
+    await writeFile(file, `globalThis.m = ${JSON.stringify(json)};`);
+    const { app } = await measureNextApp(options(dir));
+    expect(cssKeys(app, '/counter')).toHaveLength(1);
+    expect(cssKeys(app, '/counter')).toEqual(cssKeys(app, '/'));
   });
 
   it('copes with a missing build id and build manifest', async () => {

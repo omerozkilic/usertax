@@ -12,11 +12,12 @@ Base `aaaaaaa` → head `ccccccc` · 2 apps · ❌ 1 budget failed
 | 🔴 | JS for / (gzip) | 30.0 kB | 52.0 kB | +22.0 kB (+73.3%) |
 | 🔴 | JS for /about (gzip) | 34.0 kB | 56.0 kB | +22.0 kB (+64.7%) |
 
-<details><summary>1 unchanged</summary>
+<details><summary>2 unchanged</summary>
 
 | | Metric | Base | Head | Change |
 | :-: | --- | --: | --: | --: |
 | ⚪ | CSS total (gzip) | 2.0 kB | 2.0 kB | ±0 B (±0.0%) |
+| ⚪ | CSS for / (gzip) | 2.0 kB | 2.0 kB | ±0 B (±0.0%) |
 
 </details>
 

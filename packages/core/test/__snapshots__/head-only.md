@@ -9,6 +9,7 @@ Head `ccccccc` · no base report to compare with · 2 apps
 | JS total (gzip) | 56.0 kB |
 | CSS total (gzip) | 2.0 kB |
 | JS for / (gzip) | 52.0 kB |
+| CSS for / (gzip) | 2.0 kB |
 | JS for /about (gzip) | 56.0 kB |
 
 ### mobile <sub>Expo · `apps/mobile`</sub>
