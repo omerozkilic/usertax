@@ -9,6 +9,7 @@ describe('detectFramework', () => {
     [{ dependencies: { next: '16' } }, 'next'],
     [{ dependencies: { expo: '58', 'react-native': '0.88' } }, 'expo'],
     [{ dependencies: { 'react-native': '0.88' } }, 'react-native'],
+    [{ dependencies: { nuxt: '4' }, devDependencies: { vite: '8' } }, 'nuxt'],
     [{ devDependencies: { astro: '7', vite: '8' } }, 'astro'],
     [{ devDependencies: { '@sveltejs/kit': '3', vite: '8' } }, 'sveltekit'],
     [{ dependencies: { next: '16' }, devDependencies: { astro: '7' } }, 'next'],

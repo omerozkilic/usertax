@@ -182,17 +182,24 @@ describe('usertax init', () => {
     const root = await mkdtemp(join(tmpdir(), 'usertax-notes-'));
     await mkdir(join(root, 'site'));
     await mkdir(join(root, 'kit'));
+    await mkdir(join(root, 'nx'));
     const apps = [
+      { path: 'nx', framework: 'nuxt' },
       { path: 'site', framework: 'astro' },
       { path: 'kit', framework: 'sveltekit' },
     ] as const;
     expect(await appNotes(root, apps)).toEqual([
+      expect.stringContaining("nx (Nuxt): set sourcemap: { client: 'hidden' }"),
       expect.stringContaining("site (Astro): set vite: { build: { sourcemap: 'hidden' } }"),
       expect.stringContaining('kit (SvelteKit): set build.sourcemap'),
     ]);
     await writeFile(
       join(root, 'site', 'astro.config.mjs'),
       "export default { vite: { build: { sourcemap: 'hidden' } } };",
+    );
+    await writeFile(
+      join(root, 'nx', 'nuxt.config.ts'),
+      "export default defineNuxtConfig({ sourcemap: { client: 'hidden' } });",
     );
     await writeFile(
       join(root, 'kit', 'vite.config.ts'),

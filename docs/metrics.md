@@ -116,8 +116,8 @@ Rules:
 - For Vite, `.vite/manifest.json` (`build.manifest: true`) maps each HTML entry to the files it
   loads initially. Those become routes: `index.html` → `/`, `about/index.html` → `/about/`.
   Dynamic imports are not part of a route's initial JS.
-- For Astro (`dist/`) and SvelteKit with adapter-static (`build/`), routes come from the
-  prerendered HTML of each page: the scripts, stylesheets and module preloads it references,
+- For Astro (`dist/`), SvelteKit with adapter-static (`build/`) and Nuxt (`.output/public/`),
+  routes come from the prerendered HTML of each page: the scripts, stylesheets and module preloads it references,
   Astro's `component-url` and `renderer-url` island attributes, the `import("…")` calls of
   SvelteKit's inline bootstrap, and the modules those files import statically. Dynamic
   `import()` calls are not followed, so they are not part of a route. `index.html` → `/`,
@@ -126,7 +126,17 @@ Rules:
     page scripts and the island runtime, SvelteKit its bootstrap. They are measured as part of
     the HTML file's size.
   - Source maps are needed for packages: set `vite.build.sourcemap` to `'hidden'` in
-    `astro.config`, or `build.sourcemap` to `'hidden'` in SvelteKit's `vite.config`.
+    `astro.config`, `build.sourcemap` to `'hidden'` in SvelteKit's `vite.config`, or
+    `sourcemap: { client: 'hidden' }` in `nuxt.config`.
+  - Prefetch links (Nuxt prefetches the chunks of other pages) and data attributes are not
+    loaded with the page and are ignored. `200.html` and `404.html`, the fallback pages of static
+    hosts, are measured as files but are not routes.
+  - A file whose whole name is a hash (Nuxt's `_nuxt/<hash>.js`, SvelteKit's
+    `chunks/<hash>.js`) has no stable part to match between two builds, so a changed one shows as
+    one file removed and one added. The totals per route and the per-package bytes do not depend
+    on file names.
+  - Nuxt writes its client files and the pages it prerendered to `.output/public` for both
+    `nuxt generate` and `nuxt build`; pages that are not prerendered have no HTML to read.
   - SvelteKit without adapter-static writes its client output to `.svelte-kit/output/client`,
     which usertax uses when there is no `build/` directory. It has no prerendered pages, so
     there are no routes.

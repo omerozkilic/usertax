@@ -110,7 +110,17 @@ export function createMcpServer(options: McpOptions): McpServer {
         config: z.string().optional().describe('Configuration file (default: usertax.config.*)'),
         outDir: z.string().optional().describe('Build output directory of a single app'),
         framework: z
-          .enum(['vite', 'next', 'astro', 'sveltekit', 'webpack', 'static', 'expo', 'react-native'])
+          .enum([
+            'vite',
+            'next',
+            'nuxt',
+            'astro',
+            'sveltekit',
+            'webpack',
+            'static',
+            'expo',
+            'react-native',
+          ])
           .optional(),
         bundles: z
           .array(z.string())

@@ -3,6 +3,7 @@ import { diffReports, parseReport, renderMarkdown } from '@usertax/core';
 import { report, webApp } from './fixtures.js';
 
 describe.each([
+  ['nuxt', 'Nuxt'],
   ['astro', 'Astro'],
   ['sveltekit', 'SvelteKit'],
 ] as const)('a %s app', (framework, label) => {
