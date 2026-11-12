@@ -116,6 +116,20 @@ Rules:
 - For Vite, `.vite/manifest.json` (`build.manifest: true`) maps each HTML entry to the files it
   loads initially. Those become routes: `index.html` → `/`, `about/index.html` → `/about/`.
   Dynamic imports are not part of a route's initial JS.
+- For Astro (`dist/`) and SvelteKit with adapter-static (`build/`), routes come from the
+  prerendered HTML of each page: the scripts, stylesheets and module preloads it references,
+  Astro's `component-url` and `renderer-url` island attributes, the `import("…")` calls of
+  SvelteKit's inline bootstrap, and the modules those files import statically. Dynamic
+  `import()` calls are not followed, so they are not part of a route. `index.html` → `/`,
+  `about/index.html` → `/about/`, `about.html` → `/about`.
+  - Inline scripts are part of the HTML file, not of a route's JavaScript: Astro inlines small
+    page scripts and the island runtime, SvelteKit its bootstrap. They are measured as part of
+    the HTML file's size.
+  - Source maps are needed for packages: set `vite.build.sourcemap` to `'hidden'` in
+    `astro.config`, or `build.sourcemap` to `'hidden'` in SvelteKit's `vite.config`.
+  - SvelteKit without adapter-static writes its client output to `.svelte-kit/output/client`,
+    which usertax uses when there is no `build/` directory. It has no prerendered pages, so
+    there are no routes.
 - For Next.js (`.next/`, `productionBrowserSourceMaps: true`), routes come from the script and
   stylesheet tags of the prerendered pages, which is exactly what a browser loads first; legacy
   `noModule` polyfills are excluded. Pages without prerendered HTML use the client reference

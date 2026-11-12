@@ -30,6 +30,8 @@
             "enum": [
               "vite",
               "next",
+              "astro",
+              "sveltekit",
               "webpack",
               "expo",
               "react-native",

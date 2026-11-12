@@ -1,0 +1,2 @@
+import{M as e,d as t,j as n,p as r}from"../chunks/CEqXjOLT.js";n();var i=r(`<h1>About</h1> <a href="/">Home</a>`,1);function a(n){var r=i();e(2),t(n,r)}export{a as component};
+//# sourceMappingURL=3.CWZGLIWw.js.map

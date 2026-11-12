@@ -14,6 +14,8 @@ output folders and their own budgets.
   `package.json` (npm, Yarn). Every workspace package and the root are candidate apps.
 - **App detection** from dependencies and config files:
   - Next.js: `next` dependency or `next.config.*`.
+  - Astro: `astro` dependency; SvelteKit: `@sveltejs/kit` dependency. Both build with Vite and
+    depend on it, so they are checked before Vite.
   - Vite: `vite` dependency or `vite.config.*`.
   - webpack: `webpack` dependency or `webpack.config.*`.
   - Expo: `expo` dependency.
@@ -35,6 +37,20 @@ output folders and their own budgets.
 - The configuration schema is strict (unknown keys are errors) and published as JSON Schema.
 - `usertax diff` reads budgets, noise thresholds, compression and `top` from the configuration
   and exits with code 1 when a budget fails.
+
+## Implementation notes (Astro and SvelteKit)
+
+- Neither framework writes a Vite manifest of its own, so routes are read from the prerendered
+  HTML, the same source of truth the browser has: the files a page references and the modules
+  they import statically. The reader is deliberately small (attribute and statement patterns,
+  not an HTML or JavaScript parser), bounded so that hostile build output cannot make it slow,
+  and tested against real Astro 7 and SvelteKit 3 builds.
+- SvelteKit 3 reads its configuration from the `sveltekit(...)` Vite plugin and rejects
+  `svelte.config.js`, so detection looks at dependencies, not at configuration files.
+- The default output directory is `dist` for Astro and `build` for SvelteKit (adapter-static
+  writes the whole site there). When `build/` does not exist, SvelteKit's
+  `.svelte-kit/output/client` is used: the assets are measured, but there are no pages to read
+  routes from.
 
 ## Consequences
 

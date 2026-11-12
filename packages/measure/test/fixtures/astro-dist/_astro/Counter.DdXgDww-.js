@@ -1,0 +1,2 @@
+import{t as e}from"./hooks.BBRV89oA.js";import{a as t}from"./preact.Cqu7G1k0.js";var n=Symbol.for(`pv`),r=0;Array.isArray;function i(e,i,a,o,s,c){i||={};var l,u,d=i;if(`ref`in d&&typeof e!=`function`)for(u in d={},i)u==`ref`?l=i[u]:d[u]=i[u];var f={type:e,props:d,key:a,ref:l,__k:null,__:null,__b:0,__e:null,__c:null,constructor:n,__v:--r,__i:-1,__u:0};return(s||c)&&(f.__source=s,f.__self=c),t.vnode&&t.vnode(f),f}function a(){let[t,n]=e(0);return i(`button`,{onClick:()=>n(t+1),children:[`Clicked `,t,` times`]})}export{a as default};
+//# sourceMappingURL=Counter.DdXgDww-.js.map

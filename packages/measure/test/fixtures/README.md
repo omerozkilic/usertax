@@ -59,6 +59,18 @@ A real Lighthouse 13.6.0 result for `/` of the built `examples/vite-app`, served
 static server, trimmed to the fields usertax reads plus a few for context. The requested URL is
 replaced by its path because the port was random.
 
+## `astro-dist/` and `sveltekit-dist/`
+
+Real build output of two minimal apps, built on 2026-11-12, with `sourcesContent` removed from
+the source maps like `vite-dist/`.
+
+- `astro-dist/`: Astro 7.4.11 with `@astrojs/preact` 6.1.5 (Preact 11.2.0), `astro build` with
+  `vite.build.sourcemap: true`. The home page has a `client:load` Preact counter (an island); the
+  about page has one inline script, so it loads no file.
+- `sveltekit-dist/`: SvelteKit 3.2.0 with `@sveltejs/adapter-static` 4.0.1, Svelte 5.57.3 and
+  Vite 8.3.8, `vite build` with `build.sourcemap: true` and `prerender = true`. This is the
+  adapter's `build/` directory. A home page with a button and an about page.
+
 ## `lighthouse-extension.json`
 
 A real Lighthouse 13.6.0 result for a static page, audited in Chromium with the unpacked

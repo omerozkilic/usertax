@@ -192,7 +192,7 @@ export function commentWorkflow(): string {
   ].join('\n');
 }
 
-const WEB: ReadonlySet<Framework> = new Set(['vite', 'next', 'webpack']);
+const WEB: ReadonlySet<Framework> = new Set(['vite', 'next', 'astro', 'sveltekit', 'webpack']);
 const MOBILE: ReadonlySet<Framework> = new Set(['expo', 'react-native']);
 
 /** A starter configuration: route budgets for web apps, a warning budget for mobile bundles. */
@@ -237,6 +237,20 @@ export async function appNotes(root: string, apps: readonly DiscoveredApp[]): Pr
       if (!text.includes('productionBrowserSourceMaps')) {
         notes.push(
           `${where} (Next.js): set productionBrowserSourceMaps: true in next.config, for packages.`,
+        );
+      }
+    } else if (app.framework === 'astro') {
+      const text = (await config(app.path, 'astro.config.')) ?? '';
+      if (!text.includes('sourcemap')) {
+        notes.push(
+          `${where} (Astro): set vite: { build: { sourcemap: 'hidden' } } in astro.config, for packages.`,
+        );
+      }
+    } else if (app.framework === 'sveltekit') {
+      const text = (await config(app.path, 'vite.config.')) ?? '';
+      if (!text.includes('sourcemap')) {
+        notes.push(
+          `${where} (SvelteKit): set build.sourcemap to 'hidden' in vite.config, for packages. Routes need adapter-static, which writes the prerendered pages.`,
         );
       }
     } else if (app.framework === 'webpack') {
