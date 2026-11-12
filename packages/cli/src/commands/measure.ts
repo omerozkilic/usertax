@@ -5,6 +5,7 @@ import { ConfigError } from '@usertax/core';
 import type { App, AppConfig, Framework } from '@usertax/core';
 import {
   DEFAULT_OUT_DIR,
+  FALLBACK_OUT_DIRS,
   LighthouseError,
   LockfileError,
   ServerError,
@@ -46,8 +47,10 @@ app-dir, it measures that app; a matching entry in the configuration supplies it
 
 Options:
       --config <file>       Configuration file (default: usertax.config.* at the repository root)
-      --out-dir <dir>       Build output directory (default: dist, or .next for Next.js)
-      --framework <name>    vite, next, webpack, static, expo or react-native (default: detected from package.json)
+      --out-dir <dir>       Build output directory (default: dist; .next for Next.js; build for SvelteKit,
+                            or .svelte-kit/output/client without adapter-static)
+      --framework <name>    vite, next, astro, sveltekit, webpack, static, expo or react-native
+                            (default: detected from package.json)
       --id <id>             App id in the report (default: package name or folder name)
       --name <name>         Display name (default: the id)
       --sha <sha>           Commit SHA (default: $GITHUB_SHA or git rev-parse HEAD)
@@ -73,12 +76,15 @@ Lighthouse (web apps; needs the optional packages lighthouse and chrome-launcher
 
 Source maps are needed to attribute bytes to packages and modules. For Vite, set
 build.sourcemap to 'hidden' (maps are not shipped) and build.manifest to true (entries).
-For Next.js, set productionBrowserSourceMaps to true.
+For Next.js, set productionBrowserSourceMaps to true. For Astro, set vite.build.sourcemap to
+'hidden' in astro.config; for SvelteKit, set build.sourcemap to 'hidden' in vite.config.
 `;
 
 const SUPPORTED: ReadonlySet<Framework> = new Set([
   'vite',
   'next',
+  'astro',
+  'sveltekit',
   'webpack',
   'static',
   'expo',
@@ -86,6 +92,8 @@ const SUPPORTED: ReadonlySet<Framework> = new Set([
 ]);
 const FRAMEWORKS: ReadonlySet<string> = new Set([
   'vite',
+  'astro',
+  'sveltekit',
   'webpack',
   'static',
   'next',
@@ -217,6 +225,10 @@ async function runPages(
   }
 }
 
+async function isDirectory(path: string): Promise<boolean> {
+  return (await stat(path).catch(() => undefined))?.isDirectory() === true;
+}
+
 async function measureApp(spec: AppSpec, repoRoot: string, io: Io, prefix: string): Promise<App> {
   const pkg = await readPackageJson(spec.dir);
   const framework = spec.framework ?? detectFramework(pkg);
@@ -230,7 +242,12 @@ async function measureApp(spec: AppSpec, repoRoot: string, io: Io, prefix: strin
     throw new UsageError('--bundle and --archive are for React Native and Expo apps');
   }
   if (mobile && spec.lighthouse !== undefined) throw new UsageError('--lighthouse is for web apps');
-  const outDir = resolve(spec.dir, spec.outDir ?? DEFAULT_OUT_DIR[framework] ?? 'dist');
+  let outDir = resolve(spec.dir, spec.outDir ?? DEFAULT_OUT_DIR[framework] ?? 'dist');
+  if (spec.outDir === undefined && !(await isDirectory(outDir))) {
+    for (const fallback of FALLBACK_OUT_DIRS[framework] ?? []) {
+      if (await isDirectory(resolve(spec.dir, fallback))) outDir = resolve(spec.dir, fallback);
+    }
+  }
   const needsOutDir = !mobile || (framework === 'expo' && spec.bundles.length === 0);
   const outStat = needsOutDir ? await stat(outDir).catch(() => undefined) : undefined;
   if (needsOutDir && !outStat?.isDirectory() && !(mobile && spec.archives.length > 0)) {

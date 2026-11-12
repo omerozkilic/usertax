@@ -1,0 +1,2 @@
+import{C as e,D as t,E as n,S as r,_ as i,b as a,d as o,g as s,h as c,l,p as u,w as d}from"../chunks/CEqXjOLT.js";var f=u(`<h1>Home</h1> <a href="/about">About</a> <button> </button>`,1);function p(c){let u=n(0);var p=f(),m=d(r(p),4),h=e(m);a(()=>l(h,`Clicked ${i(u)??``} times`)),s(`click`,m,()=>t(u)),o(c,p)}c([`click`]);export{p as component};
+//# sourceMappingURL=2.CrgQ4PUG.js.map

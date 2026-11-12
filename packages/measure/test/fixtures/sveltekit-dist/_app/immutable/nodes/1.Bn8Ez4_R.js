@@ -1,0 +1,2 @@
+import{A as e,C as t,S as n,b as r,d as i,k as a,l as o,p as s,w as c}from"../chunks/CEqXjOLT.js";import{t as l}from"../chunks/BmqQDNW-.js";var u=s(`<h1> </h1> <p> </p>`,1);function d(s,d){e(d,!0);var f=u(),p=n(f),m=t(p,!0),h=c(p,2),g=t(h,!0);r(()=>{o(m,l.status),o(g,l.error?.message)}),i(s,f),a()}export{d as component};
+//# sourceMappingURL=1.Bn8Ez4_R.js.map

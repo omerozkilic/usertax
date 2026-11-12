@@ -178,6 +178,29 @@ describe('usertax init', () => {
     expect(await main(['init', 'extra'], capture().io)).toBe(2);
   });
 
+  it('notes the source maps that Astro and SvelteKit apps need, until they are configured', async () => {
+    const root = await mkdtemp(join(tmpdir(), 'usertax-notes-'));
+    await mkdir(join(root, 'site'));
+    await mkdir(join(root, 'kit'));
+    const apps = [
+      { path: 'site', framework: 'astro' },
+      { path: 'kit', framework: 'sveltekit' },
+    ] as const;
+    expect(await appNotes(root, apps)).toEqual([
+      expect.stringContaining("site (Astro): set vite: { build: { sourcemap: 'hidden' } }"),
+      expect.stringContaining('kit (SvelteKit): set build.sourcemap'),
+    ]);
+    await writeFile(
+      join(root, 'site', 'astro.config.mjs'),
+      "export default { vite: { build: { sourcemap: 'hidden' } } };",
+    );
+    await writeFile(
+      join(root, 'kit', 'vite.config.ts'),
+      "export default { build: { sourcemap: 'hidden' } };",
+    );
+    expect(await appNotes(root, apps)).toEqual([]);
+  });
+
   it('notes what webpack and bare React Native apps need, and falls back to master', async () => {
     const root = await mkdtemp(join(tmpdir(), 'usertax-notes-'));
     const notes = await appNotes(root, [

@@ -25,6 +25,9 @@ export function detectFramework(pkg: PackageJson | undefined): Framework {
   if ('next' in deps) return 'next';
   if ('expo' in deps) return 'expo';
   if ('react-native' in deps) return 'react-native';
+  // Astro and SvelteKit build with Vite and depend on it, so they come first.
+  if ('astro' in deps) return 'astro';
+  if ('@sveltejs/kit' in deps) return 'sveltekit';
   if ('vite' in deps) return 'vite';
   if ('webpack' in deps) return 'webpack';
   return 'static';
@@ -34,7 +37,19 @@ export function detectFramework(pkg: PackageJson | undefined): Framework {
 export const DEFAULT_OUT_DIR: Partial<Record<Framework, string>> = {
   next: '.next',
   expo: 'dist',
+  astro: 'dist',
+  // adapter-static writes the whole site here; see FALLBACK_OUT_DIRS for other adapters.
+  sveltekit: 'build',
   vite: 'dist',
   webpack: 'dist',
   static: 'dist',
+};
+
+/**
+ * Directories to try when the default one does not exist. SvelteKit writes its client output to
+ * `.svelte-kit/output/client` whatever the adapter is; only adapter-static also copies it, with
+ * the prerendered pages, to `build`.
+ */
+export const FALLBACK_OUT_DIRS: Partial<Record<Framework, readonly string[]>> = {
+  sveltekit: ['.svelte-kit/output/client'],
 };

@@ -193,6 +193,8 @@ export const appKindSchema = z.enum(['web', 'react-native']);
 export const frameworkSchema = z.enum([
   'vite',
   'next',
+  'astro',
+  'sveltekit',
   'webpack',
   'expo',
   'react-native',

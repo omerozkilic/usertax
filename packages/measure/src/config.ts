@@ -113,6 +113,8 @@ export interface DiscoveredApp {
 const MEASURABLE: ReadonlySet<Framework> = new Set([
   'vite',
   'next',
+  'astro',
+  'sveltekit',
   'webpack',
   'expo',
   'react-native',

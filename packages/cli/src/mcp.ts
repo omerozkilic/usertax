@@ -109,7 +109,9 @@ export function createMcpServer(options: McpOptions): McpServer {
           .describe('Where to save the report JSON (default: a new temporary file)'),
         config: z.string().optional().describe('Configuration file (default: usertax.config.*)'),
         outDir: z.string().optional().describe('Build output directory of a single app'),
-        framework: z.enum(['vite', 'next', 'webpack', 'static', 'expo', 'react-native']).optional(),
+        framework: z
+          .enum(['vite', 'next', 'astro', 'sveltekit', 'webpack', 'static', 'expo', 'react-native'])
+          .optional(),
         bundles: z
           .array(z.string())
           .optional()

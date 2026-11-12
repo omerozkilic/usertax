@@ -5,6 +5,7 @@ import { compressedSize } from './compressed-size.js';
 import { assignKeys } from './hash.js';
 import { foreignSources } from './foreign.js';
 import { SourceMapError, attributeBytes, packageBytes, parseSourceMap } from './sourcemap.js';
+import { htmlRoutes } from './html-routes.js';
 import { installedVersions } from './versions.js';
 import type { RawSourceMap } from './sourcemap.js';
 
@@ -253,7 +254,11 @@ export async function measureWebApp(options: MeasureWebAppOptions): Promise<Meas
     appPath: options.path,
   });
   const routes =
-    options.framework === 'vite' ? await viteRoutes(options.outDir, scan.keys) : undefined;
+    options.framework === 'vite'
+      ? await viteRoutes(options.outDir, scan.keys)
+      : options.framework === 'astro' || options.framework === 'sveltekit'
+        ? await htmlRoutes(options.outDir, scan.keys)
+        : undefined;
   return {
     app: {
       id: options.id,
