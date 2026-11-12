@@ -51,7 +51,7 @@ These steps cannot be undone easily, so they are done by hand:
    one with 2FA to publish it.
 
 3. **Public repository.** Make this repository public, enable private vulnerability reporting
-   (Settings → Security), and CodeQL starts running.
+   (Settings → Security), and CodeQL and OpenSSF Scorecard (`scorecard.yml`) start running.
 4. **Marketplace.** After the first release in `usertax-action`, publish it from that
    repository's release page ("Publish this Action to the GitHub Marketplace", requires 2FA).
    The listing name comes from `action.yml`: "usertax — PR performance cost".
