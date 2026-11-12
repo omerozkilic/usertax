@@ -95,6 +95,41 @@ describe('evaluateBudgets', () => {
     expect(evaluate({ app: 'mobile', metric: 'js.total.gzip', max: 1 }).unmatched).toHaveLength(1);
   });
 
+  it('budgets package bytes, counting a package missing from one side as 0 bytes', () => {
+    const grown = modify(base, (r) => {
+      const main = r.apps[0]?.assets?.[0];
+      if (main) {
+        main.packages = [
+          { name: 'react-dom', bytes: 60_000 },
+          { name: 'moment', bytes: 72_000 },
+        ];
+      }
+    });
+    const result = evaluateBudgets(diffReports(grown, base), [
+      budgetSchema.parse({ app: 'web', metric: 'package[*].bytes', maxIncrease: '20 kB' }),
+      budgetSchema.parse({ app: 'web', metric: 'package[react-dom].bytes', max: '50 kB' }),
+    ]);
+    expect(result.results.map((r) => [r.metricId, r.status, r.actual])).toEqual([
+      ['package[react-dom].bytes', 'pass', 0],
+      ['package[moment].bytes', 'fail', 72_000],
+      ['package[react].bytes', 'pass', -5_000],
+      ['package[react-dom].bytes', 'fail', 60_000],
+    ]);
+  });
+
+  it('does not invent package growth when the base has no attribution', () => {
+    const unattributed = modify(base, (r) => {
+      for (const asset of r.apps[0]?.assets ?? []) {
+        delete asset.packages;
+        delete asset.firstPartyBytes;
+      }
+    });
+    const result = evaluateBudgets(diffReports(head, unattributed), [
+      budgetSchema.parse({ app: 'web', metric: 'package[*].bytes', maxIncrease: '1 kB' }),
+    ]);
+    expect(result.results.map((r) => r.status)).toEqual(['skipped', 'skipped']);
+  });
+
   it('applies route CSS budgets to routes that load CSS', () => {
     const result = evaluate({ app: 'web', metric: 'route[*].css.gzip', max: '1kB' });
     expect(result.results.map((r) => [r.metricId, r.status])).toEqual([
