@@ -18,12 +18,41 @@ export function pageRoute(file: string): string {
 
 // Build output is attacker-controlled input (a pull request builds its own code), so every
 // pattern below is anchored or bounded and cannot backtrack on long input.
-const TAG = /<(script|link)\b([^>]{0,4000})>/gi;
+/** Longest tag read; longer ones are not something a bundler writes. */
+const MAX_TAG = 4000;
+
+/**
+ * The tags of the given names (lower case) in a page, as name and the text up to its `>`. One
+ * pass from left to right that never reads a character twice, so long or unclosed tags cannot make
+ * it slow; tags longer than {@link MAX_TAG} are skipped.
+ */
+export function* htmlTags(
+  html: string,
+  names: ReadonlySet<string>,
+): Generator<[name: string, attributes: string]> {
+  const lower = html.toLowerCase();
+  let at = lower.indexOf('<');
+  while (at !== -1) {
+    let end = at + 1;
+    while (end < lower.length && end - at <= 16 && /[a-z0-9]/.test(lower[end] as string)) end += 1;
+    const name = lower.slice(at + 1, end);
+    if (names.has(name)) {
+      const close = html.indexOf('>', end);
+      if (close === -1) return;
+      if (close - end <= MAX_TAG) yield [name, html.slice(end, close)];
+      at = lower.indexOf('<', close + 1);
+    } else {
+      at = lower.indexOf('<', end);
+    }
+  }
+}
+
+const LOADING_TAGS: ReadonlySet<string> = new Set(['script', 'link']);
 const ISLAND_ATTRIBUTE =
   /(?<![\w-])(?:component-url|renderer-url|before-hydration-url)\s*=\s*"([^"]{1,1000})"/g;
 const DYNAMIC_IMPORT = /\bimport\(\s*(["'`])([^"'`\\\n]{1,1000})\1\s*\)/g;
 
-function attribute(tag: string, name: string): string | undefined {
+export function attribute(tag: string, name: string): string | undefined {
   const match = new RegExp(
     `(?<![\\w-])${name}\\s*=\\s*(?:"([^"]{0,1000})"|'([^']{0,1000})'|([^\\s"'>]{1,1000}))`,
     'i',
@@ -38,8 +67,8 @@ function attribute(tag: string, name: string): string | undefined {
  */
 export function referencedUrls(html: string): string[] {
   const urls = new Set<string>();
-  for (const [, name, attributes] of html.matchAll(TAG) as Iterable<[string, string, string]>) {
-    if (name.toLowerCase() === 'script') {
+  for (const [name, attributes] of htmlTags(html, LOADING_TAGS)) {
+    if (name === 'script') {
       const src = attribute(attributes, 'src');
       if (src !== undefined) urls.add(src);
       continue;

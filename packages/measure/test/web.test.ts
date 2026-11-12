@@ -46,15 +46,23 @@ describe('scanOutputDir on a real Vite build', () => {
   it('measures shipped files only, with stable keys and exact attribution', async () => {
     const { assets, warnings } = await scanOutputDir({ outDir, appDir });
     expect(warnings).toEqual([]);
-    expect(assets.map((a) => a.key)).toEqual([
+    const media = assets.filter((a) => a.type === 'image' || a.type === 'font');
+    expect(assets.filter((a) => !media.includes(a)).map((a) => a.key)).toEqual([
       'about/index.html',
       'assets/Details-[hash].js',
       'assets/about-[hash].js',
       'assets/main-[hash].js',
+      'assets/main-[hash].css',
       'assets/styles-[hash].js',
       'assets/styles-[hash].css',
       'index.html',
     ]);
+    // The hero image, and Inter in seven subsets, each as woff2 and woff (@fontsource/inter).
+    expect(media.filter((a) => a.type === 'image').map((a) => a.key)).toEqual([
+      'assets/hero-[hash].png',
+    ]);
+    expect(media.filter((a) => a.file.endsWith('.woff2'))).toHaveLength(7);
+    expect(media.filter((a) => a.file.endsWith('.woff'))).toHaveLength(7);
     for (const asset of assets) {
       const bytes = await readFile(join(outDir, asset.file));
       expect(asset.raw).toBe(bytes.byteLength);
@@ -66,7 +74,12 @@ describe('scanOutputDir on a real Vite build', () => {
       }
     }
     const app = assets.find((a) => a.key === 'assets/main-[hash].js');
-    expect(app?.modules?.map((m) => m.path)).toEqual(['src/App.jsx', 'src/main.jsx']);
+    // `src/hero.png` is the module that exports the image's URL.
+    expect(app?.modules?.map((m) => m.path)).toEqual([
+      'src/App.jsx',
+      'src/main.jsx',
+      'src/hero.png',
+    ]);
   });
 
   it('limits the module list', async () => {
@@ -81,7 +94,14 @@ describe('viteRoutes', () => {
     expect(await viteRoutes(outDir, keys)).toEqual([
       {
         route: '/',
-        assets: ['assets/main-[hash].js', 'assets/styles-[hash].js', 'assets/styles-[hash].css'],
+        // The image comes from the manifest (`assets` of the chunk); fonts from the stylesheets.
+        assets: [
+          'assets/main-[hash].js',
+          'assets/main-[hash].css',
+          'assets/hero-[hash].png',
+          'assets/styles-[hash].js',
+          'assets/styles-[hash].css',
+        ],
       },
       {
         route: '/about/',

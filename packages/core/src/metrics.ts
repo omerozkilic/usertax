@@ -11,7 +11,7 @@ export type LighthouseMetricName = 'performance' | 'lcp' | 'tbt' | 'cls';
  * free-text parts (routes, URLs, keys) are wrapped in brackets:
  *
  * - `js.total.gzip`, `css.total.brotli`
- * - `route[/pricing].js.gzip`, `route[/pricing].css.gzip`
+ * - `route[/pricing].js.gzip`, `route[/pricing].css.gzip`, `route[/pricing].images.bytes`
  * - `bundle[ios].raw`
  * - `archive[android].file`, `archive[android].category.dex`
  * - `lighthouse[/][mobile].lcp`
@@ -154,6 +154,31 @@ function assetMetrics(assets: readonly Asset[]): Metric[] {
   ];
 }
 
+/**
+ * Bytes of the images or fonts a route references. They are compressed formats already, so only
+ * the file size counts; routes without such files get no metric.
+ */
+function mediaMetric(
+  route: string,
+  name: 'images' | 'fonts',
+  label: string,
+  loaded: readonly Asset[],
+  type: 'image' | 'font',
+): Metric[] {
+  const files = loaded.filter((asset) => asset.type === type);
+  if (files.length === 0) return [];
+  return [
+    {
+      id: `route[${route}].${name}.bytes`,
+      group: 'route',
+      label: `${label} for ${route}`,
+      unit: 'bytes',
+      direction: 'lower-is-better',
+      value: files.reduce((sum, asset) => sum + asset.raw, 0),
+    },
+  ];
+}
+
 function routeMetrics(app: App): Metric[] {
   const byKey = new Map((app.assets ?? []).map((asset) => [asset.key, asset]));
   return (app.routes ?? []).flatMap((route) => {
@@ -168,6 +193,8 @@ function routeMetrics(app: App): Metric[] {
       ...(css.length > 0
         ? sizeMetrics(`route[${route.route}].css`, `CSS for ${route.route}`, 'route', sumSizes(css))
         : []),
+      ...mediaMetric(route.route, 'images', 'Images', loaded, 'image'),
+      ...mediaMetric(route.route, 'fonts', 'Fonts', loaded, 'font'),
     ];
   });
 }

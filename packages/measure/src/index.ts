@@ -15,6 +15,8 @@ export type { DiscoveredApp, LoadedConfig } from './config.js';
 export type { CompressedSize } from './compressed-size.js';
 export { DEFAULT_OUT_DIR, FALLBACK_OUT_DIRS, detectFramework, readPackageJson } from './detect.js';
 export { htmlRoutes, pageRoute, referencedUrls, resolveUrl, staticImports } from './html-routes.js';
+export { addRouteMedia, pageMediaUrls, stylesheetMediaUrls } from './route-media.js';
+export type { RouteMediaOptions } from './route-media.js';
 export { manifestRoutes, parseReactRouterManifest, reactRouterRoutes } from './react-router.js';
 export type { ReactRouterManifest } from './react-router.js';
 export type { PackageJson } from './detect.js';

@@ -9,6 +9,8 @@ Base `aaaaaaa` → head `aaaaaaa` · 3 apps · ⚠️ 2 budget warnings
 | 🟢 | JS total (gzip) | 37.0 kB | 34.0 kB | -3.0 kB (-8.1%) |
 | 🟢 | CSS total (gzip) | 2.0 kB | 1.5 kB | -500 B (-25.0%) |
 | 🆕 | JS for /new (gzip) | – | 4.0 kB | new |
+| 🆕 | Images for /new | – | 48.0 kB | new |
+| 🆕 | Fonts for /new | – | 23.0 kB | new |
 | ➖ | JS for / (gzip) | 30.0 kB | – | removed |
 | ➖ | CSS for / (gzip) | 2.0 kB | – | removed |
 
@@ -30,9 +32,9 @@ Base `aaaaaaa` → head `aaaaaaa` · 3 apps · ⚠️ 2 budget warnings
 
 | File | Base | Head | Change |
 | --- | --: | --: | --: |
-| `legacy-1.js` | 3.0 kB | – | -3.0 kB |
+| `assets/hero-1a2b.png` | – | 48.0 kB | +48.0 kB |
 
-…and 1 more changed file.
+…and 3 more changed files.
 
 </details>
 

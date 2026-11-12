@@ -76,7 +76,10 @@ export type Asset = z.infer<typeof assetSchema>;
 
 export const routeSchema = z.object({
   route: z.string().min(1).max(512),
-  /** Keys of the assets loaded for this route. */
+  /**
+   * Keys of the assets of this route: the JavaScript and CSS it loads initially, and the images
+   * and fonts its HTML and stylesheets reference.
+   */
   assets: z.array(z.string().min(1).max(512)).max(1000),
 });
 export type Route = z.infer<typeof routeSchema>;

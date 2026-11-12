@@ -117,7 +117,7 @@ describe('usertax measure', () => {
     await cp(fixture, dist, { recursive: true, filter: (src) => !src.endsWith('.map') });
     const c = capture();
     expect(await main(['measure', bare, '--sha', 'a'.repeat(40)], c.io)).toBe(0);
-    expect(c.err()).toContain('warning: assets/main-DOR0Mk0h.js: no source map found');
+    expect(c.err()).toMatch(/warning: assets\/main-[\w-]+\.js: no source map found/);
     expect(parseReport(JSON.parse(c.out())).apps[0]?.id).toMatch(/^usertax-bare-/);
   });
 

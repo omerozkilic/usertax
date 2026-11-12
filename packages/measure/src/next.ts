@@ -2,6 +2,7 @@ import { readFile, readdir } from 'node:fs/promises';
 import { join, relative, sep } from 'node:path';
 import type { Asset, Route } from '@usertax/core';
 import { stableKey } from './hash.js';
+import { addRouteMedia } from './route-media.js';
 import { scanOutputDir } from './web.js';
 import type { MeasureResult, MeasureWebAppOptions } from './web.js';
 
@@ -173,12 +174,14 @@ export async function measureNextApp(options: MeasureWebAppOptions): Promise<Mea
 
   const routes: Route[] = [];
   const seen = new Set<string>();
+  const pages = new Map<string, string>();
   for (const dir of ['server/app', 'server/pages']) {
     const root = join(options.outDir, dir);
     for (const file of await listRelative(root, '.html')) {
       const route = htmlRoute(file);
       if (route === undefined || seen.has(route)) continue;
       seen.add(route);
+      pages.set(route, join(root, file));
       const html = await readFile(join(root, file), 'utf8');
       routes.push({
         route,
@@ -200,6 +203,11 @@ export async function measureNextApp(options: MeasureWebAppOptions): Promise<Mea
     routes.push({ route, assets: files.map(keyOf).filter((k): k is string => k !== undefined) });
   }
   routes.sort((a, b) => a.route.localeCompare(b.route));
+  const withMedia = await addRouteMedia(routes, {
+    outDir: staticDir,
+    keys: new Map(assets.map((asset) => [asset.file, asset.key])),
+    pageOf: (route) => pages.get(route),
+  });
 
   return {
     app: {
@@ -209,7 +217,7 @@ export async function measureNextApp(options: MeasureWebAppOptions): Promise<Mea
       kind: 'web',
       framework: 'next',
       assets,
-      routes,
+      routes: withMedia,
       ...(options.dependencies === undefined ? {} : { dependencies: [...options.dependencies] }),
     },
     warnings: scan.warnings,
