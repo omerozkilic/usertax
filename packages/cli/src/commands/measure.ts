@@ -205,7 +205,7 @@ async function runPages(
       formFactor: spec.formFactor,
       onRun: (url, run, result) => {
         io.stderr(
-          `lighthouse ${new URL(url).pathname} run ${run}/${spec.runs}: performance ${result.performance}, LCP ${Math.round(result.lcp)} ms, TBT ${Math.round(result.tbt)} ms, CLS ${result.cls.toFixed(3)}\n`,
+          `lighthouse ${new URL(url).pathname} run ${run}/${spec.runs}: performance ${result.performance}, LCP ${Math.round(result.lcp)} ms, TBT ${Math.round(result.tbt)} ms, CLS ${result.cls.toFixed(3)}${result.contamination === undefined ? '' : ` (browser extensions active: ${result.contamination.origins.join(', ')}; not comparable)`}\n`,
         );
       },
     });

@@ -32,6 +32,8 @@ export interface Metric {
   readonly samples?: readonly number[];
   /** Key into the noise parameters (ADR 0007), for noisy metrics. */
   readonly noiseKey?: LighthouseMetricName;
+  /** Origins of browser extensions that were active in at least one run (not comparable). */
+  readonly contamination?: readonly string[];
 }
 
 interface SizeTotals {
@@ -152,6 +154,9 @@ function lighthouseMetrics(entries: readonly Lighthouse[]): Metric[] {
     LIGHTHOUSE_METRICS.map((metric) => {
       // Medians are taken per metric, not from a single "median run".
       const samples = entry.runs.map((run) => run[metric.name]);
+      const origins = [
+        ...new Set(entry.runs.flatMap((run) => run.contamination?.origins ?? [])),
+      ].sort();
       return {
         id: `lighthouse[${entry.url}][${entry.formFactor}].${metric.name}`,
         group: 'lighthouse' as const,
@@ -161,6 +166,7 @@ function lighthouseMetrics(entries: readonly Lighthouse[]): Metric[] {
         value: summarize(samples).median,
         samples,
         noiseKey: metric.name,
+        ...(origins.length > 0 ? { contamination: origins } : {}),
       };
     }),
   );

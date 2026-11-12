@@ -184,6 +184,19 @@ usertax measure . --lighthouse / --start "pnpm preview" --base-url http://127.0.
   of runs.
 - Lighthouse and chrome-launcher are optional dependencies; install them where you run
   `usertax measure --lighthouse`.
+- **Browser extensions.** Lighthouse attributes an extension's requests and scripts to the page,
+  so a run in a Chrome profile with extensions (a wallet's script is reported as unused
+  JavaScript of the page, an ad blocker adds its own) measures the extensions as much as the
+  app. usertax's own runner starts Chrome with a temporary profile and extensions disabled, so
+  its runs are not affected; this check guards results that come from elsewhere, such as a
+  Lighthouse result passed to `runFromResult` from a script that audits in a normal browser
+  profile. When the requests or scripts that Lighthouse lists (`network-requests`, `bootup-time`,
+  `unused-javascript`, `unminified-javascript`) include a `chrome-extension://`,
+  `moz-extension://` or `safari-web-extension://` URL, the run records `contamination` (the
+  extension origins and the number of distinct URLs). The comment then marks that page's
+  Lighthouse metrics ⚠️ and "not comparable", gives no better or worse verdict for them, warns
+  with the extension ids, and budgets on them are skipped. A skipped budget is not counted as a
+  pass in the summary line.
 
 ## Why a package changed
 

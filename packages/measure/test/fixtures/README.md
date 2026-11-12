@@ -59,6 +59,15 @@ A real Lighthouse 13.6.0 result for `/` of the built `examples/vite-app`, served
 static server, trimmed to the fields usertax reads plus a few for context. The requested URL is
 replaced by its path because the port was random.
 
+## `lighthouse-extension.json`
+
+A real Lighthouse 13.6.0 result for a static page, audited in Chromium with the unpacked
+extension in `lighthouse-extension/` loaded (`--headless=new --load-extension=… --disable-extensions-except=…`
+and chrome-launcher's `ignoreDefaultFlags`, which would otherwise pass `--disable-extensions`). The
+extension's content script fetches its own `data.json`, so `network-requests` lists a
+`chrome-extension://…` request, which Lighthouse attributes to the page. Trimmed to the fields
+usertax reads plus the request list; the port of the local server is replaced by `PORT`.
+
 ## `hermes/`
 
 `index.android.hbc` is real Hermes bytecode compiled by `hermesc` (from the `hermes-compiler`

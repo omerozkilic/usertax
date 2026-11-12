@@ -641,6 +641,30 @@
                       "cls": {
                         "type": "number",
                         "minimum": 0
+                      },
+                      "contamination": {
+                        "type": "object",
+                        "properties": {
+                          "origins": {
+                            "minItems": 1,
+                            "maxItems": 20,
+                            "type": "array",
+                            "items": {
+                              "type": "string",
+                              "minLength": 1,
+                              "maxLength": 200
+                            }
+                          },
+                          "requestCount": {
+                            "type": "integer",
+                            "minimum": 0,
+                            "maximum": 9007199254740991
+                          }
+                        },
+                        "required": [
+                          "origins",
+                          "requestCount"
+                        ]
                       }
                     },
                     "required": [

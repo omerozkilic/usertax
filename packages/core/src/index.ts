@@ -88,6 +88,7 @@ export type {
   Framework,
   JsBundle,
   Lighthouse,
+  LighthouseContamination,
   LighthouseRun,
   Platform,
   Report,

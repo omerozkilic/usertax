@@ -117,6 +117,14 @@ function checksFor(budget: Budget, metric: MetricDiff): Check[] {
   changeCheck('maxIncreasePercent', budget.maxIncreasePercent, true, 1);
   changeCheck('maxDecreasePercent', budget.maxDecreasePercent, true, -1);
 
+  // A run with browser extensions active measures the extensions as much as the page.
+  if (metric.contamination !== undefined) {
+    return checks.map((check) => ({
+      ...check,
+      skipReason: 'Lighthouse ran with browser extensions active',
+    }));
+  }
+
   // Change budgets on noisy metrics respect the noise model (ADR 0007).
   return checks.map((check) => {
     const isChangeCheck = check.limit !== 'max' && check.limit !== 'min';

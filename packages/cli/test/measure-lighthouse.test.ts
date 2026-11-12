@@ -20,13 +20,20 @@ vi.mock('lighthouse', async () => {
       'utf8',
     ),
   ) as Record<string, unknown>;
+  // A real result from Chromium with a browser extension loaded.
+  const withExtension = JSON.parse(
+    await readFile(
+      new URL('../../measure/test/fixtures/lighthouse-extension.json', import.meta.url),
+      'utf8',
+    ),
+  ) as Record<string, unknown>;
   return {
     default: async (url: string) => {
       audited.push(url);
       // The page must really be served: fetch it like Lighthouse would.
       const response = await fetch(url);
       if (!response.ok) throw new Error(`HTTP ${response.status} for ${url}`);
-      return { lhr: real };
+      return { lhr: new URL(url).searchParams.has('extension') ? withExtension : real };
     },
   };
 });
@@ -90,6 +97,38 @@ describe('usertax measure --lighthouse', () => {
         ['/', 'mobile', 2],
         ['/about/', 'mobile', 2],
       ]);
+    },
+    SLOW_TEST_MS,
+  );
+
+  it(
+    'records and flags a run with a browser extension active',
+    async () => {
+      const c = capture();
+      const code = await main(
+        [
+          'measure',
+          app,
+          '--sha',
+          'a'.repeat(40),
+          '--lighthouse',
+          '/?extension=1',
+          '--runs',
+          '1',
+          '--warmup',
+          '0',
+        ],
+        c.io,
+      );
+      expect(code).toBe(0);
+      expect(c.err()).toContain(
+        'browser extensions active: chrome-extension://nojlinpnfpblhnlcjpgaeankkhjbnean; not comparable',
+      );
+      const run = parseReport(JSON.parse(c.out())).apps[0]?.lighthouse?.[0]?.runs[0];
+      expect(run?.contamination).toEqual({
+        origins: ['chrome-extension://nojlinpnfpblhnlcjpgaeankkhjbnean'],
+        requestCount: 1,
+      });
     },
     SLOW_TEST_MS,
   );

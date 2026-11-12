@@ -76,9 +76,11 @@ export type Change = 'added' | 'removed' | 'increased' | 'decreased' | 'unchange
  * - `significant` / `within-noise`: repeated measurement compared against a noise threshold.
  * - `unassessed`: repeated measurement without a configured threshold.
  * - `not-comparable`: missing on one side.
+ * - `unreliable`: a Lighthouse run had browser extensions active, so the change says nothing
+ *   about the page.
  */
 export type Significance =
-  'exact' | 'significant' | 'within-noise' | 'unassessed' | 'not-comparable';
+  'exact' | 'significant' | 'within-noise' | 'unassessed' | 'not-comparable' | 'unreliable';
 export type Verdict = 'better' | 'worse' | 'neutral' | 'unknown';
 
 export interface MetricDiff {
@@ -97,6 +99,11 @@ export interface MetricDiff {
   readonly significance: Significance;
   readonly verdict: Verdict;
   readonly spread?: { readonly base?: SampleSummary; readonly head?: SampleSummary };
+  /** Browser extensions active during Lighthouse runs, per side. Budgets skip such metrics. */
+  readonly contamination?: {
+    readonly base?: readonly string[];
+    readonly head?: readonly string[];
+  };
   readonly threshold?: number;
 }
 
@@ -246,7 +253,7 @@ function verdictOf(
   significance: Significance,
   direction: MetricDirection,
 ): Verdict {
-  if (significance === 'not-comparable') return 'unknown';
+  if (significance === 'not-comparable' || significance === 'unreliable') return 'unknown';
   if (change === 'unchanged' || significance === 'within-noise') return 'neutral';
   if (significance === 'unassessed') return 'unknown';
   const increased = change === 'increased';
@@ -275,11 +282,17 @@ function diffMetric(
     ...(head?.samples === undefined ? {} : { head: summarize(head.samples) }),
   };
   const withSpread = Object.keys(spread).length > 0 ? { spread } : {};
+  const contamination = {
+    ...(base?.contamination === undefined ? {} : { base: base.contamination }),
+    ...(head?.contamination === undefined ? {} : { head: head.contamination }),
+  };
+  const withContamination = Object.keys(contamination).length > 0 ? { contamination } : {};
 
   if (base === undefined || head === undefined) {
     return {
       ...common,
       ...withSpread,
+      ...withContamination,
       change,
       significance: 'not-comparable',
       verdict: 'unknown',
@@ -290,7 +303,9 @@ function diffMetric(
   const percent = base.value === 0 ? undefined : (delta / Math.abs(base.value)) * 100;
   let significance: Significance = 'exact';
   let threshold: number | undefined;
-  if (spread.base !== undefined && spread.head !== undefined) {
+  if (Object.keys(contamination).length > 0) {
+    significance = 'unreliable';
+  } else if (spread.base !== undefined && spread.head !== undefined) {
     const parameters =
       metric.noiseKey === undefined ? undefined : (noise[metric.noiseKey] ?? undefined);
     if (parameters === undefined) {
@@ -304,6 +319,7 @@ function diffMetric(
   return {
     ...common,
     ...withSpread,
+    ...withContamination,
     delta,
     ...(percent === undefined ? {} : { percent }),
     change,
@@ -579,6 +595,27 @@ function warningsFor(base: Report, head: Report): string[] {
   const hl = [...lighthouseVersions(head)].sort().join(', ');
   if (bl !== '' && hl !== '' && bl !== hl) {
     warnings.push(`Lighthouse versions differ between base (${bl}) and head (${hl}).`);
+  }
+  for (const [side, source] of [
+    ['base', base],
+    ['head', head],
+  ] as const) {
+    const contaminated = source.apps.flatMap((app) =>
+      (app.lighthouse ?? []).flatMap((entry) => {
+        const origins = entry.runs.flatMap((run) => run.contamination?.origins ?? []);
+        return origins.length === 0
+          ? []
+          : [{ page: `${entry.url} (${entry.formFactor})`, origins }];
+      }),
+    );
+    if (contaminated.length === 0) continue;
+    const pages = contaminated.map((c) => c.page).join(', ');
+    const origins = [...new Set(contaminated.flatMap((c) => c.origins))].sort();
+    warnings.push(
+      `Lighthouse ran with browser extensions active on ${side} for ${pages} ` +
+        `(${origins.slice(0, 5).join(', ')}${origins.length > 5 ? ', …' : ''}). ` +
+        'Those scores are not comparable and are not checked against budgets.',
+    );
   }
   return warnings;
 }

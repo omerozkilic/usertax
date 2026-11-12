@@ -84,6 +84,7 @@ function shortSha(sha: string | undefined): string {
 function icon(metric: MetricDiff): string {
   if (metric.change === 'added') return '🆕';
   if (metric.change === 'removed') return '➖';
+  if (metric.contamination !== undefined) return '⚠️';
   if (metric.change === 'unchanged') return '⚪';
   if (metric.significance === 'within-noise') return '≈';
   switch (metric.verdict) {
@@ -113,6 +114,7 @@ function changeCell(metric: MetricDiff): string {
   if (metric.change === 'removed') return 'removed';
   if (metric.delta === undefined) return '–';
   const text = `${formatDelta(metric.delta, metric.unit)}${formatPercent(metric.percent)}`;
+  if (metric.contamination !== undefined) return `${text} <sub>not comparable</sub>`;
   if (metric.delta === 0) return text;
   if (metric.significance === 'within-noise') return `${text} <sub>within noise</sub>`;
   if (metric.significance === 'unassessed') return `${text} <sub>noise not assessed</sub>`;
@@ -418,7 +420,16 @@ function summaryLine(diff: ReportDiff, evaluation: BudgetEvaluation | undefined)
     const warned = count('warn');
     if (failed > 0) parts.push(`❌ ${failed} budget${failed === 1 ? '' : 's'} failed`);
     if (warned > 0) parts.push(`⚠️ ${warned} budget warning${warned === 1 ? '' : 's'}`);
-    if (failed === 0 && warned === 0) parts.push('✅ all budgets pass');
+    const skipped = count('skipped');
+    if (failed === 0 && warned === 0) {
+      // A budget that could not be checked is not a pass.
+      if (skipped === 0) parts.push('✅ all budgets pass');
+      else if (skipped === evaluation.results.length)
+        parts.push(`⏭️ ${skipped} budget${skipped === 1 ? '' : 's'} skipped`);
+      else parts.push(`✅ ${count('pass')} pass · ⏭️ ${skipped} skipped`);
+    } else if (skipped > 0) {
+      parts.push(`⏭️ ${skipped} skipped`);
+    }
   }
   return parts.join(' · ');
 }
