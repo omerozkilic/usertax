@@ -41,10 +41,19 @@ describe('stylesheetMediaUrls', () => {
     expect(stylesheetMediaUrls(css)).toEqual(['a.woff2', 'b.woff2', '/img/hero.png', 'icon.svg']);
   });
 
+  it('reads quoted URLs with spaces and skips empty or malformed ones', () => {
+    const css =
+      '.a{background:URL( "with space.png" )}.b{background:url()}.c{background:url(url(x.png))}' +
+      ".d{background:url('d.png')}.e{background:url(e.png}";
+    expect(stylesheetMediaUrls(css)).toEqual(['with space.png', 'd.png']);
+  });
+
   it('stays fast on hostile stylesheets', () => {
     const start = performance.now();
-    stylesheetMediaUrls(`${'url('.repeat(50_000)}${'@font-face{'.repeat(20_000)}`);
+    stylesheetMediaUrls(`${'url('.repeat(200_000)}${'@font-face{'.repeat(20_000)}`);
     stylesheetMediaUrls(`url(${'a'.repeat(200_000)}`);
+    stylesheetMediaUrls('url("'.repeat(200_000));
+    stylesheetMediaUrls(`url('${'b'.repeat(200_000)}`);
     expect(performance.now() - start).toBeLessThan(1000);
   });
 });
@@ -70,10 +79,19 @@ describe('pageMediaUrls', () => {
     ]);
   });
 
+  it('matches tag names whole and in any case', () => {
+    expect(pageMediaUrls('<IMG SRC="/a.png"><imgx src="/b.png"><img\nsrc="/c.png">')).toEqual([
+      '/a.png',
+      '/c.png',
+    ]);
+  });
+
   it('stays fast on hostile pages', () => {
     const start = performance.now();
     pageMediaUrls(`${'<img src='.repeat(50_000)}${'<style>'.repeat(20_000)}`);
-    pageMediaUrls(`<style>${'url('.repeat(50_000)}`);
+    pageMediaUrls(`<style>${'url('.repeat(200_000)}</style>`);
+    pageMediaUrls('<img '.repeat(200_000));
+    pageMediaUrls('<link rel=icon '.repeat(100_000));
     expect(performance.now() - start).toBeLessThan(1000);
   });
 });

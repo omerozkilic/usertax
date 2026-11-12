@@ -1,7 +1,7 @@
 import { readFile } from 'node:fs/promises';
 import { join, posix, relative, sep } from 'node:path';
 import type { Route } from '@usertax/core';
-import { resolveUrl } from './html-routes.js';
+import { attribute, htmlTags, resolveUrl } from './html-routes.js';
 import { assetType } from './web.js';
 
 /** URLs read from one page or stylesheet. More is not a page anyone loads. */
@@ -13,22 +13,46 @@ const MAX_ROUTE_ASSETS = 1000;
 
 // Build output is attacker-controlled input (a pull request builds its own code), so every
 // pattern below is bounded and its alternatives are disjoint: none can backtrack on long input.
-const MEDIA_TAG = /<(img|link|video)\b([^>]{0,4000})>/gi;
-const CSS_URL = /url\(\s*(?:"([^"]{1,2048})"|'([^']{1,2048})'|([^\s"')]{1,2048}))\s*\)/gi;
+const MEDIA_TAGS: ReadonlySet<string> = new Set(['img', 'link', 'video']);
+/** Longest URL kept. */
+const MAX_URL = 2048;
 
-function attribute(tag: string, name: string): string | undefined {
-  const match = new RegExp(
-    `(?<![\\w-])${name}\\s*=\\s*(?:"([^"]{0,2000})"|'([^']{0,2000})'|([^\\s"'>]{1,2000}))`,
-    'i',
-  ).exec(tag);
-  return match?.[1] ?? match?.[2] ?? match?.[3];
-}
+const isSpace = (char: string | undefined) =>
+  char === ' ' || char === '\t' || char === '\n' || char === '\r' || char === '\f';
 
+/**
+ * The `url(…)` values of a stylesheet, quoted or not. One pass from left to right: after each
+ * `url(` the scan continues where its value ended, so no character is read twice and hostile
+ * input (unclosed quotes, `url(url(url(…`) stays linear.
+ */
 function cssUrls(css: string): string[] {
   const urls: string[] = [];
-  for (const match of css.matchAll(CSS_URL)) {
-    urls.push((match[1] ?? match[2] ?? match[3]) as string);
-    if (urls.length >= MAX_URLS) break;
+  const lower = css.toLowerCase();
+  let at = 0;
+  while (urls.length < MAX_URLS) {
+    const start = lower.indexOf('url(', at);
+    if (start === -1) break;
+    let i = start + 4;
+    while (isSpace(css[i])) i += 1;
+    const quote = css[i];
+    if (quote === '"' || quote === "'") {
+      const end = css.indexOf(quote, i + 1);
+      if (end === -1) break;
+      const value = css.slice(i + 1, end);
+      if (value.length > 0 && value.length <= MAX_URL) urls.push(value);
+      at = end + 1;
+      continue;
+    }
+    let end = i;
+    while (end < css.length && end - i <= MAX_URL) {
+      const char = css[end];
+      if (char === ')' || char === '(' || char === '"' || char === "'" || isSpace(char)) break;
+      end += 1;
+    }
+    let after = end;
+    while (isSpace(css[after])) after += 1;
+    if (css[after] === ')' && end > i && end - i <= MAX_URL) urls.push(css.slice(i, end));
+    at = Math.max(end, start + 4);
   }
   return urls;
 }
@@ -67,10 +91,7 @@ export function stylesheetMediaUrls(css: string): string[] {
  */
 export function pageMediaUrls(html: string): string[] {
   const urls: string[] = [];
-  for (const [, name, attributes] of html.matchAll(MEDIA_TAG) as Iterable<
-    [string, string, string]
-  >) {
-    const tag = name.toLowerCase();
+  for (const [tag, attributes] of htmlTags(html, MEDIA_TAGS)) {
     if (tag === 'img') {
       const src =
         attribute(attributes, 'src') ?? attribute(attributes, 'srcset')?.trim().split(/[\s,]/)[0];
