@@ -9,6 +9,14 @@ describe('detectFramework', () => {
     [{ dependencies: { next: '16' } }, 'next'],
     [{ dependencies: { expo: '58', 'react-native': '0.88' } }, 'expo'],
     [{ dependencies: { 'react-native': '0.88' } }, 'react-native'],
+    [
+      {
+        dependencies: { 'react-router': '7' },
+        devDependencies: { '@react-router/dev': '7', vite: '8' },
+      },
+      'react-router',
+    ],
+    [{ dependencies: { 'react-router': '7' }, devDependencies: { vite: '8' } }, 'vite'],
     [{ dependencies: { nuxt: '4' }, devDependencies: { vite: '8' } }, 'nuxt'],
     [{ devDependencies: { astro: '7', vite: '8' } }, 'astro'],
     [{ devDependencies: { '@sveltejs/kit': '3', vite: '8' } }, 'sveltekit'],

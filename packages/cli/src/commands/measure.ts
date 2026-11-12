@@ -48,9 +48,10 @@ app-dir, it measures that app; a matching entry in the configuration supplies it
 Options:
       --config <file>       Configuration file (default: usertax.config.* at the repository root)
       --out-dir <dir>       Build output directory (default: dist; .next for Next.js; build for SvelteKit,
-                            or .svelte-kit/output/client without adapter-static; .output/public for Nuxt)
-      --framework <name>    vite, next, nuxt, astro, sveltekit, webpack, static, expo or react-native
-                            (default: detected from package.json)
+                            or .svelte-kit/output/client without adapter-static; .output/public for Nuxt;
+                            build/client for React Router)
+      --framework <name>    vite, next, react-router, nuxt, astro, sveltekit, webpack, static, expo or
+                            react-native (default: detected from package.json)
       --id <id>             App id in the report (default: package name or folder name)
       --name <name>         Display name (default: the id)
       --sha <sha>           Commit SHA (default: $GITHUB_SHA or git rev-parse HEAD)
@@ -78,12 +79,14 @@ Source maps are needed to attribute bytes to packages and modules. For Vite, set
 build.sourcemap to 'hidden' (maps are not shipped) and build.manifest to true (entries).
 For Next.js, set productionBrowserSourceMaps to true. For Astro, set vite.build.sourcemap to
 'hidden' in astro.config; for SvelteKit, set build.sourcemap to 'hidden' in vite.config; for
-Nuxt, set sourcemap.client to 'hidden' in nuxt.config.
+Nuxt, set sourcemap.client to 'hidden' in nuxt.config; for React Router, set build.sourcemap to
+'hidden' in vite.config.
 `;
 
 const SUPPORTED: ReadonlySet<Framework> = new Set([
   'vite',
   'next',
+  'react-router',
   'nuxt',
   'astro',
   'sveltekit',
@@ -94,6 +97,7 @@ const SUPPORTED: ReadonlySet<Framework> = new Set([
 ]);
 const FRAMEWORKS: ReadonlySet<string> = new Set([
   'vite',
+  'react-router',
   'nuxt',
   'astro',
   'sveltekit',

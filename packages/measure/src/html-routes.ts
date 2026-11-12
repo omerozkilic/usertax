@@ -7,7 +7,7 @@ const MAX_FILES = 5000;
 const MAX_IMPORTS = 5000;
 
 /** Pages that static hosts serve for unknown paths. They are not routes. */
-const FALLBACK_PAGES = new Set(['200.html', '404.html']);
+const FALLBACK_PAGES = new Set(['200.html', '404.html', '__spa-fallback.html']);
 
 /** Route of a prerendered page: `index.html` → `/`, `a/index.html` → `/a/`, `a.html` → `/a`. */
 export function pageRoute(file: string): string {

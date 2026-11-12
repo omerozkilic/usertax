@@ -6,6 +6,7 @@ import { assignKeys } from './hash.js';
 import { foreignSources } from './foreign.js';
 import { SourceMapError, attributeBytes, packageBytes, parseSourceMap } from './sourcemap.js';
 import { htmlRoutes } from './html-routes.js';
+import { MANIFEST_PREFIX, reactRouterRoutes } from './react-router.js';
 import { installedVersions } from './versions.js';
 import type { RawSourceMap } from './sourcemap.js';
 
@@ -141,7 +142,12 @@ export async function scanOutputDir(options: ScanOptions): Promise<ScanResult> {
         const found = await findSourceMap(options.outDir, path, code, fileSet);
         // Tiny generated files (Next.js build manifests, loaders) rarely have maps; only warn
         // where the missing attribution matters.
-        if (found === undefined && content.byteLength >= MIN_WARN_BYTES) {
+        // The route manifest of React Router is data, not code that needs attribution.
+        if (
+          found === undefined &&
+          content.byteLength >= MIN_WARN_BYTES &&
+          !code.startsWith(MANIFEST_PREFIX)
+        ) {
           warnings.push({
             file: path,
             message: 'no source map found; packages and modules are not attributed',
@@ -256,11 +262,14 @@ export async function measureWebApp(options: MeasureWebAppOptions): Promise<Meas
   const routes =
     options.framework === 'vite'
       ? await viteRoutes(options.outDir, scan.keys)
-      : options.framework === 'astro' ||
-          options.framework === 'sveltekit' ||
-          options.framework === 'nuxt'
-        ? await htmlRoutes(options.outDir, scan.keys)
-        : undefined;
+      : options.framework === 'react-router'
+        ? ((await reactRouterRoutes(options.outDir, scan.keys)) ??
+          (await htmlRoutes(options.outDir, scan.keys)))
+        : options.framework === 'astro' ||
+            options.framework === 'sveltekit' ||
+            options.framework === 'nuxt'
+          ? await htmlRoutes(options.outDir, scan.keys)
+          : undefined;
   return {
     app: {
       id: options.id,

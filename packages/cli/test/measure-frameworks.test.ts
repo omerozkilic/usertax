@@ -44,6 +44,16 @@ describe('usertax measure for Vite-based frameworks', () => {
     expect(measured?.routes?.map((r) => r.route)).toEqual(['/', '/about/']);
   });
 
+  it('measures a React Router app from build/client, prerendered or server-rendered', async () => {
+    const deps = { '@react-router/dev': '7', vite: '8' };
+    for (const fixture of ['react-router-dist/', 'react-router-ssr-dist/']) {
+      const dir = await app(deps, 'build/client', fixture);
+      const measured = await measure([dir]);
+      expect(measured?.framework).toBe('react-router');
+      expect(measured?.routes?.map((r) => r.route)).toEqual(['/', '/about']);
+    }
+  });
+
   it('measures a Nuxt app from .output/public, without its fallback pages', async () => {
     const dir = await app({ nuxt: '4', vite: '8' }, '.output/public', 'nuxt-dist/');
     const measured = await measure([dir]);

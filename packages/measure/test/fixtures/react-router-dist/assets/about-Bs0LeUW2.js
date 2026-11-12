@@ -1,0 +1,2 @@
+import{D as e,t}from"./jsx-runtime-DBP03XRE.js";var n=t(),r=e(function(){return(0,n.jsx)(`main`,{children:(0,n.jsx)(`h1`,{children:`About`})})});export{r as default};
+//# sourceMappingURL=about-Bs0LeUW2.js.map
