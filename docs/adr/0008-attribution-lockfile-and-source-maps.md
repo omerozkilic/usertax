@@ -52,6 +52,22 @@ changed, but not why the change happened in this PR.
   counted as unattributed. Workspace packages imported from outside the app directory exist on
   disk and stay first-party.
 
+## Implementation notes (duplicate packages)
+
+- Source-map attribution already grouped bytes by package name, which merged two installed
+  versions into one row. A source is now also tied to its _install root_: the directory of the
+  installed copy, resolved the way the bundler wrote it (relative to the map file, or to the app
+  root for webpack and Turbopack). Two sources share a root exactly when they come from the same
+  copy, including a copy hoisted above the app (`../../node_modules/x`).
+- The version of a copy comes from where it is recorded: pnpm's virtual-store folder name, or the
+  copy's own `package.json` for npm, Yarn and Bun layouts. It is read only for packages that the
+  source map reaches through two or more roots, and a copy without a readable version is left
+  out instead of guessed. The source map is untrusted input, so a root may contain `..` only as
+  a prefix, and a version must look like one before it is reported.
+- The report records `packages[].versions` only when a file holds two or more versions, so
+  reports of apps without duplicates do not change. The `via` of each version is joined from the
+  dependency snapshot in the diff, not stored per file.
+
 ## Consequences
 
 - The comment answers "why" without an LLM.

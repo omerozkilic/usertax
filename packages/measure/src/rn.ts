@@ -4,8 +4,15 @@ import { decode } from '@jridgewell/sourcemap-codec';
 import type { Dependency, Framework, JsBundle, Platform } from '@usertax/core';
 import { ArchiveError, analyzeArchive, isHermesBytecode } from './archive.js';
 import { compressedSize } from './compressed-size.js';
-import { SourceMapError, attributeBytes, classifySources, parseSourceMap } from './sourcemap.js';
-import type { Attribution, ForeignSource, RawSourceMap } from './sourcemap.js';
+import {
+  SourceMapError,
+  attributeBytes,
+  classifySources,
+  packageBytes,
+  parseSourceMap,
+} from './sourcemap.js';
+import type { Attribution, ForeignSource, RawSourceMap, VersionOf } from './sourcemap.js';
+import { installedVersions } from './versions.js';
 import { foreignSources } from './foreign.js';
 import type { MeasureResult, Warning } from './web.js';
 
@@ -19,6 +26,7 @@ export function attributeHermes(
   map: RawSourceMap,
   mapDir = '.',
   isForeign?: ForeignSource,
+  versionOf?: VersionOf,
 ): Attribution {
   const sourceBytes = new Map<number, number>();
   let attributed = 0;
@@ -34,7 +42,13 @@ export function attributeHermes(
       attributed += span;
     }
   }
-  const { foreignBytes, ...classified } = classifySources(sourceBytes, map, mapDir, isForeign);
+  const { foreignBytes, ...classified } = classifySources(
+    sourceBytes,
+    map,
+    mapDir,
+    isForeign,
+    versionOf,
+  );
   return { ...classified, unattributedBytes: byteLength - attributed + foreignBytes };
 }
 
@@ -82,12 +96,11 @@ export async function measureBundle(
   if (map !== undefined) {
     const mapDir = posix.dirname(relative(appDir, mapFile).split(sep).join('/'));
     const isForeign = await foreignSources(map, mapDir, appDir, appPath);
+    const versionOf = await installedVersions(map, mapDir, appDir);
     const attribution = hermes
-      ? attributeHermes(content.byteLength, map, mapDir, isForeign)
-      : attributeBytes(content.toString('utf8'), map, mapDir, isForeign);
-    bundle.packages = [...attribution.packages.entries()]
-      .map(([name, bytes]) => ({ name, bytes }))
-      .sort((a, b) => b.bytes - a.bytes || a.name.localeCompare(b.name));
+      ? attributeHermes(content.byteLength, map, mapDir, isForeign, versionOf)
+      : attributeBytes(content.toString('utf8'), map, mapDir, isForeign, versionOf);
+    bundle.packages = packageBytes(attribution);
     bundle.firstPartyBytes = attribution.firstPartyBytes;
     bundle.unattributedBytes = attribution.unattributedBytes;
     bundle.modules = attribution.modules.slice(0, maxModules);

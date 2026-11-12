@@ -247,6 +247,48 @@ function packagesBlock(app: AppDiff): string | undefined {
   ].join('\n');
 }
 
+function duplicatesBlock(app: AppDiff): string | undefined {
+  if (app.duplicates.length === 0) return undefined;
+  const withStatus = app.duplicates.some((dup) => dup.introduced !== undefined);
+  const rows = app.duplicates.map((dup) => {
+    const versions = dup.versions
+      .map(
+        (v) =>
+          `${inlineCode(v.version)} ${formatBytes(v.bytes)}${v.direct === true ? ' (direct)' : viaText(v.via)}`,
+      )
+      .join(' · ');
+    const status = withStatus ? ` ${dup.introduced === true ? '**new**' : 'existing'} |` : '';
+    return `| ${inlineCode(dup.name)} | ${SCOPE_LABEL[dup.scope]} | ${versions} | ${formatBytes(dup.bytes)} |${status}`;
+  });
+  const table =
+    [
+      withStatus
+        ? '| Package | Bundle | Versions | Total | |'
+        : '| Package | Bundle | Versions | Total |',
+      withStatus ? '| --- | --- | --- | --: | --- |' : '| --- | --- | --- | --: |',
+      ...rows,
+    ].join('\n') + moreDuplicates(app.omitted.duplicates);
+  const introduced = app.duplicates.filter((dup) => dup.introduced === true).length;
+  if (withStatus && introduced === 0) {
+    const total = app.duplicates.length + app.omitted.duplicates;
+    return details(
+      `${total} duplicate ${total === 1 ? 'package' : 'packages'} already in the base`,
+      table,
+    );
+  }
+  return [
+    '**Duplicate packages** <sub>the same package bundled in more than one version</sub>',
+    '',
+    table,
+  ].join('\n');
+}
+
+function moreDuplicates(count: number): string {
+  return count > 0
+    ? `\n\n…and ${count} more duplicate ${count === 1 ? 'package' : 'packages'}.`
+    : '';
+}
+
 function dependenciesBlock(app: AppDiff): string | undefined {
   if (app.dependencies.length === 0) return undefined;
   const rows = app.dependencies.map(
@@ -318,6 +360,7 @@ function appBlocks(app: AppDiff, headOnly: boolean, compression: Compression): B
   }
   for (const block of [
     packagesBlock(app),
+    duplicatesBlock(app),
     assetsBlock(app, compression),
     archiveEntriesBlock(app),
     dependenciesBlock(app),

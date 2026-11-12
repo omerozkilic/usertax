@@ -4,7 +4,8 @@ import type { App, Asset, AssetType, Dependency, Framework, Route } from '@usert
 import { compressedSize } from './compressed-size.js';
 import { assignKeys } from './hash.js';
 import { foreignSources } from './foreign.js';
-import { SourceMapError, attributeBytes, parseSourceMap } from './sourcemap.js';
+import { SourceMapError, attributeBytes, packageBytes, parseSourceMap } from './sourcemap.js';
+import { installedVersions } from './versions.js';
 import type { RawSourceMap } from './sourcemap.js';
 
 const TYPES: Record<string, AssetType> = {
@@ -152,10 +153,9 @@ export async function scanOutputDir(options: ScanOptions): Promise<ScanResult> {
             options.appDir,
             options.appPath,
           );
-          const attribution = attributeBytes(code, found.map, mapDir, isForeign);
-          asset.packages = [...attribution.packages.entries()]
-            .map(([name, bytes]) => ({ name, bytes }))
-            .sort((a, b) => b.bytes - a.bytes || a.name.localeCompare(b.name));
+          const versionOf = await installedVersions(found.map, mapDir, options.appDir);
+          const attribution = attributeBytes(code, found.map, mapDir, isForeign, versionOf);
+          asset.packages = packageBytes(attribution);
           asset.firstPartyBytes = attribution.firstPartyBytes;
           asset.unattributedBytes = attribution.unattributedBytes;
           asset.modules = attribution.modules.slice(0, maxModules);

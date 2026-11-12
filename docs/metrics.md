@@ -216,6 +216,25 @@ Alternatives are shown for packages that were added or grew, only when the
 them. The data is generated into `packages/core/src/data/alternatives.json` by
 `node scripts/update-alternatives.js`, and CI checks that it matches the pinned dataset version.
 
+## Duplicate packages
+
+When one JavaScript file contains the same package in more than one version, every user downloads
+it more than once. usertax reports these from the source map, per installed copy:
+
+- The copy is the directory where the bundler found the package (`node_modules/a/node_modules/x`,
+  a copy hoisted above the app, or a folder in pnpm's virtual store). Its version comes from the
+  pnpm folder name, or from the copy's `package.json` for npm, Yarn and Bun layouts.
+- A report file lists `packages[].versions` (bytes per version) only when it holds at least two
+  versions of the package. A copy whose `package.json` cannot be read has no version and is left
+  out of the split, so the versions may add up to less than the package's total.
+- The comment shows each duplicate with its versions, their minified bytes and, from the lockfile
+  snapshot, the direct dependency that pulls each version in (`via`). Duplicates that the pull
+  request introduced are marked **new**; when the base already had them they are collapsed.
+
+Limits: a duplicate is detected inside one file. Two different versions in two different chunks
+are not reported, and neither is the same version installed twice. Compressed sizes do not split
+per version; the bytes are minified bytes, like the package list.
+
 ## Trying it locally
 
 ```bash
