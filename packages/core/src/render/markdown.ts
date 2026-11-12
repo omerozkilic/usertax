@@ -188,6 +188,14 @@ function versionList(versions: readonly string[]): string {
   return versions.map((v) => inlineCode(v)).join(', ');
 }
 
+/** How a transitive package got in: the chain from a direct dependency, or the dependencies. */
+function reachText(cause: { via?: readonly string[]; chain?: readonly string[] }): string {
+  if (cause.chain !== undefined && cause.chain.length > 1) {
+    return ` via ${cause.chain.map((name) => inlineCode(name)).join(' → ')}`;
+  }
+  return viaText(cause.via);
+}
+
 function viaText(via: readonly string[] | undefined): string {
   return via === undefined || via.length === 0
     ? ''
@@ -201,14 +209,14 @@ export function causeText(cause: PackageCause | undefined): string {
     case 'no-version-change':
       return 'same version; more or less of it is imported';
     case 'added':
-      return `added ${versionList(cause.head)}${cause.direct ? ' (direct)' : viaText(cause.via)}`;
+      return `added ${versionList(cause.head)}${cause.direct ? ' (direct)' : reachText(cause)}`;
     case 'removed':
-      return `removed ${versionList(cause.base)}${cause.direct ? ' (direct)' : viaText(cause.via)}`;
+      return `removed ${versionList(cause.base)}${cause.direct ? ' (direct)' : reachText(cause)}`;
     case 'upgraded':
     case 'downgraded':
-      return `${cause.kind} ${versionList(cause.base)} → ${versionList(cause.head)}${cause.direct ? '' : viaText(cause.via)}`;
+      return `${cause.kind} ${versionList(cause.base)} → ${versionList(cause.head)}${cause.direct ? '' : reachText(cause)}`;
     case 'changed':
-      return `versions ${versionList(cause.base)} → ${versionList(cause.head)}${cause.direct ? '' : viaText(cause.via)}`;
+      return `versions ${versionList(cause.base)} → ${versionList(cause.head)}${cause.direct ? '' : reachText(cause)}`;
   }
 }
 

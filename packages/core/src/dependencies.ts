@@ -13,6 +13,8 @@ export interface DependencyChange {
   /** Only reachable through dev dependencies. */
   readonly dev: boolean;
   readonly via?: readonly string[];
+  /** The shortest chain from a direct dependency to the package that depends on this one. */
+  readonly chain?: readonly string[];
 }
 
 interface Parsed {
@@ -75,6 +77,12 @@ export function diffDependencies(
     }
     const entries = after.get(name) ?? before.get(name) ?? [];
     const via = [...new Set(entries.flatMap((d) => d.via ?? []))].sort().slice(0, 3);
+    // A version that is a direct dependency or one step away needs no chain; show one only when
+    // every version is further away, and then the shortest.
+    const steps = (d: Dependency) =>
+      d.direct ? 0 : (d.chain?.length ?? (d.via === undefined ? Infinity : 1));
+    const nearest = [...entries].sort((a, b) => steps(a) - steps(b))[0];
+    const chain = nearest?.direct === true ? undefined : nearest?.chain;
     changes.push({
       name,
       kind,
@@ -83,6 +91,7 @@ export function diffDependencies(
       direct: entries.some((d) => d.direct),
       dev: entries.every((d) => d.dev === true),
       ...(via.length > 0 ? { via } : {}),
+      ...(chain === undefined ? {} : { chain }),
     });
   }
   return changes;

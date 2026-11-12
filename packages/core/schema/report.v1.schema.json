@@ -718,6 +718,16 @@
                     "minLength": 1,
                     "maxLength": 214
                   }
+                },
+                "chain": {
+                  "minItems": 2,
+                  "maxItems": 10,
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 214
+                  }
                 }
               },
               "required": [

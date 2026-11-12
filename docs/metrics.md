@@ -240,10 +240,18 @@ the comment gets a reason:
 | ---------------------------------------------- | ------------------------------------------------------------------------------------- |
 | `added 2.30.1 (direct)`                        | The app now declares the package.                                                     |
 | `added 1.2.0 via x`                            | A transitive dependency, pulled in by the direct dependency or workspace package `x`. |
+| `added 1.2.0 via x → y`                        | The same, more than one step away: `x` needs `y`, which needs the package.            |
 | `upgraded 4.17.20 → 4.17.21`                   | One resolved version on each side.                                                    |
 | `versions a → a, b`                            | Several versions are installed (duplicates).                                          |
 | `removed …`                                    | No longer in the lockfile.                                                            |
 | `same version; more or less of it is imported` | The lockfile did not change for this package; the app imports a different part of it. |
+
+The chain is the shortest path in the lockfile from a direct dependency down to the package
+that needs this one (the package itself is the row), taken from every lockfile format usertax
+reads. When several chains have the same length, the first by package name is shown. It is left
+out when `via` already says it (the package is one step from a direct dependency), when a
+version of the package is closer than any chain, and for chains longer than ten packages. The
+report keeps it as `dependencies[].chain`.
 
 Lockfile changes that do not change any bundle (dev tooling, packages that are not bundled) are
 listed separately in a collapsed section.

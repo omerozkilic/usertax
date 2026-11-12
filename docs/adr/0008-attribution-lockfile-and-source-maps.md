@@ -68,6 +68,18 @@ changed, but not why the change happened in this PR.
   reports of apps without duplicates do not change. The `via` of each version is joined from the
   dependency snapshot in the diff, not stored per file.
 
+## Implementation notes (dependency chains)
+
+- `via` names the direct dependencies that pull a package in, but a reviewer then has to find the
+  way from there. The lockfile graph already has it, so the walk that finds `via` also keeps the
+  path to each package, from the direct dependency down to the package that depends on it, and
+  records the shortest one as `chain` (ties go to the first by name, so reports are stable).
+- It is only written when it adds something: at least two names, and not longer than ten (the
+  schema's limit). A package one step from a direct dependency is already fully described by
+  `via`, so reports of apps without deep trees do not change.
+- Names in a chain come from the lockfile of a pull request, so they are untrusted text and are
+  rendered like every other package name.
+
 ## Consequences
 
 - The comment answers "why" without an LLM.

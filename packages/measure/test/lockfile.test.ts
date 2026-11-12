@@ -89,6 +89,94 @@ snapshots:
   });
 });
 
+/** A pnpm lockfile for a root that declares `roots`, with the packages in `tree` (name → deps). */
+function tree(roots: string[], packages: Record<string, string[]>) {
+  const declared = roots
+    .map((name) => `      ${name}: { specifier: '1', version: 1.0.0 }`)
+    .join('\n');
+  const snapshots = Object.entries(packages)
+    .map(([name, deps]) =>
+      deps.length === 0
+        ? `  ${name}@1.0.0: {}`
+        : `  ${name}@1.0.0: { dependencies: { ${deps.map((d) => `${d}: 1.0.0`).join(', ')} } }`,
+    )
+    .join('\n');
+  return parsePnpmLock(
+    `lockfileVersion: '9.0'\nimporters:\n  .:\n    dependencies:\n${declared}\nsnapshots:\n${snapshots}\n`,
+  );
+}
+
+const chainOf = (graph: ReturnType<typeof tree>, name: string) =>
+  dependenciesOf(graph, '.').find((d) => d.name === name)?.chain;
+
+describe('dependency chains', () => {
+  it('lead from a direct dependency down to the package that needs the package', () => {
+    const graph = tree(['a'], { a: ['b'], b: ['c'], c: ['d'], d: [] });
+    expect(chainOf(graph, 'd')).toEqual(['a', 'b', 'c']);
+    expect(chainOf(graph, 'c')).toEqual(['a', 'b']);
+  });
+
+  it('are left out where via already says it, and for direct dependencies', () => {
+    const graph = tree(['a', 'x'], { a: ['b'], b: [], x: ['a'] });
+    // a is direct although x needs it too; b is one step from a.
+    expect(chainOf(graph, 'a')).toBeUndefined();
+    expect(chainOf(graph, 'b')).toBeUndefined();
+    expect(dependenciesOf(graph, '.').find((d) => d.name === 'b')?.via).toEqual(['a', 'x']);
+  });
+
+  it('take the shortest route, and the first by name between equal ones', () => {
+    const shortest = tree(['x', 'y'], { x: ['p'], p: ['t'], y: ['q'], q: ['r'], r: ['t'], t: [] });
+    expect(chainOf(shortest, 't')).toEqual(['x', 'p']);
+    const tie = tree(['b', 'a'], { b: ['p'], p: ['t'], a: ['q'], q: ['t'], t: [] });
+    expect(chainOf(tie, 't')).toEqual(['a', 'q']);
+  });
+
+  it('stop at a cycle', () => {
+    const graph = tree(['a'], { a: ['b'], b: ['a', 'c'], c: [] });
+    expect(chainOf(graph, 'c')).toEqual(['a', 'b']);
+  });
+
+  it('are left out when they would be longer than the report allows', () => {
+    const names = Array.from({ length: 13 }, (_, i) => `p${i}`);
+    const packages = Object.fromEntries(
+      names.map((name, i) => [name, i + 1 < names.length ? [names[i + 1] as string] : []]),
+    );
+    const graph = tree(['p0'], packages);
+    expect(chainOf(graph, 'p10')).toHaveLength(10);
+    expect(chainOf(graph, 'p11')).toBeUndefined();
+    expect(dependenciesOf(graph, '.').find((d) => d.name === 'p12')?.via).toEqual(['p0']);
+  });
+});
+
+describe.each([
+  ['pnpm', 'pnpm'],
+  ['npm', 'npm'],
+  ['yarn1', 'yarn-classic'],
+  ['bun', 'bun'],
+])('the dependency chains of the %s lockfile for fast-glob', (dir, format) => {
+  it('agree across package managers', async () => {
+    const root = join(fixtures, 'chain', dir);
+    const result = await readAppDependencies(root, root);
+    expect(result?.format).toBe(format);
+    const by = (name: string) => result?.dependencies.find((d) => d.name === name);
+    // fast-glob → @nodelib/fs.walk → @nodelib/fs.scandir → run-parallel → queue-microtask
+    expect(by('queue-microtask')).toMatchObject({
+      via: ['fast-glob'],
+      chain: ['fast-glob', '@nodelib/fs.walk', '@nodelib/fs.scandir', 'run-parallel'],
+    });
+    expect(by('@nodelib/fs.scandir')?.chain).toEqual(['fast-glob', '@nodelib/fs.walk']);
+    // One step from fast-glob: nothing to add to via.
+    expect(by('@nodelib/fs.walk')).toEqual({
+      name: '@nodelib/fs.walk',
+      version: '1.2.8',
+      direct: false,
+      via: ['fast-glob'],
+    });
+    expect(by('fast-glob')).toEqual({ name: 'fast-glob', version: '3.3.3', direct: true });
+    expect(result?.dependencies).toHaveLength(18);
+  });
+});
+
 describe('parsePnpmLock', () => {
   it('reads v6 lockfiles, aliases and scoped packages', () => {
     const graph = parsePnpmLock(`lockfileVersion: '6.0'
@@ -176,7 +264,13 @@ describe('parseBunLock', () => {
       { name: 'debug', version: '4.4.3', direct: true },
       { name: 'ms', version: '2.0.0', direct: true },
       { name: 'ms', version: '2.1.3', direct: false, via: ['debug'] },
-      { name: 'queue-microtask', version: '1.2.3', direct: false, via: ['@nodelib/fs.scandir'] },
+      {
+        name: 'queue-microtask',
+        version: '1.2.3',
+        direct: false,
+        via: ['@nodelib/fs.scandir'],
+        chain: ['@nodelib/fs.scandir', 'run-parallel'],
+      },
       { name: 'run-parallel', version: '1.2.0', direct: false, via: ['@nodelib/fs.scandir'] },
     ]);
   });
