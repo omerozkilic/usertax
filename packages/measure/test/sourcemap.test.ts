@@ -1,4 +1,4 @@
-import { readFile } from 'node:fs/promises';
+import { readFile, readdir } from 'node:fs/promises';
 import { encode } from '@jridgewell/sourcemap-codec';
 import { describe, expect, it } from 'vitest';
 import {
@@ -246,8 +246,10 @@ describe('attributeBytes', () => {
   });
 
   it('accounts for every byte of a real Vite chunk', async () => {
-    const code = await readFile(new URL('styles-SChyrMlz.js', fixture), 'utf8');
-    const raw = parseSourceMap(await readFile(new URL('styles-SChyrMlz.js.map', fixture), 'utf8'));
+    // The vendor chunk; its hash changes when the fixture is rebuilt.
+    const name = (await readdir(fixture)).find((file) => /^styles-[\w-]+\.js$/.test(file)) ?? '';
+    const code = await readFile(new URL(name, fixture), 'utf8');
+    const raw = parseSourceMap(await readFile(new URL(`${name}.map`, fixture), 'utf8'));
     const result = attributeBytes(code, raw, 'dist/assets');
     const packageBytes = [...result.packages.values()].reduce((a, b) => a + b, 0);
     expect(packageBytes + result.firstPartyBytes + result.unattributedBytes).toBe(

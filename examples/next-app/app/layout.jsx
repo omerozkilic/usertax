@@ -1,3 +1,4 @@
+import { GeistSans } from 'geist/font/sans';
 import './globals.css';
 
 export const metadata = {
@@ -7,7 +8,7 @@ export const metadata = {
 
 export default function RootLayout({ children }) {
   return (
-    <html lang="en">
+    <html lang="en" className={GeistSans.className}>
       <body>
         <nav>
           <a href="/">Home</a> · <a href="/about">About</a> · <a href="/counter">Counter</a>

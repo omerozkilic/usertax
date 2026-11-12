@@ -40,6 +40,29 @@ describe('extractMetrics', () => {
     expect([...metrics.keys()].filter((id) => id.startsWith('route[/about].css'))).toEqual([]);
   });
 
+  it('sums the file bytes of the images and fonts a route references', () => {
+    const app = webApp();
+    app.assets?.push(
+      { key: 'hero.png', file: 'hero.png', type: 'image', raw: 48_000, gzip: 47_000 },
+      { key: 'logo.svg', file: 'logo.svg', type: 'image', raw: 2_000 },
+      { key: 'inter.woff2', file: 'inter.woff2', type: 'font', raw: 23_000 },
+    );
+    app.routes = [
+      { route: '/', assets: ['hero.png', 'logo.svg', 'inter.woff2', 'hero.png'] },
+      { route: '/about', assets: ['logo.svg'] },
+    ];
+    const metrics = byId(app);
+    expect(metrics.get('route[/].images.bytes')).toMatchObject({
+      value: 50_000,
+      label: 'Images for /',
+      group: 'route',
+      unit: 'bytes',
+    });
+    expect(metrics.get('route[/].images.bytes')?.compression).toBeUndefined();
+    expect(metrics.get('route[/].fonts.bytes')?.value).toBe(23_000);
+    expect(metrics.get('route[/about].fonts.bytes')).toBeUndefined();
+  });
+
   it('ignores unknown and duplicate asset keys in routes', () => {
     const metrics = byId(
       webApp({

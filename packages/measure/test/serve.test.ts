@@ -1,4 +1,4 @@
-import { mkdtemp } from 'node:fs/promises';
+import { mkdtemp, readdir } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -58,8 +58,9 @@ describe('serveStatic', () => {
   });
 
   it('gzips text when the client accepts it', async () => {
-    const plain = await get(`${server.url}/assets/main-DOR0Mk0h.js`);
-    const gzipped = await get(`${server.url}/assets/main-DOR0Mk0h.js`, {
+    const main = (await readdir(join(root, 'assets'))).find((f) => /^main-[\w-]+\.js$/.test(f));
+    const plain = await get(`${server.url}/assets/${main ?? ''}`);
+    const gzipped = await get(`${server.url}/assets/${main ?? ''}`, {
       'accept-encoding': 'gzip, br',
     });
     expect(plain.encoding).toBe('');

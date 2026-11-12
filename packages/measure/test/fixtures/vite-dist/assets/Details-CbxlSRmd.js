@@ -1,0 +1,1 @@
+import{t as e}from"./styles-B3IXql3j.js";var t=e(),n=[`Sizes are measured from the build output, not estimated.`,`Bytes are attributed to packages through source maps.`,`Compressed sizes use gzip level 9 and brotli quality 11.`];function r(){return(0,t.jsx)(`ul`,{children:n.map(e=>(0,t.jsx)(`li`,{children:e},e))})}export{r as default};

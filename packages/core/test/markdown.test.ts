@@ -115,7 +115,23 @@ describe('renderMarkdown', () => {
       ];
       const web = r.apps[0] as App;
       web.assets = (web.assets ?? []).filter((a) => a.key !== 'legacy.js');
-      web.routes = [...(web.routes ?? []), { route: '/new', assets: ['assets/about-[hash].js'] }];
+      // The new route shows a hero image and a web font (route[/new].images and .fonts).
+      web.assets.push(
+        { key: 'assets/hero-[hash].png', file: 'assets/hero-1a2b.png', type: 'image', raw: 48_000 },
+        {
+          key: 'assets/inter-[hash].woff2',
+          file: 'assets/inter-3c4d.woff2',
+          type: 'font',
+          raw: 23_000,
+        },
+      );
+      web.routes = [
+        ...(web.routes ?? []),
+        {
+          route: '/new',
+          assets: ['assets/about-[hash].js', 'assets/hero-[hash].png', 'assets/inter-[hash].woff2'],
+        },
+      ];
       web.routes = web.routes.filter((route) => route.route !== '/');
       const css = web.assets.find((a) => a.type === 'css');
       if (css) css.gzip = 1_500;

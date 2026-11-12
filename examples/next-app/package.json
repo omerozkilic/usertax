@@ -9,6 +9,7 @@
     "start": "next start --port 3100"
   },
   "dependencies": {
+    "geist": "1.8.2",
     "next": "16.4.5",
     "react": "19.3.1",
     "react-dom": "19.3.1"

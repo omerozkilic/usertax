@@ -28,6 +28,8 @@ archive keys) are wrapped in brackets.
 | `css.total.{raw,gzip,brotli}`                      | All CSS files of a web app                                                                                             | bytes    |
 | `route[<route>].js.{raw,gzip,brotli}`              | JavaScript loaded for one route                                                                                        | bytes    |
 | `route[<route>].css.{raw,gzip,brotli}`             | Stylesheets loaded for one route; only for routes that load at least one CSS file                                      | bytes    |
+| `route[<route>].images.bytes`                      | Images a route's HTML, stylesheets or (Vite) code reference, file size; only for routes that reference one             | bytes    |
+| `route[<route>].fonts.bytes`                       | Web fonts a route's stylesheets or HTML reference, file size; only for routes that reference one                       | bytes    |
 | `bundle[<ios\|android>].raw`                       | React Native JS or Hermes bundle                                                                                       | bytes    |
 | `archive[<key>].file`                              | APK / AAB / IPA file size                                                                                              | bytes    |
 | `archive[<key>].category.<category>`               | Compressed size of one category (`js-bundle`, `dex`, `native`, `resources`, `assets`, `binary`, `frameworks`, `other`) | bytes    |
@@ -125,6 +127,23 @@ Rules:
   shows as removed. Stylesheets inlined into the HTML (`<style>`, such as the small stylesheets
   Astro inlines or Next.js `inlined` entries) are part of the HTML file's size, not of the route's
   CSS.
+- A route's images and fonts are the files in the build output that it references, counted once
+  each at their file size (they are compressed formats already):
+  - from its stylesheets: the first source of each `@font-face` rule (a browser downloads the
+    first format it supports; later ones are fallbacks) and every other `url()`;
+  - from its prerendered HTML: `<img src>` (for responsive images the `src` fallback, or the
+    first `srcset` candidate without one; the `<source>` alternatives of a `<picture>` are not
+    counted), `<video poster>`, icons, `<link rel="preload">` of images and fonts, and `url()` in
+    inline `<style>` blocks;
+  - for Vite, also the images the route's code imports (the `assets` of its chunks in the
+    manifest).
+
+  These are the files a route _can_ load, an upper bound: a browser downloads a font only when
+  text uses it, and only the `unicode-range` subsets it needs (`@fontsource/inter` declares
+  seven), and a background image only when its selector matches. Images created at run time,
+  `style` attributes, other hosts and `data:` URLs are not counted, nor are images that
+  `next/image` optimises per request (they are not in the build output).
+
 - For Astro (`dist/`), SvelteKit with adapter-static (`build/`) and Nuxt (`.output/public/`),
   routes come from the prerendered HTML of each page: the scripts, stylesheets and module preloads it references,
   Astro's `component-url` and `renderer-url` island attributes, the `import("…")` calls of
