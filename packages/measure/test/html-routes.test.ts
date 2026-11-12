@@ -202,21 +202,6 @@ describe('htmlRoutes on real builds', () => {
     expect(found?.map((r) => r.route)).toEqual(['/', '/about/']);
     const [home, about] = found ?? [];
     expect(home?.assets).toEqual(['_nuxt/IBdXmKL5.js', '_nuxt/BxnytY3l.js']);
-    expect(about?.assets).toHaveLength(9);
-    const own = (assets: string[] | undefined, other: string[] | undefined) =>
-      (assets ?? []).filter((key) => !(other ?? []).includes(key));
-    expect(own(home?.assets, about?.assets)).toEqual(['_app/immutable/nodes/2.[hash].js']);
-    expect(own(about?.assets, home?.assets)).toEqual(['_app/immutable/nodes/3.[hash].js']);
-  });
-
-  it('lists the entry and page chunk of a Nuxt page, not its prefetched lazy chunks', async () => {
-    const found = await routes(nuxt);
-    // 200.html and 404.html are the fallback pages of a static host, not routes.
-    expect(found?.map((r) => r.route)).toEqual(['/', '/about/']);
-    const [home, about] = found ?? [];
-    expect(home?.assets).toEqual(
-      ['_nuxt/IBdXmKL5.[hash].js', '_nuxt/BxnytY3l.[hash].js'].map((k) => k.replace('.[hash]', '')),
-    );
     expect(about?.assets).toEqual(['_nuxt/IBdXmKL5.js', '_nuxt/lBV859Qk.js']);
   });
 
