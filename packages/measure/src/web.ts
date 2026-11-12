@@ -314,7 +314,9 @@ export async function measureWebApp(options: MeasureWebAppOptions): Promise<Meas
           outDir: options.outDir,
           keys: scan.keys,
           pageOf: (route) => {
-            const file = pages.get(route);
+            // React Router names a page `/about`; its prerendered HTML is `about/index.html`.
+            const other = route.endsWith('/') ? route.slice(0, -1) : `${route}/`;
+            const file = pages.get(route) ?? pages.get(other);
             return file === undefined ? undefined : join(options.outDir, file);
           },
         });

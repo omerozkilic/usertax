@@ -1,4 +1,4 @@
-import { cp, mkdtemp, readdir, rm } from 'node:fs/promises';
+import { copyFile, cp, mkdtemp, readFile, readdir, rm, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
@@ -193,6 +193,33 @@ describe('reactRouterRoutes on real builds', () => {
     const names = new Set(app.assets?.flatMap((a) => a.packages?.map((p) => p.name) ?? []));
     for (const name of ['react-dom', 'react-router', 'react']) expect(names.has(name)).toBe(true);
     expect(warnings).toEqual([]);
+  });
+
+  it('reads the images of a prerendered page whose route has no trailing slash', async () => {
+    // `/about` comes from the manifest; its page is `about/index.html`, read as `/about/`.
+    const dir = await mkdtemp(join(tmpdir(), 'usertax-rr-media-'));
+    await cp(path(spa), dir, { recursive: true });
+    const hero = new URL('../../../examples/vite-app/src/hero.png', import.meta.url);
+    await copyFile(hero, join(dir, 'assets', 'hero-DUjzQ72x.png'));
+    const page = join(dir, 'about', 'index.html');
+    const html = await readFile(page, 'utf8');
+    await writeFile(
+      page,
+      html.replace('</body>', '<img src="/assets/hero-DUjzQ72x.png" alt=""></body>'),
+    );
+    const { app } = await measureWebApp({
+      id: 'rr',
+      name: 'rr',
+      appDir: dir,
+      path: '.',
+      outDir: dir,
+      framework: 'react-router',
+    });
+    const about = app.routes?.find((r) => r.route === '/about');
+    expect(about?.assets).toContain('assets/hero-[hash].png');
+    expect(app.routes?.find((r) => r.route === '/')?.assets).not.toContain(
+      'assets/hero-[hash].png',
+    );
   });
 
   it('falls back to the prerendered pages when the manifest is gone', async () => {

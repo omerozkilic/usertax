@@ -156,7 +156,9 @@ Rules:
   text uses it, and only the `unicode-range` subsets it needs (`@fontsource/inter` declares
   seven), and a background image only when its selector matches. Images created at run time,
   `style` attributes, other hosts and `data:` URLs are not counted, nor are images that
-  `next/image` optimises per request (they are not in the build output).
+  `next/image` optimises per request (they are not in the build output). A server-rendered React Router
+  app has no HTML in `build/client`, so only the images and fonts of its stylesheets are counted,
+  not the images its route modules import.
 
 - For Astro (`dist/`), SvelteKit with adapter-static (`build/`) and Nuxt (`.output/public/`),
   routes come from the prerendered HTML of each page: the scripts, stylesheets and module preloads it references,
