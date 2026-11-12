@@ -26,6 +26,8 @@ export function detectFramework(pkg: PackageJson | undefined): Framework {
   if ('expo' in deps) return 'expo';
   if ('react-native' in deps) return 'react-native';
   // Astro and SvelteKit build with Vite and depend on it, so they come first.
+  // `react-router` alone is the library (a Vite app with a router); the framework mode has a CLI.
+  if ('@react-router/dev' in deps) return 'react-router';
   if ('nuxt' in deps) return 'nuxt';
   if ('astro' in deps) return 'astro';
   if ('@sveltejs/kit' in deps) return 'sveltekit';
@@ -39,6 +41,8 @@ export const DEFAULT_OUT_DIR: Partial<Record<Framework, string>> = {
   next: '.next',
   expo: 'dist',
   astro: 'dist',
+  // Client files; prerendered pages are written here too, the server build is not measured.
+  'react-router': 'build/client',
   // `nuxt generate` and `nuxt build` both write the client files and prerendered pages here.
   nuxt: '.output/public',
   // adapter-static writes the whole site here; see FALLBACK_OUT_DIRS for other adapters.

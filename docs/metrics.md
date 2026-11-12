@@ -127,7 +127,8 @@ Rules:
     the HTML file's size.
   - Source maps are needed for packages: set `vite.build.sourcemap` to `'hidden'` in
     `astro.config`, `build.sourcemap` to `'hidden'` in SvelteKit's `vite.config`, or
-    `sourcemap: { client: 'hidden' }` in `nuxt.config`.
+    `sourcemap: { client: 'hidden' }` in `nuxt.config`, or `build.sourcemap` to `'hidden'` in the
+    `vite.config` of a React Router app.
   - Prefetch links (Nuxt prefetches the chunks of other pages) and data attributes are not
     loaded with the page and are ignored. `200.html` and `404.html`, the fallback pages of static
     hosts, are measured as files but are not routes.
@@ -140,6 +141,13 @@ Rules:
   - SvelteKit without adapter-static writes its client output to `.svelte-kit/output/client`,
     which usertax uses when there is no `build/` directory. It has no prerendered pages, so
     there are no routes.
+- For React Router 7 in framework mode (`build/client/`), routes come from the client manifest
+  of the build, `assets/manifest-<hash>.js`, which lists every route with the modules it loads:
+  the entry, and the module and static imports of each route from the root down to the page. A
+  route with child routes is a layout, so a page is a route without children; an index route
+  takes the path of its parent (`/`, `/about`, `/blog/:slug`, `/files/*`). It needs no HTML, so
+  server-rendered apps, whose `build/client` has none, get routes too. Without a manifest, the
+  prerendered pages are read like Astro's. `__spa-fallback.html` is not a route.
 - For Next.js (`.next/`, `productionBrowserSourceMaps: true`), routes come from the script and
   stylesheet tags of the prerendered pages, which is exactly what a browser loads first; legacy
   `noModule` polyfills are excluded. Pages without prerendered HTML use the client reference

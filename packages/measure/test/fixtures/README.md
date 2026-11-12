@@ -59,7 +59,7 @@ A real Lighthouse 13.6.0 result for `/` of the built `examples/vite-app`, served
 static server, trimmed to the fields usertax reads plus a few for context. The requested URL is
 replaced by its path because the port was random.
 
-## `astro-dist/`, `sveltekit-dist/` and `nuxt-dist/`
+## `astro-dist/`, `sveltekit-dist/`, `nuxt-dist/` and React Router builds
 
 Real build output of two minimal apps, built on 2026-11-12, with `sourcesContent` removed from
 the source maps like `vite-dist/`.
@@ -74,6 +74,14 @@ the source maps like `vite-dist/`.
 `nuxt-dist/` is the `.output/public` directory of `nuxt generate` for Nuxt 4.6.4 (Vue 3.5.45,
 vue-router 5.5.0) with `sourcemap: { client: 'hidden' }`: a home page with a counter and an
 about page, built on 2026-11-12 and trimmed like the others.
+
+`react-router-dist/` and `react-router-ssr-dist/` are the `build/client` directory of the same
+minimal React Router 7.18.5 app (React 19.3.1, Vite 8.3.8, `build.sourcemap: true`), a home page
+with a counter and an about page, built on 2026-11-12: `react-router-dist/` with
+`ssr: false, prerender: ['/', '/about']` (prerendered pages), `react-router-ssr-dist/` with
+`ssr: true` (assets and the manifest only, no HTML; its source maps are removed because routes do
+not need them). A build with React Router 8.5.1 (the same app, prerendered) was also measured by
+hand: same files, same manifest format, same routes. It is not kept as a fixture.
 
 ## `lighthouse-extension.json`
 

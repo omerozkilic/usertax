@@ -124,6 +124,7 @@
             "enum": [
               "vite",
               "next",
+              "react-router",
               "nuxt",
               "astro",
               "sveltekit",

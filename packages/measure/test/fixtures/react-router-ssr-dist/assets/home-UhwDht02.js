@@ -1,0 +1,2 @@
+import{A as e,D as t,O as n,t as r}from"./jsx-runtime-DBP03XRE.js";var i=e(n(),1),a=r(),o=t(function(){let[e,t]=(0,i.useState)(0);return(0,a.jsxs)(`main`,{children:[(0,a.jsx)(`h1`,{children:`Home`}),(0,a.jsxs)(`button`,{onClick:()=>t(e+1),children:[`Clicked `,e,` times`]})]})});export{o as default};
+//# sourceMappingURL=home-UhwDht02.js.map

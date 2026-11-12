@@ -113,6 +113,7 @@ export function createMcpServer(options: McpOptions): McpServer {
           .enum([
             'vite',
             'next',
+            'react-router',
             'nuxt',
             'astro',
             'sveltekit',

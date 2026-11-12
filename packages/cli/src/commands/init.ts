@@ -195,6 +195,7 @@ export function commentWorkflow(): string {
 const WEB: ReadonlySet<Framework> = new Set([
   'vite',
   'next',
+  'react-router',
   'nuxt',
   'astro',
   'sveltekit',
@@ -244,6 +245,13 @@ export async function appNotes(root: string, apps: readonly DiscoveredApp[]): Pr
       if (!text.includes('productionBrowserSourceMaps')) {
         notes.push(
           `${where} (Next.js): set productionBrowserSourceMaps: true in next.config, for packages.`,
+        );
+      }
+    } else if (app.framework === 'react-router') {
+      const text = (await config(app.path, 'vite.config.')) ?? '';
+      if (!text.includes('sourcemap')) {
+        notes.push(
+          `${where} (React Router): set build.sourcemap to 'hidden' in vite.config, for packages.`,
         );
       }
     } else if (app.framework === 'nuxt') {

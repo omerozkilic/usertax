@@ -1,0 +1,2 @@
+import{D as e,a as t,d as n,i as r,r as i,s as a,t as o,u as s}from"./jsx-runtime-DBP03XRE.js";var c=o();function l({children:e}){return(0,c.jsxs)(`html`,{lang:`en`,children:[(0,c.jsxs)(`head`,{children:[(0,c.jsx)(`meta`,{charSet:`utf-8`}),(0,c.jsx)(t,{}),(0,c.jsx)(r,{})]}),(0,c.jsxs)(`body`,{children:[(0,c.jsxs)(`nav`,{children:[(0,c.jsx)(i,{to:`/`,children:`Home`}),` `,(0,c.jsx)(i,{to:`/about`,children:`About`})]}),e,(0,c.jsx)(n,{}),(0,c.jsx)(s,{})]})]})}var u=e(function(){return(0,c.jsx)(a,{})});export{l as Layout,u as default};
+//# sourceMappingURL=root-DoysVDau.js.map

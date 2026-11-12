@@ -183,12 +183,15 @@ describe('usertax init', () => {
     await mkdir(join(root, 'site'));
     await mkdir(join(root, 'kit'));
     await mkdir(join(root, 'nx'));
+    await mkdir(join(root, 'rr'));
     const apps = [
+      { path: 'rr', framework: 'react-router' },
       { path: 'nx', framework: 'nuxt' },
       { path: 'site', framework: 'astro' },
       { path: 'kit', framework: 'sveltekit' },
     ] as const;
     expect(await appNotes(root, apps)).toEqual([
+      expect.stringContaining("rr (React Router): set build.sourcemap to 'hidden'"),
       expect.stringContaining("nx (Nuxt): set sourcemap: { client: 'hidden' }"),
       expect.stringContaining("site (Astro): set vite: { build: { sourcemap: 'hidden' } }"),
       expect.stringContaining('kit (SvelteKit): set build.sourcemap'),
@@ -196,6 +199,10 @@ describe('usertax init', () => {
     await writeFile(
       join(root, 'site', 'astro.config.mjs'),
       "export default { vite: { build: { sourcemap: 'hidden' } } };",
+    );
+    await writeFile(
+      join(root, 'rr', 'vite.config.ts'),
+      "export default { build: { sourcemap: 'hidden' } };",
     );
     await writeFile(
       join(root, 'nx', 'nuxt.config.ts'),
