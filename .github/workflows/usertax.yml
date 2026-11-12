@@ -31,7 +31,7 @@ jobs:
       - run: pnpm build && pnpm build:action
       - run: pnpm build:examples
       - id: usertax
-        uses: ./packages/action
+        uses: ./packages/action # zizmor: ignore[self-repository] the action is built in this workspace first
         with:
           mode: measure
           config: .github/usertax.config.json

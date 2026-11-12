@@ -2,7 +2,7 @@
 # Step 2 of 2: posts the comment from the default branch and reads the report as data.
 name: usertax comment
 on:
-  workflow_run:
+  workflow_run: # zizmor: ignore[dangerous-triggers] default-branch code only; the report is untrusted data
     workflows: [usertax]
     types: [completed]
 permissions:
@@ -25,7 +25,7 @@ jobs:
           run-id: ${{ github.event.workflow_run.id }}
           github-token: ${{ github.token }}
           path: .usertax-head
-      - uses: omerozkilic/usertax-action@v0
+      - uses: omerozkilic/usertax-action@v0 # zizmor: ignore[unpinned-uses] pin a commit SHA to freeze the action
         with:
           mode: comment
           head-report: .usertax-head/usertax-report.json
