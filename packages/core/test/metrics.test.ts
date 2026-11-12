@@ -40,6 +40,29 @@ describe('extractMetrics', () => {
     expect([...metrics.keys()].filter((id) => id.startsWith('route[/about].css'))).toEqual([]);
   });
 
+  it('sums minified package bytes per app, and per platform for mobile bundles', () => {
+    const web = webApp();
+    const second = web.assets?.[1];
+    if (second) second.packages = [{ name: 'react', bytes: 1_000 }];
+    const metrics = byId(web);
+    expect(metrics.get('package[react-dom].bytes')).toMatchObject({
+      value: 60_000,
+      group: 'package',
+      unit: 'bytes',
+      label: 'Package react-dom (minified)',
+      packageScope: 'web',
+    });
+    expect(metrics.get('package[react].bytes')?.value).toBe(6_000);
+    expect(metrics.get('package[react].bytes')?.compression).toBeUndefined();
+    // First-party code is not a package.
+    expect([...metrics.keys()].filter((id) => id.startsWith('package[null]'))).toEqual([]);
+    const mobile = byId(mobileApp());
+    expect(mobile.get('package[react-native][android].bytes')).toMatchObject({
+      value: 500_000,
+      label: 'Package react-native (Android, minified)',
+    });
+  });
+
   it('ignores unknown and duplicate asset keys in routes', () => {
     const metrics = byId(
       webApp({

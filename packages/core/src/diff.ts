@@ -2,7 +2,7 @@ import { alternativesFor } from './alternatives.js';
 import type { Alternatives } from './alternatives.js';
 import { diffDependencies } from './dependencies.js';
 import type { DependencyChange } from './dependencies.js';
-import { extractMetrics } from './metrics.js';
+import { attributedFiles, extractMetrics, packageTotals } from './metrics.js';
 import type {
   LighthouseMetricName,
   Metric,
@@ -329,13 +329,22 @@ function diffMetric(
   };
 }
 
+/** A package missing from the other side's attributed bundle has 0 bytes there. */
+function absentAsZero(metric: Metric, other: App | undefined): Metric | undefined {
+  if (metric.packageScope === undefined || other === undefined) return undefined;
+  if (!packageTotals(other).has(metric.packageScope)) return undefined;
+  return { ...metric, value: 0 };
+}
+
 function diffMetrics(base: App | undefined, head: App | undefined, noise: NoiseThresholds) {
   const baseMetrics = new Map((base ? extractMetrics(base) : []).map((m) => [m.id, m]));
   const headMetrics = head ? extractMetrics(head) : [];
-  const result = headMetrics.map((metric) => diffMetric(baseMetrics.get(metric.id), metric, noise));
+  const result = headMetrics.map((metric) =>
+    diffMetric(baseMetrics.get(metric.id) ?? absentAsZero(metric, base), metric, noise),
+  );
   const headIds = new Set(headMetrics.map((m) => m.id));
   for (const [id, metric] of baseMetrics) {
-    if (!headIds.has(id)) result.push(diffMetric(metric, undefined, noise));
+    if (!headIds.has(id)) result.push(diffMetric(metric, absentAsZero(metric, head), noise));
   }
   return result;
 }
@@ -405,33 +414,6 @@ function diffAssets(
   return top(diffs, limit, (d) => rankValue(d.delta, rankBy));
 }
 
-type PackageTotals = Map<string, Map<string | null, number>>;
-
-/** The files of an app that carry source-map attribution, with the bundle they belong to. */
-function attributedFiles(app: App | undefined) {
-  return [
-    ...(app?.assets ?? []).filter((a) => a.type === 'js').map((a) => ({ scope: 'web', item: a })),
-    ...(app?.bundles ?? []).map((b) => ({ scope: b.platform, item: b })),
-  ];
-}
-
-function packageTotals(app: App | undefined): PackageTotals {
-  const totals: PackageTotals = new Map();
-  const add = (scope: string, name: string | null, bytes: number) => {
-    let byName = totals.get(scope);
-    if (!byName) {
-      byName = new Map();
-      totals.set(scope, byName);
-    }
-    byName.set(name, (byName.get(name) ?? 0) + bytes);
-  };
-  for (const { scope, item } of attributedFiles(app)) {
-    for (const pkg of item.packages ?? []) add(scope, pkg.name, pkg.bytes);
-    if (item.firstPartyBytes !== undefined) add(scope, null, item.firstPartyBytes);
-  }
-  return totals;
-}
-
 function diffPackages(base: App | undefined, head: App | undefined, limit: number) {
   const baseTotals = packageTotals(base);
   const headTotals = packageTotals(head);
@@ -443,7 +425,7 @@ function diffPackages(base: App | undefined, head: App | undefined, limit: numbe
       const baseBytes = b.get(name);
       const headBytes = h.get(name);
       diffs.push({
-        scope: scope as PackageDiff['scope'],
+        scope,
         name,
         base: baseBytes ?? 0,
         head: headBytes ?? 0,

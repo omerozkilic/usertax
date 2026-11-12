@@ -29,6 +29,8 @@ archive keys) are wrapped in brackets.
 | `route[<route>].js.{raw,gzip,brotli}`              | JavaScript loaded for one route                                                                                        | bytes    |
 | `route[<route>].css.{raw,gzip,brotli}`             | Stylesheets loaded for one route; only for routes that load at least one CSS file                                      | bytes    |
 | `bundle[<ios\|android>].raw`                       | React Native JS or Hermes bundle                                                                                       | bytes    |
+| `package[<name>].bytes`                            | Minified bytes of one package in a web app's JavaScript, from source maps                                              | bytes    |
+| `package[<name>][<ios\|android>].bytes`            | Minified bytes of one package in a React Native bundle                                                                 | bytes    |
 | `archive[<key>].file`                              | APK / AAB / IPA file size                                                                                              | bytes    |
 | `archive[<key>].category.<category>`               | Compressed size of one category (`js-bundle`, `dex`, `native`, `resources`, `assets`, `binary`, `frameworks`, `other`) | bytes    |
 | `lighthouse[<url>][<mobile\|desktop>].performance` | Lighthouse performance score, 0–100                                                                                    | score    |
@@ -70,6 +72,8 @@ one or more limits. Values can be numbers in the metric's unit or strings with a
     { "metric": "js.total.gzip", "max": "200 kB" },
     { "metric": "route[*].js.gzip", "maxIncrease": "10 kB", "level": "warn" },
     { "metric": "route[*].css.gzip", "max": "20 kB" },
+    { "metric": "package[*].bytes", "maxIncrease": "20 kB" },
+    { "metric": "package[lodash].bytes", "maxIncrease": 0 },
     { "app": "mobile", "metric": "archive[android].file", "maxIncreasePercent": 2 },
     { "metric": "lighthouse[*][mobile].performance", "min": 80, "maxDecrease": 5 }
   ]
@@ -94,6 +98,14 @@ Rules:
   change skips them. `max` and `min` always apply to the median.
 - A budget whose patterns match no metric is listed in the comment, because it is usually a
   typo.
+- Package budgets use the minified bytes of the package table (ADR 0008); compressed sizes per
+  package do not add up and have no metric. `package[*].bytes` also matches the per-platform ids
+  of mobile bundles. A package that is in only one of the two builds has 0 bytes in the other,
+  so `"maxIncrease": "20 kB"` catches a new package too, as long as that build's bundle was
+  attributed from source maps (otherwise the check is skipped). Package metrics are only used by
+  budgets; the comment shows packages in their own table.
+- When more than 20 checks match, the comment lists only the ones that fail or warn and counts
+  the rest.
 - The overall status is `fail` if any budget fails, otherwise `warn` if any warns, otherwise
   `pass`.
 
