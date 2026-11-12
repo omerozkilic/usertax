@@ -10,6 +10,8 @@ budgets are written. The report format itself is defined in
 - Sizes use SI units: 1 kB = 1000 bytes, 1 MB = 1000 kB (the convention of Chrome DevTools).
 - gzip sizes use level 9 and brotli sizes use quality 11. Both settings are recorded in every
   report and printed in the PR comment.
+- Files in formats that are compressed already (PNG, JPEG, GIF, WebP, AVIF, WOFF, WOFF2) have only
+  their file size: servers send them as they are. File tables show that size for them.
 - Per-package and per-module sizes are **minified bytes attributed by source maps**. Compression
   does not split additively across packages, so packages are not given compressed sizes.
 - For React Native with Hermes, the bundle size is the size of the Hermes bytecode file;

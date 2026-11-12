@@ -35,6 +35,27 @@ const TYPES: Record<string, AssetType> = {
   '.wasm': 'wasm',
 };
 
+/**
+ * Formats that are compressed already: servers send them as they are, so they get no gzip or
+ * brotli size (computing one costs time and says nothing). SVG and TTF/OTF fonts are text or
+ * uncompressed and are compressed like code.
+ */
+const PRECOMPRESSED = new Set([
+  '.png',
+  '.jpg',
+  '.jpeg',
+  '.gif',
+  '.webp',
+  '.avif',
+  '.woff',
+  '.woff2',
+]);
+
+export function isPrecompressed(path: string): boolean {
+  const dot = path.lastIndexOf('.');
+  return dot !== -1 && PRECOMPRESSED.has(path.slice(dot).toLowerCase());
+}
+
 /** Files in the output directory that are not shipped to users. */
 function isShipped(path: string): boolean {
   if (path.endsWith('.map')) return false;
@@ -128,15 +149,16 @@ export async function scanOutputDir(options: ScanOptions): Promise<ScanResult> {
   for (const path of shipped) {
     const content = await readFile(join(options.outDir, path));
     const type = assetType(path);
-    const size = compressedSize(content);
-    const asset: Asset = {
-      key: keys.get(path) ?? path,
-      file: path,
-      type,
-      raw: size.raw,
-      gzip: size.gzip,
-      brotli: size.brotli,
-    };
+    const asset: Asset = isPrecompressed(path)
+      ? { key: keys.get(path) ?? path, file: path, type, raw: content.byteLength }
+      : (({ raw, gzip, brotli }) => ({
+          key: keys.get(path) ?? path,
+          file: path,
+          type,
+          raw,
+          gzip,
+          brotli,
+        }))(compressedSize(content));
     if (type === 'js') {
       const code = content.toString('utf8');
       try {

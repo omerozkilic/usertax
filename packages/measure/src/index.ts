@@ -80,7 +80,14 @@ export type {
   VersionOf,
 } from './sourcemap.js';
 export { installedVersions } from './versions.js';
-export { assetType, entryRoute, measureWebApp, scanOutputDir, viteRoutes } from './web.js';
+export {
+  assetType,
+  entryRoute,
+  isPrecompressed,
+  measureWebApp,
+  scanOutputDir,
+  viteRoutes,
+} from './web.js';
 export type {
   MeasureResult,
   MeasureWebAppOptions,
