@@ -31,6 +31,13 @@ Only the manifests and lockfiles are kept.
 `@nodelib/fs.scandir/@nodelib/fs.stat`); generated with `bun install --lockfile-only` (Bun 1.4.4)
 on 2026-11-07.
 
+`chain/` has one package that needs `fast-glob` 3.3.3 (`fast-glob` → `@nodelib/fs.walk` →
+`@nodelib/fs.scandir` → `run-parallel` → `queue-microtask`, four steps deep), locked on
+2026-11-12 with pnpm 10.28.0 (`pnpm install --lockfile-only --ignore-workspace`), npm 10.9.9
+(`npm install --package-lock-only`), Yarn 1.22.22 (`yarn install` in a scratch directory) and Bun
+1.4.4 (`bun install --lockfile-only`). Yarn Berry is not included: its lockfile could not be
+generated in the environment that made these fixtures.
+
 ## `next-dist/`
 
 Part of the real `.next/` output of `pnpm --filter @usertax-examples/next-app build` (Next.js

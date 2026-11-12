@@ -186,6 +186,12 @@ export const dependencySchema = z.object({
   dev: z.boolean().optional(),
   /** For transitive dependencies: up to three direct dependencies that pull it in. */
   via: z.array(z.string().min(1).max(214)).max(3).optional(),
+  /**
+   * For a transitive dependency more than one step from the app: the shortest chain of packages
+   * from a direct dependency down to the one that depends on this package. Absent when `via`
+   * already says it all.
+   */
+  chain: z.array(z.string().min(1).max(214)).min(2).max(10).optional(),
 });
 export type Dependency = z.infer<typeof dependencySchema>;
 
