@@ -5,6 +5,7 @@ import { encode } from '@jridgewell/sourcemap-codec';
 import { describe, expect, it } from 'vitest';
 import {
   attributeBytes,
+  displayPath,
   installRoot,
   installedVersions,
   packageBytes,
@@ -54,6 +55,17 @@ describe('installRoot', () => {
   it('finds nothing for first-party code or a path that is not a package', () => {
     expect(installRoot('../../src/main.ts', undefined, 'dist/assets')).toBeUndefined();
     expect(installRoot('node_modules/.pnpm/x/y.js', undefined, '.')).toBeUndefined();
+  });
+
+  it('drops a query string without slowing down on a hostile one', () => {
+    // A source map is untrusted input; many `?` followed by a newline made a regular expression
+    // backtrack quadratically.
+    const source = `node_modules/lodash/x.js?${'?'.repeat(200_000)}\n`;
+    expect(installRoot(source, undefined, '.')).toEqual({
+      name: 'lodash',
+      root: 'node_modules/lodash',
+    });
+    expect(displayPath(source, undefined, '.')).toBe('node_modules/lodash/x.js');
   });
 
   it('rejects a root with a backslash, because it is used to find a file', () => {

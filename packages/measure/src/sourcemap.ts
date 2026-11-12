@@ -138,6 +138,15 @@ export function packageOf(path: string): string | undefined {
   return first;
 }
 
+/**
+ * Drops a `?query` suffix (loader and cache-busting parameters). Source paths come from an
+ * untrusted source map, so this avoids a regular expression that backtracks on long input.
+ */
+function withoutQuery(text: string): string {
+  const index = text.indexOf('?');
+  return index === -1 ? text : text.slice(0, index);
+}
+
 /** One installed copy of a package, as the path where a bundler found it. */
 export interface InstallRoot {
   readonly name: string;
@@ -163,10 +172,9 @@ export function installRoot(
   // Resolve the source the way a bundler wrote it: webpack and Turbopack paths are relative to the
   // app root, everything else to the map file.
   const webpack = /^webpack:\/\/[^/]*\/(.*)$/s.exec(source);
-  const clean = (webpack?.[1] ?? source)
-    .replace(/^\0/, '')
-    .replace(/^[a-z]+:\/\/\/?/i, '')
-    .replace(/\?.*$/, '');
+  const clean = withoutQuery(
+    (webpack?.[1] ?? source).replace(/^\0/, '').replace(/^[a-z]+:\/\/\/?/i, ''),
+  );
   const project = clean.startsWith('[project]/') ? clean.slice('[project]/'.length) : undefined;
   const full = project ?? (posix.isAbsolute(clean) ? clean : undefined);
   const path = posix.normalize(
@@ -226,10 +234,9 @@ export function displayPath(
   // webpack: `webpack://<namespace>/<path>` is relative to the webpack context (the app root),
   // not to the map file.
   const webpack = /^webpack:\/\/[^/]*\/(.*)$/s.exec(source);
-  const clean = (webpack?.[1] ?? source)
-    .replace(/^\0/, '')
-    .replace(/^[a-z]+:\/\/\/?/i, '')
-    .replace(/\?.*$/, '');
+  const clean = withoutQuery(
+    (webpack?.[1] ?? source).replace(/^\0/, '').replace(/^[a-z]+:\/\/\/?/i, ''),
+  );
   if (virtual) return `(virtual) ${clean}`;
   if (webpack !== null) {
     // The webpack runtime, ignored modules (`ignored|…`) and generated loader modules.
