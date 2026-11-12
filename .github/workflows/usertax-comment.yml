@@ -3,7 +3,7 @@ name: usertax comment
 # Dogfooding, step 2 of the fork-safe setup (ADR 0005): runs the action from the default branch,
 # never the pull request's code, and treats the measured report as untrusted data.
 on:
-  workflow_run:
+  workflow_run: # zizmor: ignore[dangerous-triggers] default-branch code only; the report is untrusted data (ADR 0005)
     workflows: [usertax]
     types: [completed]
 
@@ -36,7 +36,7 @@ jobs:
           run-id: ${{ github.event.workflow_run.id }}
           github-token: ${{ github.token }}
           path: .usertax-head
-      - uses: ./packages/action
+      - uses: ./packages/action # zizmor: ignore[self-repository] the action is built in this workspace first
         with:
           mode: comment
           config: .github/usertax.config.json

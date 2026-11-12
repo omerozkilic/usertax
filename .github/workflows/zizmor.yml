@@ -1,0 +1,67 @@
+name: zizmor
+
+# Static analysis of GitHub Actions workflows (injection, excessive permissions, unpinned actions,
+# dangerous triggers). usertax is meant to be safe to run on pull requests, including forks
+# (ADR 0005), so its own workflows, and the ones `usertax init` writes, are held to the same bar.
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: zizmor-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  workflows:
+    name: This repository's workflows
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      # Findings fail the job and show as annotations; uploading SARIF needs a token that pull
+      # requests from forks do not get.
+      - uses: zizmorcore/zizmor-action@45d7276c9ca790aabd705e31ca99c6185c3e76dd # v0.8.1
+        with:
+          version: 1.32.0
+          advanced-security: false
+
+  generated:
+    name: Workflows written by usertax init
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: pnpm/action-setup@73e46992e05b19abd31f2f3c20e0e7370d762115 # v6.1.1
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: 24
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm build
+      - name: Generate the workflows for a sample repository, in both modes
+        env:
+          OUT: ${{ runner.temp }}/generated
+        run: |
+          for mode in pair single; do
+            mkdir -p "$OUT/$mode"
+            cd "$OUT/$mode"
+            git init -q
+            echo '{"name":"demo","private":true,"scripts":{"build":"vite build"}}' > package.json
+            echo '{}' > pnpm-lock.yaml
+            flags=--budget
+            if [ "$mode" = single ]; then flags="--budget --single"; fi
+            node "$GITHUB_WORKSPACE/packages/cli/bin/usertax.js" init $flags
+          done
+      - uses: zizmorcore/zizmor-action@45d7276c9ca790aabd705e31ca99c6185c3e76dd # v0.8.1
+        with:
+          version: 1.32.0
+          advanced-security: false
+          inputs: ${{ runner.temp }}/generated/pair ${{ runner.temp }}/generated/single

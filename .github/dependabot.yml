@@ -4,6 +4,9 @@ updates:
     directory: /
     schedule:
       interval: weekly
+    # Do not take a release the day it is published; security updates are not delayed.
+    cooldown:
+      default-days: 7
     open-pull-requests-limit: 10
     commit-message:
       prefix: chore
@@ -17,6 +20,9 @@ updates:
     directory: /
     schedule:
       interval: weekly
+    # Do not take a release the day it is published; security updates are not delayed.
+    cooldown:
+      default-days: 7
     commit-message:
       prefix: ci
     groups:

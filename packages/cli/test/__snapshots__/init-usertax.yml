@@ -23,7 +23,7 @@ jobs:
       - run: pnpm install --frozen-lockfile
       - run: pnpm run build # build with source maps (see the notes of usertax init)
       - id: usertax
-        uses: omerozkilic/usertax-action@v0
+        uses: omerozkilic/usertax-action@v0 # zizmor: ignore[unpinned-uses] pin a commit SHA to freeze the action
         with:
           mode: measure
       - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2

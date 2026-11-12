@@ -44,7 +44,8 @@ const ACTIONS = {
   bun: 'oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2.2.0',
   upload: 'actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2',
   download: 'actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2',
-  usertax: 'omerozkilic/usertax-action@v0',
+  usertax:
+    'omerozkilic/usertax-action@v0 # zizmor: ignore[unpinned-uses] pin a commit SHA to freeze the action',
 } as const;
 
 /** Detects the package manager from the lockfile at the repository root (npm without one). */
@@ -160,7 +161,7 @@ export function commentWorkflow(): string {
     '# Step 2 of 2: posts the comment from the default branch and reads the report as data.',
     'name: usertax comment',
     'on:',
-    '  workflow_run:',
+    '  workflow_run: # zizmor: ignore[dangerous-triggers] default-branch code only; the report is untrusted data',
     '    workflows: [usertax]',
     '    types: [completed]',
     'permissions:',

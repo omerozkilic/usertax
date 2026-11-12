@@ -76,7 +76,7 @@ jobs:
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           repository: omerozkilic/usertax-action
-          ssh-key: ${{ secrets.ACTION_REPO_DEPLOY_KEY }}
+          ssh-key: ${{ secrets.ACTION_REPO_DEPLOY_KEY }} # zizmor: ignore[artipacked] the key stays configured so the next step can push
           path: usertax-action
       - if: steps.key.outputs.present == 'true'
         name: Sync, commit and tag
@@ -130,7 +130,7 @@ jobs:
           cache: pnpm
       - run: pnpm install --frozen-lockfile && pnpm build && pnpm pack:cli
       # `npm stage publish` (staged publishing) needs npm 12; pinned for reproducible releases.
-      - run: npm install --global npm@12.2.1 && npm --version
+      - run: npm install --global npm@12.2.1 && npm --version # zizmor: ignore[adhoc-packages] npm 12 is needed for staged publishing; the version is pinned
       # Staged, not direct: the version waits on npmjs.com until a maintainer approves it with
       # 2FA (`npm stage approve <id>` or the package's "Staged" tab). The trusted publisher on
       # npmjs.com allows only `npm stage publish`, as npm recommends (docs/releasing.md).

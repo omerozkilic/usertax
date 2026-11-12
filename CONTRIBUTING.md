@@ -20,6 +20,7 @@ pnpm check
 | `pnpm format` / `pnpm format:check` | Prettier                                               |
 | `pnpm test` / `pnpm test:coverage`  | Vitest; CI enforces coverage thresholds                |
 | `pnpm check`                        | Everything CI runs                                     |
+| `uvx zizmor .`                      | Lint the GitHub workflows like CI does (needs `uv`)    |
 
 ## Repository layout
 
