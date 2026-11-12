@@ -37,6 +37,9 @@ const head = modify(base, (r) => {
   }
 });
 
+/** Budget checks listed one by one before passed and skipped ones are only counted. */
+const LISTED_BUDGET_ROWS = 20;
+
 /** Turns the calibrated default noise thresholds off, to test unassessed changes. */
 const OFF: NoiseThresholds = { performance: null, lcp: null, tbt: null, cls: null };
 
@@ -65,6 +68,52 @@ describe('renderMarkdown', () => {
     });
     expect(markdown.startsWith(COMMENT_MARKER)).toBe(true);
     await expect(markdown).toMatchFileSnapshot('./__snapshots__/comparison.md');
+  });
+
+  it('lists only the package budgets that need attention when a glob checks many', () => {
+    const many = modify(head, (r) => {
+      const main = r.apps[0]?.assets?.[0];
+      if (main) {
+        main.packages = Array.from({ length: 30 }, (_, i) => ({ name: `pkg-${i}`, bytes: 1_000 }));
+        main.packages.push({ name: '<img src=x onerror=alert(1)>|`x', bytes: 40_000 });
+      }
+    });
+    const diff = diffReports(many, base);
+    const budgets = evaluateBudgets(diff, [
+      budgetSchema.parse({ app: 'web', metric: 'package[*].bytes', maxIncrease: '20 kB' }),
+    ]);
+    expect(budgets.results.length).toBeGreaterThan(LISTED_BUDGET_ROWS);
+    const markdown = renderMarkdown(diff, { budgets });
+    // Package metrics have their own table and never show as metric rows.
+    expect(markdown).not.toContain('| Package pkg-0 (minified) |');
+    const budgetRows = markdown.split('\n').filter((line) => line.includes('maxIncrease'));
+    expect(budgetRows).toHaveLength(1);
+    expect(budgetRows[0]).toContain('❌');
+    expect(markdown).toContain(`Not listed: ${budgets.results.length - 1} passed.`);
+    const html = micromark(markdown, {
+      allowDangerousHtml: true,
+      extensions: [gfm()],
+      htmlExtensions: [gfmHtml()],
+    });
+    expect(html).not.toMatch(/<img/);
+    // The hostile name stays inside its table cell.
+    const cells = /<tr>\s*<td[^>]*>❌<\/td>([\s\S]*?)<\/tr>/.exec(html)?.[1] ?? '';
+    expect(cells.match(/<td/g)).toHaveLength(5);
+  });
+
+  it('counts budget checks when none needs attention', () => {
+    const diff = diffReports(head);
+    const budgets = evaluateBudgets(diff, [
+      budgetSchema.parse({ app: 'web', metric: 'package[*].bytes', maxIncrease: '20 kB' }),
+      budgetSchema.parse({ metric: '*', max: '1 GB' }),
+    ]);
+    expect(budgets.results.length).toBeGreaterThan(LISTED_BUDGET_ROWS);
+    const markdown = renderMarkdown(diff, { budgets });
+    const passed = budgets.results.filter((r) => r.status === 'pass').length;
+    const skipped = budgets.results.length - passed;
+    expect(markdown).toContain(
+      `${budgets.results.length} budget checks: ${passed} passed, ${skipped} skipped.`,
+    );
   });
 
   it('renders head values when there is no base', async () => {

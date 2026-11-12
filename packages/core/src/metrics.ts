@@ -2,7 +2,7 @@ import type { App, Asset, Compression, JsBundle, Lighthouse, Platform } from './
 import { summarize } from './stats.js';
 
 export type MetricUnit = 'bytes' | 'ms' | 'score' | 'unitless';
-export type MetricGroup = 'web' | 'route' | 'bundle' | 'archive' | 'lighthouse';
+export type MetricGroup = 'web' | 'route' | 'bundle' | 'archive' | 'lighthouse' | 'package';
 export type MetricDirection = 'lower-is-better' | 'higher-is-better';
 export type LighthouseMetricName = 'performance' | 'lcp' | 'tbt' | 'cls';
 
@@ -15,6 +15,7 @@ export type LighthouseMetricName = 'performance' | 'lcp' | 'tbt' | 'cls';
  * - `bundle[ios].raw`
  * - `archive[android].file`, `archive[android].category.dex`
  * - `lighthouse[/][mobile].lcp`
+ * - `package[lodash].bytes`, `package[lodash][android].bytes` (minified bytes per bundle)
  *
  * Budgets select metrics with glob patterns such as `route[*].js.gzip`.
  */
@@ -34,6 +35,11 @@ export interface Metric {
   readonly noiseKey?: LighthouseMetricName;
   /** Origins of browser extensions that were active in at least one run (not comparable). */
   readonly contamination?: readonly string[];
+  /**
+   * For package metrics, the bundle they belong to. A package missing on one side of a comparison
+   * has 0 bytes there, provided that side's bundle was attributed at all.
+   */
+  readonly packageScope?: PackageScope;
 }
 
 interface SizeTotals {
@@ -85,6 +91,59 @@ function sizeMetrics(
 }
 
 const PLATFORM_LABEL: Record<Platform, string> = { ios: 'iOS', android: 'Android' };
+
+/** Where attributed bytes ship: the web app's JavaScript, or one mobile JS bundle. */
+export type PackageScope = 'web' | Platform;
+
+/** The files of an app that carry source-map attribution, with the scope they ship in. */
+export function attributedFiles(
+  app: App | undefined,
+): { scope: PackageScope; item: Asset | JsBundle }[] {
+  return [
+    ...(app?.assets ?? [])
+      .filter((a) => a.type === 'js')
+      .map((a) => ({ scope: 'web' as const, item: a })),
+    ...(app?.bundles ?? []).map((b) => ({ scope: b.platform, item: b })),
+  ];
+}
+
+/** Minified bytes per package (`null` for first-party code), per scope, from source maps. */
+export function packageTotals(app: App | undefined): Map<PackageScope, Map<string | null, number>> {
+  const totals = new Map<PackageScope, Map<string | null, number>>();
+  const add = (scope: PackageScope, name: string | null, bytes: number) => {
+    const byName = totals.get(scope) ?? new Map<string | null, number>();
+    totals.set(scope, byName);
+    byName.set(name, (byName.get(name) ?? 0) + bytes);
+  };
+  for (const { scope, item } of attributedFiles(app)) {
+    for (const pkg of item.packages ?? []) add(scope, pkg.name, pkg.bytes);
+    if (item.firstPartyBytes !== undefined) add(scope, null, item.firstPartyBytes);
+  }
+  return totals;
+}
+
+/** `package[<name>].bytes` for web JavaScript, `package[<name>][<platform>].bytes` for bundles. */
+function packageMetrics(app: App): Metric[] {
+  const metrics: Metric[] = [];
+  for (const [scope, byName] of packageTotals(app)) {
+    for (const [name, bytes] of byName) {
+      if (name === null) continue;
+      const web = scope === 'web';
+      metrics.push({
+        id: web ? `package[${name}].bytes` : `package[${name}][${scope}].bytes`,
+        group: 'package',
+        label: web
+          ? `Package ${name} (minified)`
+          : `Package ${name} (${PLATFORM_LABEL[scope]}, minified)`,
+        unit: 'bytes',
+        direction: 'lower-is-better',
+        value: bytes,
+        packageScope: scope,
+      });
+    }
+  }
+  return metrics;
+}
 
 function assetMetrics(assets: readonly Asset[]): Metric[] {
   const js = assets.filter((asset) => asset.type === 'js');
@@ -215,5 +274,6 @@ export function extractMetrics(app: App): Metric[] {
     ...bundleMetrics(app.bundles ?? []),
     ...archiveMetrics(app),
     ...lighthouseMetrics(app.lighthouse ?? []),
+    ...packageMetrics(app),
   ];
 }
