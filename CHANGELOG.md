@@ -1,5 +1,28 @@
 # Changelog
 
+## [0.3.0](https://github.com/omerozkilic/usertax/compare/v0.2.0...v0.3.0) (2026-11-13)
+
+
+### Features
+
+* **core:** budget the bytes of each package with package[&lt;name&gt;].bytes ([#82](https://github.com/omerozkilic/usertax/issues/82)) ([2411604](https://github.com/omerozkilic/usertax/commit/24116045adb032072c03973661dd5585af0eee2b))
+* **measure,core:** explain why a dependency was added with the chain from a direct dependency ([#78](https://github.com/omerozkilic/usertax/issues/78)) ([370711a](https://github.com/omerozkilic/usertax/commit/370711a9deba78ca2dfabf7939983d53ab8d0801))
+* **measure,core:** mark Lighthouse runs with browser extensions active as not comparable ([53fc739](https://github.com/omerozkilic/usertax/commit/53fc7394ef30574db79cb44282e971da53bb6649))
+* **measure,core:** report packages bundled in more than one version ([#71](https://github.com/omerozkilic/usertax/issues/71)) ([100dc44](https://github.com/omerozkilic/usertax/commit/100dc445102f29723ad8d577d87d73a127d1bceb))
+* **measure,core:** report the CSS each route loads as route[].css.* ([#80](https://github.com/omerozkilic/usertax/issues/80)) ([dd3b938](https://github.com/omerozkilic/usertax/commit/dd3b938d33076915ac1c7221e6072f4ce818676a))
+* **measure,core:** report the images and fonts each route references ([#81](https://github.com/omerozkilic/usertax/issues/81)) ([e6d70f7](https://github.com/omerozkilic/usertax/commit/e6d70f75f6c89463d4ea8367dfa7276b69c32002))
+* **measure:** measure Astro and SvelteKit apps with routes from their prerendered pages ([#75](https://github.com/omerozkilic/usertax/issues/75)) ([230d720](https://github.com/omerozkilic/usertax/commit/230d7200cfbadc9d1225d4c4a54c52d467f9e235))
+* **measure:** measure Nuxt apps with routes from their prerendered pages ([f7ff25a](https://github.com/omerozkilic/usertax/commit/f7ff25acfde7cfda5ba124ece4511e0711210e29))
+* **measure:** measure React Router framework-mode apps with routes from their client manifest ([#77](https://github.com/omerozkilic/usertax/issues/77)) ([ecc1c83](https://github.com/omerozkilic/usertax/commit/ecc1c83f345d5fd1bc90987f0ffaf0c992cc5354))
+* **measure:** measure Rsbuild and Rspack builds ([#84](https://github.com/omerozkilic/usertax/issues/84)) ([2564670](https://github.com/omerozkilic/usertax/commit/2564670b17f4059f3b0bebb0ba2358ecb18ecbe5))
+
+
+### Bug Fixes
+
+* **measure:** do not gzip and brotli files in compressed formats ([#86](https://github.com/omerozkilic/usertax/issues/86)) ([5fdaa7a](https://github.com/omerozkilic/usertax/commit/5fdaa7a3c0be4a980a5ce9ca99cc428a79bc62ca))
+* **measure:** read the prerendered page of React Router routes for images ([#87](https://github.com/omerozkilic/usertax/issues/87)) ([3c30694](https://github.com/omerozkilic/usertax/commit/3c306941fb7e0a54eb5fd083ac22b64f1fcb9036))
+* **security:** override node-forge to 1.4.3 in the Expo example's tooling ([#85](https://github.com/omerozkilic/usertax/issues/85)) ([719ebd3](https://github.com/omerozkilic/usertax/commit/719ebd342d385617c794758955a681c019473eed))
+
 ## [0.2.0](https://github.com/omerozkilic/usertax/compare/v0.1.4...v0.2.0) (2026-11-07)
 
 
