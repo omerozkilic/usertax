@@ -30,8 +30,10 @@ vi.mock('lighthouse', async () => {
   return {
     default: async (url: string) => {
       audited.push(url);
-      // The page must really be served: fetch it like Lighthouse would.
-      const response = await fetch(url);
+      // The page must really be served: fetch it like Lighthouse would. Each request gets a new
+      // connection: a kept-alive one can be closed by the server (after its 5 s idle timeout) just
+      // as a stalled CI runner reuses it, which fails the request with a reset.
+      const response = await fetch(url, { headers: { connection: 'close' } });
       if (!response.ok) throw new Error(`HTTP ${response.status} for ${url}`);
       return { lhr: new URL(url).searchParams.has('extension') ? withExtension : real };
     },
@@ -79,7 +81,7 @@ describe('usertax measure --lighthouse', () => {
         ],
         c.io,
       );
-      expect(code).toBe(0);
+      expect(code, c.err()).toBe(0);
       // One warm-up run per page (not recorded), then two recorded runs.
       expect(audited.map((url) => new URL(url).pathname)).toEqual([
         '/',
@@ -120,7 +122,7 @@ describe('usertax measure --lighthouse', () => {
         ],
         c.io,
       );
-      expect(code).toBe(0);
+      expect(code, c.err()).toBe(0);
       expect(c.err()).toContain(
         'browser extensions active: chrome-extension://nojlinpnfpblhnlcjpgaeankkhjbnean; not comparable',
       );
