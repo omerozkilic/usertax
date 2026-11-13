@@ -1,6 +1,6 @@
 {
   "name": "usertax-monorepo",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "private": true,
   "description": "What does this pull request cost your users? Web and mobile performance diffs on every PR.",
   "license": "MIT",
