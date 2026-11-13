@@ -10,7 +10,7 @@
 import { execFileSync } from 'node:child_process';
 import { mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
-import { join } from 'node:path';
+import { join, resolve } from 'node:path';
 
 const repo = new URL('..', import.meta.url).pathname;
 const cli = join(repo, 'packages/cli/bin/usertax.js');
@@ -68,7 +68,7 @@ try {
     if (!markdown.includes(expected)) throw new Error(`demo output does not contain ${expected}`);
   }
   if (output === undefined) process.stdout.write(markdown);
-  else writeFileSync(join(repo, output), markdown);
+  else writeFileSync(resolve(repo, output), markdown);
 } finally {
   execFileSync('git', ['worktree', 'remove', '--force', tree], { cwd: repo, stdio: 'ignore' });
   rmSync(work, { recursive: true, force: true });
