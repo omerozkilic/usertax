@@ -144,3 +144,26 @@ the recorded ones (`warmup`, default 1).
 
 Bundle and file sizes are deterministic for a given lockfile and build tool. The numbers in the
 README come from [`docs/demo`](../demo/README.md) (`pnpm demo`).
+
+## Hermes bytecode attribution
+
+Hermes source maps map bytecode offsets to modules, so the bytes between two mappings are
+attributed to the first one's module (ADR 0008). Headers, string tables and the last mapping of
+each function block have no source and stay unattributed. How much that is was measured on the
+Expo example, exported one platform at a time (see [metrics](../metrics.md)):
+
+| Bundle  | Bytecode (bytes) | Attributed to a module | Unattributed     |
+| ------- | ---------------- | ---------------------- | ---------------- |
+| Android | 1,250,656        | 774,338                | 476,318 (38.1 %) |
+| iOS     | 1,246,572        | 771,728                | 474,844 (38.1 %) |
+
+The three parts (packages, first-party code, unattributed) always add up to the bundle size, and
+`pnpm e2e` checks that. Per-package numbers are therefore a lower bound of what each package
+costs in the bytecode, and the unattributed share is not split among packages. Reproduce with:
+
+```bash
+pnpm build && pnpm build:examples
+node packages/cli/bin/usertax.js measure examples/expo-app --output expo.json
+node -e 'for (const b of JSON.parse(require("fs").readFileSync("expo.json")).apps[0].bundles)
+  console.log(b.platform, b.raw, b.unattributedBytes)'
+```
