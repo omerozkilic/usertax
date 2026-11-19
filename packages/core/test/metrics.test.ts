@@ -134,6 +134,20 @@ describe('extractMetrics', () => {
     });
   });
 
+  it('reports the Expo update per platform: total, bundle and assets', () => {
+    const metrics = byId(mobileApp());
+    expect(metrics.get('update[android].total')).toMatchObject({
+      value: 2_500_000,
+      group: 'update',
+      unit: 'bytes',
+      direction: 'lower-is-better',
+      label: 'Android Expo update: bundle and assets',
+    });
+    expect(metrics.get('update[android].bundle')?.value).toBe(2_000_000);
+    expect(metrics.get('update[ios].assets')?.value).toBe(500_000);
+    expect(byId(webApp()).has('update[android].total')).toBe(false);
+  });
+
   it('labels plain JS bundles', () => {
     const app = mobileApp();
     const bundle = app.bundles?.[0];

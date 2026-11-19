@@ -49,6 +49,12 @@ Base `aaaaaaa` → head `aaaaaaa` · 3 apps · ⚠️ 2 budget warnings
 | 🆕 | android\: native \(compressed\) | – | 20.0 MB | new |
 | 🆕 | android\: native libraries arm64\-v8a \(compressed\) | – | 12.0 MB | new |
 | 🆕 | android\: native libraries x86\_64 \(compressed\) | – | 8.0 MB | new |
+| 🆕 | Android Expo update\: bundle and assets | – | 2.5 MB | new |
+| 🆕 | Android Expo update\: bundle | – | 2.0 MB | new |
+| 🆕 | Android Expo update\: assets | – | 500.0 kB | new |
+| 🆕 | iOS Expo update\: bundle and assets | – | 2.6 MB | new |
+| 🆕 | iOS Expo update\: bundle | – | 2.1 MB | new |
+| 🆕 | iOS Expo update\: assets | – | 500.0 kB | new |
 
 **Packages with the largest change** <sub>minified bytes from source maps</sub>
 
@@ -69,6 +75,12 @@ Base `aaaaaaa` → head `aaaaaaa` · 3 apps · ⚠️ 2 budget warnings
 | ➖ | android\: native \(compressed\) | 20.0 MB | – | removed |
 | ➖ | android\: native libraries arm64\-v8a \(compressed\) | 12.0 MB | – | removed |
 | ➖ | android\: native libraries x86\_64 \(compressed\) | 8.0 MB | – | removed |
+| ➖ | Android Expo update\: bundle and assets | 2.5 MB | – | removed |
+| ➖ | Android Expo update\: bundle | 2.0 MB | – | removed |
+| ➖ | Android Expo update\: assets | 500.0 kB | – | removed |
+| ➖ | iOS Expo update\: bundle and assets | 2.6 MB | – | removed |
+| ➖ | iOS Expo update\: bundle | 2.1 MB | – | removed |
+| ➖ | iOS Expo update\: assets | 500.0 kB | – | removed |
 
 **Packages with the largest change** <sub>minified bytes from source maps</sub>
 

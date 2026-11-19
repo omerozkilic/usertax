@@ -45,8 +45,10 @@ Base `aaaaaaa` → head `ccccccc` · 2 apps · ❌ 1 budget failed
 | :-: | --- | --: | --: | --: |
 | 🔴 | Android APK \(android\) | 30.0 MB | 30.4 MB | +400.0 kB (+1.3%) |
 | 🔴 | android\: native libraries arm64\-v8a \(compressed\) | 12.0 MB | 12.4 MB | +400.0 kB (+3.3%) |
+| 🔴 | Android Expo update\: bundle and assets | 2.5 MB | 2.6 MB | +72.0 kB (+2.9%) |
+| 🔴 | Android Expo update\: bundle | 2.0 MB | 2.1 MB | +72.0 kB (+3.6%) |
 
-<details><summary>5 unchanged</summary>
+<details><summary>9 unchanged</summary>
 
 | | Metric | Base | Head | Change |
 | :-: | --- | --: | --: | --: |
@@ -55,6 +57,10 @@ Base `aaaaaaa` → head `ccccccc` · 2 apps · ❌ 1 budget failed
 | ⚪ | android\: js\-bundle \(compressed\) | 1.0 MB | 1.0 MB | ±0 B (±0.0%) |
 | ⚪ | android\: native \(compressed\) | 20.0 MB | 20.0 MB | ±0 B (±0.0%) |
 | ⚪ | android\: native libraries x86\_64 \(compressed\) | 8.0 MB | 8.0 MB | ±0 B (±0.0%) |
+| ⚪ | Android Expo update\: assets | 500.0 kB | 500.0 kB | ±0 B (±0.0%) |
+| ⚪ | iOS Expo update\: bundle and assets | 2.6 MB | 2.6 MB | ±0 B (±0.0%) |
+| ⚪ | iOS Expo update\: bundle | 2.1 MB | 2.1 MB | ±0 B (±0.0%) |
+| ⚪ | iOS Expo update\: assets | 500.0 kB | 500.0 kB | ±0 B (±0.0%) |
 
 </details>
 

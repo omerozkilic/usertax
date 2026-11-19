@@ -78,7 +78,7 @@ a date, measured on real builds ([full comment](docs/demo/add-moment.md),
 | Attribution  | Source maps, lockfiles: pnpm 6 / 9, npm 2 / 3, Yarn 1, Yarn 2+, Bun                                                                                                                                                                | –                             |
 | Budgets      | `max`, `min`, increase / decrease in bytes or percent, warn / fail, from `usertax.config.(json\|ts)`; exit code 1 on failure                                                                                                       | –                             |
 | Lighthouse   | Runner (`--lighthouse`), every run stored, medians, IQR, noise thresholds calibrated on GitHub-hosted runners ([benchmarks](docs/benchmarks/README.md))                                                                            | –                             |
-| Mobile       | Expo and bare React Native bundles (JS and Hermes bytecode, with attribution), APK / AAB / IPA breakdown                                                                                                                           | Per-device download estimates |
+| Mobile       | Expo and bare React Native bundles (JS and Hermes bytecode, with attribution), APK / AAB / IPA breakdown, Expo update (OTA) size                                                                                                   | Per-device download estimates |
 | Distribution | GitHub Action on the [Marketplace](https://github.com/marketplace/actions/usertax-pr-performance-cost) (fork-safe two-workflow setup, dogfooded here); CLI `npx @usertax/cli`; MCP server (`usertax mcp`); monorepos in one report | –                             |
 
 ## GitHub Action

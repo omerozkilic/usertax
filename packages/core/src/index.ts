@@ -79,6 +79,7 @@ export {
   parseReportText,
   reportJsonSchema,
   reportSchema,
+  updateSchema,
 } from './schema.js';
 export type {
   App,
@@ -94,6 +95,7 @@ export type {
   LighthouseContamination,
   LighthouseRun,
   Platform,
+  Update,
   Report,
   Route,
 } from './schema.js';
