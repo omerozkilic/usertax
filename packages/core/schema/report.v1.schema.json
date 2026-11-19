@@ -555,6 +555,35 @@
                     ]
                   }
                 },
+                "downloads": {
+                  "maxItems": 10,
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "abi": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 100
+                      },
+                      "density": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 20
+                      },
+                      "bytes": {
+                        "type": "integer",
+                        "minimum": 0,
+                        "maximum": 9007199254740991
+                      }
+                    },
+                    "required": [
+                      "abi",
+                      "density",
+                      "bytes"
+                    ]
+                  }
+                },
                 "entries": {
                   "maxItems": 50000,
                   "type": "array",
