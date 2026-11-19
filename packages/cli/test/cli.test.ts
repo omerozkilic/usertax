@@ -3,6 +3,7 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { afterEach, beforeAll, describe, expect, it, vi } from 'vitest';
 import { HELP, main } from '@usertax/cli';
+import { REPORT_LIMITS } from '@usertax/core';
 import { BASE_SHA, modify, report, webApp } from '../../core/test/fixtures.js';
 
 function capture() {
@@ -135,6 +136,27 @@ describe('usertax diff', () => {
       [join(dir, 'missing.json'), 'cannot read head report'],
       [malformed, 'is not valid JSON'],
       [invalid, 'invalid usertax report'],
+    ] as const) {
+      const c = capture();
+      expect(await main(['diff', path], c.io)).toBe(2);
+      expect(c.err()).toContain(expected);
+    }
+  });
+});
+
+describe('usertax diff with hostile reports', () => {
+  it('rejects oversized, deeply nested and oversized-string reports with a message', async () => {
+    const dir = await mkdtemp(join(tmpdir(), 'usertax-hostile-'));
+    const big = join(dir, 'big.json');
+    const deep = join(dir, 'deep.json');
+    const long = join(dir, 'long.json');
+    await writeFile(big, ' '.repeat(REPORT_LIMITS.maxBytes + 1));
+    await writeFile(deep, '['.repeat(1_000_000) + ']'.repeat(1_000_000));
+    await writeFile(long, JSON.stringify({ schemaVersion: 1, tool: 'x'.repeat(5000) }));
+    for (const [path, expected] of [
+      [big, 'is larger than 20000000 bytes'],
+      [deep, 'nested deeper than 16 levels'],
+      [long, 'string longer than 1024 characters'],
     ] as const) {
       const c = capture();
       expect(await main(['diff', path], c.io)).toBe(2);

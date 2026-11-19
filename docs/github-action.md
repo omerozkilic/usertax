@@ -106,6 +106,26 @@ Strings from reports are escaped or shown as code; links in comments only come f
 data. The head report is refused if it was measured for another commit than the pull request
 head.
 
+### Limits on reports
+
+The head report comes from the pull request's build, so a fork controls it. Before the schema
+is applied, the comment job refuses a report that exceeds any of these limits and says which one
+(`usertax diff` applies the same limits to its files):
+
+| Limit                  | Value                              |
+| ---------------------- | ---------------------------------- |
+| File size              | 20 000 000 bytes                   |
+| Nesting depth          | 16 levels (a valid report nests 9) |
+| Items in an array      | 50 000                             |
+| Keys in an object      | 100                                |
+| Characters in a string | 1 024 (also for object keys)       |
+| Values in the report   | 5 000 000                          |
+
+They sit at or above the bounds of the schema, so a report that usertax produced never reaches
+them. A refused report fails the comment job with a message; nothing is rendered from it. The
+base report, read from an artifact of your own default branch, has the same size cap.
+They are exported as `REPORT_LIMITS` from `@usertax/core`.
+
 ## Single workflow
 
 For repositories that do not accept pull requests from forks, `mode: all` measures and comments

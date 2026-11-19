@@ -53,6 +53,8 @@ export type {
 } from './metrics.js';
 export { parsePercent, parseQuantity } from './quantity.js';
 export { escapeText, inlineCode } from './render/escape.js';
+export { REPORT_LIMITS, findLimitViolation } from './limits.js';
+export type { ReportLimits } from './limits.js';
 export { renderJson } from './render/json.js';
 export {
   COMMENT_MARKER,
@@ -74,6 +76,7 @@ export {
   jsBundleSchema,
   lighthouseSchema,
   parseReport,
+  parseReportText,
   reportJsonSchema,
   reportSchema,
 } from './schema.js';

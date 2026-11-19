@@ -2,9 +2,11 @@ import { readFile, stat } from 'node:fs/promises';
 import { resolve } from 'node:path';
 import {
   ConfigError,
+  REPORT_LIMITS,
+  ReportValidationError,
   diffReports,
   evaluateBudgets,
-  parseReport,
+  parseReportText,
   renderMarkdown,
 } from '@usertax/core';
 import type { BudgetEvaluation, Config, Report } from '@usertax/core';
@@ -26,7 +28,6 @@ import { GitHub } from './github.js';
 import { resolvePullRequest } from './pr.js';
 import { commitStatus, setCommitStatus } from './status.js';
 
-const MAX_REPORT_BYTES = 20_000_000;
 /** Events on the default branch whose report is stored as a base report. */
 const BASE_EVENTS = new Set(['push', 'workflow_dispatch', 'schedule']);
 
@@ -96,9 +97,15 @@ async function readHeadReport(path: string): Promise<Report> {
     throw new InputError(
       `head report ${path} not found; download the measure workflow's artifact first`,
     );
-  if (info.size > MAX_REPORT_BYTES)
-    throw new InputError(`head report ${path} is larger than ${MAX_REPORT_BYTES} bytes`);
-  return parseReport(JSON.parse(await readFile(path, 'utf8')));
+  if (info.size > REPORT_LIMITS.maxBytes)
+    throw new InputError(`head report ${path} is larger than ${REPORT_LIMITS.maxBytes} bytes`);
+  try {
+    return parseReportText(await readFile(path, 'utf8'));
+  } catch (error) {
+    if (error instanceof ReportValidationError)
+      throw new InputError(`head report ${path}: ${error.message}`);
+    throw error;
+  }
 }
 
 async function loadTrustedConfig(ctx: Context): Promise<Config | undefined> {

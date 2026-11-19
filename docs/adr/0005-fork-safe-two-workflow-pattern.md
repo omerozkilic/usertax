@@ -59,6 +59,21 @@ No input of the action requires a secret.
   commit regardless of which check suite created them. Without the permission, the action logs
   a warning and still comments (`commit-status: false` turns it off).
 
+## Implementation notes (report limits)
+
+- "Validated against the schema and size-capped" now has precise limits, applied before the
+  schema: 20 MB of text, 16 levels of nesting, 50 000 items per array, 100 keys per object,
+  1 024 characters per string or key and 5 million values (`REPORT_LIMITS` in
+  `packages/core/src/limits.ts`, listed in `docs/github-action.md`). The check walks the parsed
+  JSON without recursion, so a hostile depth cannot overflow the stack, and `parseReportText`
+  turns a parser failure into a validation error. The decision itself is unchanged.
+- The same path (`parseReportText`) reads the head report in the action, the base report from its
+  artifact and the files of `usertax diff`; the base artifact's entry is inflated with the same
+  size cap.
+- Deterministic mutation fuzz tests (`packages/core/test/fuzz.test.ts`) damage a valid report and
+  check that whatever parses also diffs and renders into Markdown that GitHub's renderer shows
+  without raw HTML, foreign links or a second marker.
+
 ## Consequences
 
 - Safe by default for public repositories.
