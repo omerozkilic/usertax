@@ -129,6 +129,18 @@ export const archiveSchema = z.object({
       }),
     )
     .max(20),
+  /** Native libraries (`lib/<abi>/`) per ABI in an APK or AAB; absent without native libraries. */
+  abis: z
+    .array(
+      z.object({
+        abi: z.string().min(1).max(100),
+        compressed: bytes,
+        uncompressed: bytes,
+        count: z.number().int().nonnegative(),
+      }),
+    )
+    .max(20)
+    .optional(),
   entries: z
     .array(
       z.object({

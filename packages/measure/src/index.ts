@@ -1,6 +1,7 @@
 export {
   ArchiveError,
   HERMES_MAGIC,
+  abiOf,
   analyzeArchive,
   categorize,
   isHermesBytecode,

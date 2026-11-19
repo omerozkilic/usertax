@@ -120,6 +120,20 @@ describe('extractMetrics', () => {
     expect(metrics.get('archive[android].category.dex')?.value).toBe(8_000_000);
   });
 
+  it('reports native libraries per ABI', () => {
+    const app = mobileApp();
+    const archive = app.archives?.[0];
+    if (archive === undefined) throw new Error('fixture has no archive');
+    archive.abis = [
+      { abi: 'arm64-v8a', compressed: 12_000_000, uncompressed: 30_000_000, count: 2 },
+    ];
+    expect(byId(app).get('archive[android].abi[arm64-v8a]')).toMatchObject({
+      value: 12_000_000,
+      group: 'archive',
+      label: 'android: native libraries arm64-v8a (compressed)',
+    });
+  });
+
   it('labels plain JS bundles', () => {
     const app = mobileApp();
     const bundle = app.bundles?.[0];
