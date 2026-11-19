@@ -1,12 +1,13 @@
-import { readFile, writeFile } from 'node:fs/promises';
+import { readFile, stat, writeFile } from 'node:fs/promises';
 import { resolve } from 'node:path';
 import { parseArgs } from 'node:util';
 import {
   ConfigError,
+  REPORT_LIMITS,
   ReportValidationError,
   diffReports,
   evaluateBudgets,
-  parseReport,
+  parseReportText,
   renderJson,
   renderMarkdown,
 } from '@usertax/core';
@@ -38,19 +39,16 @@ const COMPRESSIONS = new Set<Compression>(['gzip', 'brotli', 'raw']);
 export async function readReport(path: string, role: string): Promise<Report> {
   let text: string;
   try {
+    if ((await stat(path)).size > REPORT_LIMITS.maxBytes)
+      throw new UsageError(`${role} report ${path} is larger than ${REPORT_LIMITS.maxBytes} bytes`);
     text = await readFile(path, 'utf8');
   } catch (error) {
+    if (error instanceof UsageError) throw error;
     const code = (error as NodeJS.ErrnoException).code ?? 'unknown error';
     throw new UsageError(`cannot read ${role} report ${path}: ${code}`);
   }
-  let json: unknown;
   try {
-    json = JSON.parse(text);
-  } catch {
-    throw new UsageError(`${role} report ${path} is not valid JSON`);
-  }
-  try {
-    return parseReport(json);
+    return parseReportText(text);
   } catch (error) {
     if (error instanceof ReportValidationError) {
       throw new UsageError(`${role} report ${path}: ${error.message}`);

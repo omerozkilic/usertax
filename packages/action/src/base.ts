@@ -1,7 +1,7 @@
 import { mkdtemp, rm, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-import { parseReport } from '@usertax/core';
+import { REPORT_LIMITS, parseReportText } from '@usertax/core';
 import type { Report } from '@usertax/core';
 import { readZipFile } from '@usertax/measure';
 import type { GitHub } from './github.js';
@@ -53,8 +53,8 @@ export async function findBaseReport(
     try {
       const zip = join(dir, 'artifact.zip');
       await writeFile(zip, await gh.downloadArtifact(artifact.id));
-      const report = parseReport(
-        JSON.parse((await readZipFile(zip, REPORT_FILE)).toString('utf8')),
+      const report = parseReportText(
+        (await readZipFile(zip, REPORT_FILE, REPORT_LIMITS.maxBytes)).toString('utf8'),
       );
       return { found: true, report, sha: candidate, behind };
     } finally {

@@ -4,7 +4,7 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { beforeAll, describe, expect, it } from 'vitest';
-import { COMMENT_MARKER } from '@usertax/core';
+import { COMMENT_MARKER, REPORT_LIMITS } from '@usertax/core';
 import type { Report } from '@usertax/core';
 import {
   GitHub,
@@ -399,6 +399,28 @@ describe('run', () => {
       expect.stringContaining('not found; download the measure workflow'),
       '::error::GITHUB_REPOSITORY must be owner/repo, received "nope"',
     ]);
+  });
+
+  it('rejects hostile head reports with the limit that was hit', async () => {
+    const dir = await mkdtemp(join(tmpdir(), 'usertax-hostile-'));
+    const cases: [string, string, string][] = [
+      ['big.json', ' '.repeat(REPORT_LIMITS.maxBytes + 1), 'is larger than 20000000 bytes'],
+      ['deep.json', '['.repeat(1_000_000) + ']'.repeat(1_000_000), 'nested deeper than 16 levels'],
+      ['broken.json', '{"schemaVersion":1,', 'report is not valid JSON'],
+      ['long.json', JSON.stringify({ name: 'x'.repeat(5000) }), 'string longer than 1024'],
+    ];
+    for (const [name, content, expected] of cases) {
+      await writeFile(join(dir, name), content);
+      const logs: string[] = [];
+      expect(
+        await run({
+          env: env({ 'INPUT_HEAD-REPORT': join(dir, name) }),
+          fetch,
+          log: (l) => logs.push(l),
+        }),
+      ).toBe(1);
+      expect(logs).toEqual([expect.stringContaining(expected)]);
+    }
   });
 
   it('measures, names the artifact and can comment in one job', async () => {

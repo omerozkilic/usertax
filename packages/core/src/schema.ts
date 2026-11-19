@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { REPORT_LIMITS, findLimitViolation } from './limits.js';
 
 /**
  * The usertax report: everything measured for one commit. See ADR 0003.
@@ -303,8 +304,38 @@ export class ReportValidationError extends Error {
 
 const MAX_REPORTED_ISSUES = 20;
 
-/** Validates untrusted input as a report. Throws {@link ReportValidationError}. */
+/**
+ * Parses the text of a report file, which is untrusted input: the size is limited before
+ * parsing, then {@link parseReport} applies the structural limits and the schema. Throws
+ * {@link ReportValidationError}, never a `SyntaxError` or `RangeError`.
+ */
+export function parseReportText(text: string): Report {
+  if (text.length > REPORT_LIMITS.maxBytes) {
+    throw new ReportValidationError(
+      `report is larger than ${REPORT_LIMITS.maxBytes} characters`,
+      [],
+    );
+  }
+  let json: unknown;
+  try {
+    json = JSON.parse(text);
+  } catch (error) {
+    // A stack overflow in the parser (extreme nesting) is also "not usable JSON".
+    if (!(error instanceof SyntaxError) && !(error instanceof RangeError)) throw error;
+    throw new ReportValidationError('report is not valid JSON', []);
+  }
+  return parseReport(json);
+}
+
+/**
+ * Validates untrusted input as a report: structural limits first ({@link REPORT_LIMITS}), then
+ * the schema. Throws {@link ReportValidationError}.
+ */
 export function parseReport(input: unknown): Report {
+  const violation = findLimitViolation(input);
+  if (violation !== undefined) {
+    throw new ReportValidationError(`report ${violation}`, []);
+  }
   if (typeof input === 'object' && input !== null && 'schemaVersion' in input) {
     const version = input.schemaVersion;
     if (typeof version === 'number' && version > REPORT_SCHEMA_VERSION) {
