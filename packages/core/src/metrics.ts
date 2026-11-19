@@ -1,8 +1,9 @@
-import type { App, Asset, Compression, JsBundle, Lighthouse, Platform } from './schema.js';
+import type { App, Asset, Compression, JsBundle, Lighthouse, Platform, Update } from './schema.js';
 import { summarize } from './stats.js';
 
 export type MetricUnit = 'bytes' | 'ms' | 'score' | 'unitless';
-export type MetricGroup = 'web' | 'route' | 'bundle' | 'archive' | 'lighthouse' | 'package';
+export type MetricGroup =
+  'web' | 'route' | 'bundle' | 'archive' | 'update' | 'lighthouse' | 'package';
 export type MetricDirection = 'lower-is-better' | 'higher-is-better';
 export type LighthouseMetricName = 'performance' | 'lcp' | 'tbt' | 'cls';
 
@@ -14,6 +15,7 @@ export type LighthouseMetricName = 'performance' | 'lcp' | 'tbt' | 'cls';
  * - `route[/pricing].js.gzip`, `route[/pricing].css.gzip`, `route[/pricing].images.bytes`
  * - `bundle[ios].raw`
  * - `archive[android].file`, `archive[android].category.dex`, `archive[android].abi[arm64-v8a]`
+ * - `update[android].total`, `update[android].bundle`, `update[android].assets`
  * - `lighthouse[/][mobile].lcp`
  * - `package[lodash].bytes`, `package[lodash][android].bytes` (minified bytes per bundle)
  *
@@ -239,6 +241,25 @@ function archiveMetrics(app: App): Metric[] {
   ]);
 }
 
+function updateMetrics(updates: readonly Update[]): Metric[] {
+  return updates.flatMap((update) => {
+    const label = `${PLATFORM_LABEL[update.platform]} Expo update`;
+    const metric = (part: string, text: string, value: number): Metric => ({
+      id: `update[${update.platform}].${part}`,
+      group: 'update',
+      label: `${label}: ${text}`,
+      unit: 'bytes',
+      direction: 'lower-is-better',
+      value,
+    });
+    return [
+      metric('total', 'bundle and assets', update.bundleBytes + update.assetBytes),
+      metric('bundle', 'bundle', update.bundleBytes),
+      metric('assets', 'assets', update.assetBytes),
+    ];
+  });
+}
+
 const LIGHTHOUSE_METRICS: readonly {
   name: LighthouseMetricName;
   label: string;
@@ -281,6 +302,7 @@ export function extractMetrics(app: App): Metric[] {
     ...routeMetrics(app),
     ...bundleMetrics(app.bundles ?? []),
     ...archiveMetrics(app),
+    ...updateMetrics(app.updates ?? []),
     ...lighthouseMetrics(app.lighthouse ?? []),
     ...packageMetrics(app),
   ];

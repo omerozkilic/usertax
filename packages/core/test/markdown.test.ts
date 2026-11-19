@@ -25,6 +25,8 @@ const head = modify(base, (r) => {
     main.brotli = 45_000;
     main.packages = [...(main.packages ?? []), { name: 'moment', bytes: 72_000 }];
   }
+  const update = r.apps[1]?.updates?.[0];
+  if (update) update.bundleBytes += 72_000;
   const archive = r.apps[1]?.archives?.[0];
   if (archive) {
     archive.fileSize += 400_000;

@@ -113,6 +113,22 @@ export function mobileApp(overrides: Partial<App> = {}): App {
         ],
       },
     ],
+    updates: [
+      {
+        platform: 'android',
+        file: '_expo/static/js/android/index.hbc',
+        bundleBytes: 2_000_000,
+        assetCount: 3,
+        assetBytes: 500_000,
+      },
+      {
+        platform: 'ios',
+        file: '_expo/static/js/ios/index.hbc',
+        bundleBytes: 2_100_000,
+        assetCount: 3,
+        assetBytes: 500_000,
+      },
+    ],
     ...overrides,
   };
 }

@@ -38,6 +38,9 @@ archive keys) are wrapped in brackets.
 | `archive[<key>].file`                              | APK / AAB / IPA file size                                                                                              | bytes    |
 | `archive[<key>].category.<category>`               | Compressed size of one category (`js-bundle`, `dex`, `native`, `resources`, `assets`, `binary`, `frameworks`, `other`) | bytes    |
 | `archive[<key>].abi[<abi>]`                        | Compressed size of the native libraries (`lib/<abi>/`) of one ABI in an APK or AAB                                     | bytes    |
+| `update[<android\|ios>].total`                     | Expo update (OTA): launch bundle plus assets, as exported                                                              | bytes    |
+| `update[<android\|ios>].bundle`                    | Expo update: the launch bundle                                                                                         | bytes    |
+| `update[<android\|ios>].assets`                    | Expo update: the assets `metadata.json` lists                                                                          | bytes    |
 | `lighthouse[<url>][<mobile\|desktop>].performance` | Lighthouse performance score, 0–100                                                                                    | score    |
 | `lighthouse[<url>][<mobile\|desktop>].lcp`         | Largest Contentful Paint                                                                                               | ms       |
 | `lighthouse[<url>][<mobile\|desktop>].tbt`         | Total Blocking Time                                                                                                    | ms       |
@@ -232,8 +235,8 @@ usertax never builds a mobile app; it reads what your build produced.
 > different pairs of Hermes bundles in four runs (Android 1,250,708 or 1,250,656 bytes, iOS
 > 1,246,572 or 1,246,608 bytes), so pull requests showed bundle changes of a few dozen bytes
 > without a code change. Each platform exported on its own gave the same bundle in four out of
-> four runs. The example exports Android into `dist/` and copies the iOS bundle next to it
-> ([`export.mjs`](../examples/expo-app/export.mjs)).
+> four runs. The example exports Android into `dist/` and copies the iOS bundle, its assets and its
+> `metadata.json` entry next to it ([`export.mjs`](../examples/expo-app/export.mjs)).
 
 - **Bundles.** Each bundle is measured with its source map (`<file>.map`). Plain JavaScript
   bundles are attributed byte by byte like web bundles, and also get gzip and brotli sizes.
@@ -248,6 +251,18 @@ usertax never builds a mobile app; it reads what your build produced.
   `packages/measure/src/archive.ts`), and the comment lists the entries that changed most. The
   file size and compressed sizes are proxies for download size: stores deliver per-device
   variants (ADR 0009).
+- **Expo update (OTA).** A JavaScript-only change reaches users as an EAS Update, not as a store
+  build. For an Expo app, usertax reads `metadata.json` in the `expo export` directory, which
+  lists what an update serves per platform: the launch bundle and its assets. It reports their
+  sizes on disk as `update[<platform>].bundle`, `.assets` and `.total` (source maps are not
+  part of an update). Nothing is built or sent to EAS, and an export without `metadata.json`,
+  or a bare React Native app, has no update size. It differs from the store download in three
+  ways: it holds only JavaScript and assets, not native code; sizes are uncompressed, while
+  EAS serves files compressed and clients download only the assets they do not already have, so
+  the real download of an update is smaller; and it is not measured when you pass `--bundle`
+  yourself, because the export directory is then not read. On
+  [`examples/expo-app`](../examples/expo-app), which has no assets, the update is the bundle:
+  1,250,656 bytes for Android and 1,246,572 for iOS in four of four runs.
 
 ## Lighthouse
 

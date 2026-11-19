@@ -302,6 +302,7 @@ async function measureApp(spec: AppSpec, repoRoot: string, io: Io, prefix: strin
             ? spec.bundles
             : await findExpoBundles(outDir),
         archives: spec.archives,
+        ...(framework === 'expo' && outStat !== undefined ? { updateDir: outDir } : {}),
       })
     : await (framework === 'next' ? measureNextApp : measureWebApp)({
         ...common,

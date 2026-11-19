@@ -60,6 +60,42 @@ describe('usertax measure for React Native and Expo', () => {
       ['android', 'apk'],
       ['store', 'aab'],
     ]);
+    // No metadata.json in this export: no update size, and no warning about it.
+    expect(app).not.toHaveProperty('updates');
+    expect(c.err()).not.toContain('metadata.json');
+  });
+
+  it('reports the size of the Expo update from the export directory', async () => {
+    const dir = await mkdtemp(join(tmpdir(), 'usertax-expo-update-'));
+    await writeFile(
+      join(dir, 'package.json'),
+      '{"dependencies":{"expo":"58","react-native":"0.88"}}',
+    );
+    await cp(join(fixtures, 'expo-update'), join(dir, 'dist'), { recursive: true });
+    const c = capture();
+    expect(await main(['measure', dir, '--sha', 'a'.repeat(40)], c.io)).toBe(0);
+    const app = parseReport(JSON.parse(c.out())).apps[0];
+    expect(
+      app?.updates?.map((u) => [u.platform, u.bundleBytes, u.assetCount, u.assetBytes]),
+    ).toEqual([
+      ['android', 636, 1, 11_827],
+      ['ios', 736, 1, 11_827],
+    ]);
+    expect(app?.bundles?.map((b) => b.platform)).toEqual(['android', 'ios']);
+  });
+
+  it('does not measure an update for a bare React Native app or explicit bundles', async () => {
+    const c = capture();
+    const args = [
+      'measure',
+      bare,
+      '--sha',
+      'a'.repeat(40),
+      '--bundle',
+      `android=${join(fixtures, 'hermes/index.android.hbc')}`,
+    ];
+    expect(await main(args, c.io)).toBe(0);
+    expect(parseReport(JSON.parse(c.out())).apps[0]).not.toHaveProperty('updates');
   });
 
   it('measures a bare React Native app from explicit bundles', async () => {

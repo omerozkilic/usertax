@@ -151,6 +151,26 @@ for (const { dir: example, args: extra, format } of mobile) {
       `${example}: react-native not found in the ${bundle.platform} bundle`,
     );
   }
+  // An Expo export is an EAS Update: its bundles are the files that the update serves.
+  const updates = app?.updates ?? [];
+  if (example.includes('expo')) {
+    check(
+      updates
+        .map((u) => u.platform)
+        .sort()
+        .join() === 'android,ios',
+      `${example}: expected an update size for android and ios`,
+    );
+    for (const update of updates) {
+      const bundle = bundles.find((b) => b.platform === update.platform);
+      check(
+        bundle?.raw === update.bundleBytes,
+        `${example}: ${update.platform} update bundle is ${update.bundleBytes} bytes, the measured bundle ${bundle?.raw}`,
+      );
+    }
+  } else {
+    check(updates.length === 0, `${example}: only Expo apps have an update size`);
+  }
   process.stdout.write(execFileSync(process.execPath, [cli, 'diff', output], { encoding: 'utf8' }));
 }
 

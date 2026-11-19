@@ -159,6 +159,20 @@ export const archiveSchema = z.object({
 });
 export type Archive = z.infer<typeof archiveSchema>;
 
+/**
+ * What `expo export` produces for one platform, which is what an EAS Update serves: the launch
+ * bundle and the assets listed in `metadata.json`, as sizes on disk. Source maps are not part of it.
+ */
+export const updateSchema = z.object({
+  platform: platformSchema,
+  /** The launch bundle, relative to the export directory. */
+  file: pathText,
+  bundleBytes: bytes,
+  assetCount: z.number().int().nonnegative(),
+  assetBytes: bytes,
+});
+export type Update = z.infer<typeof updateSchema>;
+
 export const lighthouseContaminationSchema = z.object({
   /**
    * Origins of browser extensions whose requests or scripts appeared in the run, such as
@@ -245,6 +259,8 @@ export const appSchema = z.object({
   routes: z.array(routeSchema).max(2000).optional(),
   bundles: z.array(jsBundleSchema).max(10).optional(),
   archives: z.array(archiveSchema).max(20).optional(),
+  /** Expo updates (OTA), one per platform, separate from the store archives. */
+  updates: z.array(updateSchema).max(2).optional(),
   lighthouse: z.array(lighthouseSchema).max(50).optional(),
   dependencies: z.array(dependencySchema).max(50_000).optional(),
 });

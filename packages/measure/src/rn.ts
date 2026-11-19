@@ -13,6 +13,7 @@ import {
 } from './sourcemap.js';
 import type { Attribution, ForeignSource, RawSourceMap, VersionOf } from './sourcemap.js';
 import { installedVersions } from './versions.js';
+import { measureExpoUpdates } from './expo-update.js';
 import { foreignSources } from './foreign.js';
 import type { MeasureResult, Warning } from './web.js';
 
@@ -133,6 +134,8 @@ export interface MeasureRnAppOptions {
   readonly framework: Extract<Framework, 'expo' | 'react-native'>;
   readonly bundles: readonly BundleInput[];
   readonly archives: readonly ArchiveInput[];
+  /** `expo export` output directory whose update (OTA) size is measured; Expo apps only. */
+  readonly updateDir?: string | undefined;
   readonly dependencies?: readonly Dependency[];
 }
 
@@ -158,6 +161,9 @@ export async function measureRnApp(options: MeasureRnAppOptions): Promise<Measur
       warnings.push({ file: input.file, message: error.message });
     }
   }
+  const update =
+    options.updateDir === undefined ? undefined : await measureExpoUpdates(options.updateDir);
+  if (update !== undefined) warnings.push(...update.warnings);
   return {
     app: {
       id: options.id,
@@ -167,6 +173,7 @@ export async function measureRnApp(options: MeasureRnAppOptions): Promise<Measur
       framework: options.framework,
       ...(bundles.length > 0 ? { bundles } : {}),
       ...(archives.length > 0 ? { archives } : {}),
+      ...(update !== undefined && update.updates.length > 0 ? { updates: update.updates } : {}),
       ...(options.dependencies === undefined ? {} : { dependencies: [...options.dependencies] }),
     },
     warnings,

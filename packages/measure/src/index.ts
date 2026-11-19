@@ -51,6 +51,8 @@ export {
 } from './lighthouse.js';
 export type { LighthouseResultLike, RunLighthouseOptions } from './lighthouse.js';
 export { htmlAssets, htmlRoute, measureNextApp, nextKeys } from './next.js';
+export { measureExpoUpdates } from './expo-update.js';
+export type { ExpoUpdateResult } from './expo-update.js';
 export { attributeHermes, findExpoBundles, measureBundle, measureRnApp } from './rn.js';
 export type { ArchiveInput, BundleInput, MeasureRnAppOptions } from './rn.js';
 export { serveStatic } from './serve.js';

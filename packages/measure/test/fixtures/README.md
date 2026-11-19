@@ -126,3 +126,14 @@ Info-ZIP's `zip` (`-fz` forces ZIP64 records in `zip64-ipa`; `commented` has an 
 Entry contents are placeholders, except the JS bundles of the APK and IPA, which are the real
 Hermes bytecode from `hermes/`. A real APK built from `examples/expo-app` is analysed in CI
 (see the `android` job) because this environment has no Android SDK.
+
+## `expo-update/`
+
+The layout `expo export` writes for an EAS Update (Expo SDK 58): `metadata.json` in Expo's format
+(`fileMetadata.<platform>.bundle` and `.assets[]` with `path` and `ext`), the Hermes bundles under
+`_expo/static/js/<platform>/` with their source maps, and one asset under `assets/`, named by its
+MD5 without an extension as Expo does. The bundles are the real Hermes bytecode from `hermes/`
+(the iOS one padded with 100 zero bytes so the two platforms differ); the asset is a generated
+64 × 64 PNG that both platforms list. The layout and the asset entry format were checked against
+a real export of `examples/expo-app` with an image added. The update sizes of the real example
+are checked in CI by `pnpm e2e`.
