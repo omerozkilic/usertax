@@ -28,6 +28,8 @@ const head = modify(base, (r) => {
   const archive = r.apps[1]?.archives?.[0];
   if (archive) {
     archive.fileSize += 400_000;
+    const arm64 = archive.abis?.find((abi) => abi.abi === 'arm64-v8a');
+    if (arm64) arm64.compressed += 400_000;
     archive.entries.push({
       path: 'res/drawable-xxhdpi/hero.png',
       category: 'resources',

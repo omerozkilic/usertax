@@ -92,6 +92,10 @@ export function mobileApp(overrides: Partial<App> = {}): App {
           { category: 'js-bundle', compressed: 1_000_000, uncompressed: 2_000_000, count: 1 },
           { category: 'native', compressed: 20_000_000, uncompressed: 40_000_000, count: 1 },
         ],
+        abis: [
+          { abi: 'arm64-v8a', compressed: 12_000_000, uncompressed: 24_000_000, count: 1 },
+          { abi: 'x86_64', compressed: 8_000_000, uncompressed: 16_000_000, count: 1 },
+        ],
         entries: [
           { path: 'classes.dex', category: 'dex', compressed: 8_000_000, uncompressed: 16_000_000 },
           {

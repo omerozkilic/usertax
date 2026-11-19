@@ -21,5 +21,7 @@ Head `ccccccc` · no base report to compare with · 2 apps
 | android\: dex \(compressed\) | 8.0 MB |
 | android\: js\-bundle \(compressed\) | 1.0 MB |
 | android\: native \(compressed\) | 20.0 MB |
+| android\: native libraries arm64\-v8a \(compressed\) | 12.4 MB |
+| android\: native libraries x86\_64 \(compressed\) | 8.0 MB |
 
 <sub>usertax 0\.1\.0 · gzip level 9, brotli quality 11</sub>

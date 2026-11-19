@@ -13,7 +13,7 @@ export type LighthouseMetricName = 'performance' | 'lcp' | 'tbt' | 'cls';
  * - `js.total.gzip`, `css.total.brotli`
  * - `route[/pricing].js.gzip`, `route[/pricing].css.gzip`, `route[/pricing].images.bytes`
  * - `bundle[ios].raw`
- * - `archive[android].file`, `archive[android].category.dex`
+ * - `archive[android].file`, `archive[android].category.dex`, `archive[android].abi[arm64-v8a]`
  * - `lighthouse[/][mobile].lcp`
  * - `package[lodash].bytes`, `package[lodash][android].bytes` (minified bytes per bundle)
  *
@@ -227,6 +227,14 @@ function archiveMetrics(app: App): Metric[] {
       unit: 'bytes' as const,
       direction: 'lower-is-better' as const,
       value: category.compressed,
+    })),
+    ...(archive.abis ?? []).map((abi) => ({
+      id: `archive[${archive.key}].abi[${abi.abi}]`,
+      group: 'archive' as const,
+      label: `${archive.key}: native libraries ${abi.abi} (compressed)`,
+      unit: 'bytes' as const,
+      direction: 'lower-is-better' as const,
+      value: abi.compressed,
     })),
   ]);
 }

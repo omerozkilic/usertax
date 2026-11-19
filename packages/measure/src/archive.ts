@@ -200,6 +200,13 @@ export function categorize(format: ArchiveFormat, path: string): ArchiveCategory
   return 'other';
 }
 
+/** ABI directory (`arm64-v8a`, …) of a native library entry in an APK or AAB, if it has one. */
+export function abiOf(format: ArchiveFormat, path: string): string | undefined {
+  if (format === 'ipa') return undefined;
+  const inner = format === 'aab' ? path.replace(/^[^/]+\//, '') : path;
+  return /^lib\/([^/]+)\/[^/]/.exec(inner)?.[1];
+}
+
 function detectFormat(file: string, entries: readonly ZipEntry[]): ArchiveFormat {
   const extension = /\.(apk|aab|ipa)$/i.exec(file)?.[1]?.toLowerCase();
   if (extension === 'apk' || extension === 'aab' || extension === 'ipa') return extension;
@@ -241,6 +248,7 @@ export async function analyzeArchive(options: AnalyzeArchiveOptions): Promise<Ar
       ArchiveCategory,
       { compressed: number; uncompressed: number; count: number }
     >();
+    const abis = new Map<string, { compressed: number; uncompressed: number; count: number }>();
     const kept: Archive['entries'] = [];
     const omitted = { count: 0, compressed: 0, uncompressed: 0 };
     let bundle: ZipEntry | undefined;
@@ -252,6 +260,14 @@ export async function analyzeArchive(options: AnalyzeArchiveOptions): Promise<Ar
       total.uncompressed += entry.uncompressed;
       total.count += 1;
       categories.set(category, total);
+      const abi = abiOf(format, entry.path);
+      if (abi !== undefined) {
+        const abiTotal = abis.get(abi) ?? { compressed: 0, uncompressed: 0, count: 0 };
+        abiTotal.compressed += entry.compressed;
+        abiTotal.uncompressed += entry.uncompressed;
+        abiTotal.count += 1;
+        abis.set(abi, abiTotal);
+      }
       if (entry.compressed >= minEntryBytes) {
         kept.push({
           path: entry.path,
@@ -278,6 +294,13 @@ export async function analyzeArchive(options: AnalyzeArchiveOptions): Promise<Ar
         categories: [...categories.entries()]
           .map(([category, total]) => ({ category, ...total }))
           .sort((a, b) => b.compressed - a.compressed),
+        ...(abis.size > 0
+          ? {
+              abis: [...abis.entries()]
+                .map(([abi, total]) => ({ abi, ...total }))
+                .sort((a, b) => b.compressed - a.compressed || a.abi.localeCompare(b.abi)),
+            }
+          : {}),
         entries: kept.sort((a, b) => b.compressed - a.compressed || a.path.localeCompare(b.path)),
         ...(omitted.count > 0 ? { omittedEntries: omitted } : {}),
       },

@@ -91,5 +91,23 @@ for name in ('zip64-ipa.zip', 'commented.zip'):
     os.replace(os.path.join(HERE, name), os.path.join(HERE, name[:-4]))
 subprocess.run(['rm', '-rf', work], check=True)
 
+# Several ABIs (appended last so the fixtures above keep their bytes); AAB modules share ABIs.
+write('multi-abi.apk', [
+    ('AndroidManifest.xml', text(800), DEFLATED),
+    ('classes.dex', text(5000), DEFLATED),
+    ('lib/arm64-v8a/libapp.so', noise(9000), DEFLATED),
+    ('lib/arm64-v8a/libhermes.so', noise(6000), DEFLATED),
+    ('lib/armeabi-v7a/libapp.so', noise(7000), DEFLATED),
+    ('lib/x86_64/libapp.so', noise(10000), DEFLATED),
+    ('lib/README.txt', text(300), DEFLATED),
+])
+
+write('multi-abi.aab', [
+    ('base/manifest/AndroidManifest.xml', text(800), DEFLATED),
+    ('base/lib/arm64-v8a/libapp.so', noise(9000), DEFLATED),
+    ('base/lib/x86_64/libapp.so', noise(10000), DEFLATED),
+    ('feature_maps/lib/arm64-v8a/libmaps.so', noise(4000), DEFLATED),
+])
+
 with open(os.path.join(HERE, 'not-a-zip.apk'), 'wb') as f:
     f.write(b'this is not a zip archive\n')

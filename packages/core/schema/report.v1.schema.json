@@ -520,6 +520,41 @@
                     ]
                   }
                 },
+                "abis": {
+                  "maxItems": 20,
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "abi": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 100
+                      },
+                      "compressed": {
+                        "type": "integer",
+                        "minimum": 0,
+                        "maximum": 9007199254740991
+                      },
+                      "uncompressed": {
+                        "type": "integer",
+                        "minimum": 0,
+                        "maximum": 9007199254740991
+                      },
+                      "count": {
+                        "type": "integer",
+                        "minimum": 0,
+                        "maximum": 9007199254740991
+                      }
+                    },
+                    "required": [
+                      "abi",
+                      "compressed",
+                      "uncompressed",
+                      "count"
+                    ]
+                  }
+                },
                 "entries": {
                   "maxItems": 50000,
                   "type": "array",

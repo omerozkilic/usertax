@@ -37,6 +37,7 @@ archive keys) are wrapped in brackets.
 | `package[<name>][<ios\|android>].bytes`            | Minified bytes of one package in a React Native bundle                                                                 | bytes    |
 | `archive[<key>].file`                              | APK / AAB / IPA file size                                                                                              | bytes    |
 | `archive[<key>].category.<category>`               | Compressed size of one category (`js-bundle`, `dex`, `native`, `resources`, `assets`, `binary`, `frameworks`, `other`) | bytes    |
+| `archive[<key>].abi[<abi>]`                        | Compressed size of the native libraries (`lib/<abi>/`) of one ABI in an APK or AAB                                     | bytes    |
 | `lighthouse[<url>][<mobile\|desktop>].performance` | Lighthouse performance score, 0–100                                                                                    | score    |
 | `lighthouse[<url>][<mobile\|desktop>].lcp`         | Largest Contentful Paint                                                                                               | ms       |
 | `lighthouse[<url>][<mobile\|desktop>].tbt`         | Total Blocking Time                                                                                                    | ms       |

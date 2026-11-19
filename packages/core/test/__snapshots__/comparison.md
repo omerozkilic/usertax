@@ -44,8 +44,9 @@ Base `aaaaaaa` → head `ccccccc` · 2 apps · ❌ 1 budget failed
 | | Metric | Base | Head | Change |
 | :-: | --- | --: | --: | --: |
 | 🔴 | Android APK \(android\) | 30.0 MB | 30.4 MB | +400.0 kB (+1.3%) |
+| 🔴 | android\: native libraries arm64\-v8a \(compressed\) | 12.0 MB | 12.4 MB | +400.0 kB (+3.3%) |
 
-<details><summary>4 unchanged</summary>
+<details><summary>5 unchanged</summary>
 
 | | Metric | Base | Head | Change |
 | :-: | --- | --: | --: | --: |
@@ -53,6 +54,7 @@ Base `aaaaaaa` → head `ccccccc` · 2 apps · ❌ 1 budget failed
 | ⚪ | android\: dex \(compressed\) | 8.0 MB | 8.0 MB | ±0 B (±0.0%) |
 | ⚪ | android\: js\-bundle \(compressed\) | 1.0 MB | 1.0 MB | ±0 B (±0.0%) |
 | ⚪ | android\: native \(compressed\) | 20.0 MB | 20.0 MB | ±0 B (±0.0%) |
+| ⚪ | android\: native libraries x86\_64 \(compressed\) | 8.0 MB | 8.0 MB | ±0 B (±0.0%) |
 
 </details>
 

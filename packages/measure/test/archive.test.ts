@@ -3,6 +3,7 @@ import { fileURLToPath } from 'node:url';
 import { describe, expect, it } from 'vitest';
 import {
   ArchiveError,
+  abiOf,
   analyzeArchive,
   categorize,
   isHermesBytecode,
@@ -121,6 +122,50 @@ describe('readEntryPrefix', () => {
     } finally {
       await handle.close();
     }
+  });
+});
+
+describe('native libraries per ABI', () => {
+  it('breaks an APK down by lib/<abi>/', async () => {
+    const { archive } = await analyzeArchive({
+      file: `${dir}multi-abi.apk`,
+      minEntryBytes: 0,
+    });
+    expect(archive.abis?.map((a) => [a.abi, a.count])).toEqual([
+      ['arm64-v8a', 2],
+      ['x86_64', 1],
+      ['armeabi-v7a', 1],
+    ]);
+    const native = archive.categories.find((c) => c.category === 'native');
+    // lib/README.txt is native but belongs to no ABI.
+    expect(native?.count).toBe(5);
+    const abiTotal = archive.abis?.reduce((sum, a) => sum + a.compressed, 0) ?? 0;
+    const readme = archive.entries.find((e) => e.path === 'lib/README.txt')?.compressed ?? 0;
+    expect(abiTotal + readme).toBe(native?.compressed);
+  });
+
+  it('adds the same ABI across AAB modules', async () => {
+    const { archive } = await analyzeArchive({ file: `${dir}multi-abi.aab` });
+    expect(archive.abis?.map((a) => [a.abi, a.count])).toEqual([
+      ['arm64-v8a', 2],
+      ['x86_64', 1],
+    ]);
+  });
+
+  it('is absent without native libraries and for IPA', async () => {
+    expect((await analyzeArchive({ file: `${dir}Example.ipa` })).archive.abis).toBeUndefined();
+  });
+
+  it.each([
+    ['apk', 'lib/arm64-v8a/libfoo.so', 'arm64-v8a'],
+    ['aab', 'base/lib/x86_64/libfoo.so', 'x86_64'],
+    ['aab', 'feature/lib/armeabi-v7a/libfoo.so', 'armeabi-v7a'],
+    ['apk', 'lib/README.txt', undefined],
+    ['apk', 'assets/lib/x86/libfoo.so', undefined],
+    ['aab', 'lib/x86/libfoo.so', undefined],
+    ['ipa', 'Payload/A.app/lib/x86/libfoo.so', undefined],
+  ] as const)('%s %s → %s', (format, path, abi) => {
+    expect(abiOf(format, path)).toBe(abi);
   });
 });
 

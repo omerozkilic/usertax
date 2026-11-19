@@ -47,6 +47,8 @@ Base `aaaaaaa` → head `aaaaaaa` · 3 apps · ⚠️ 2 budget warnings
 | 🆕 | android\: dex \(compressed\) | – | 8.0 MB | new |
 | 🆕 | android\: js\-bundle \(compressed\) | – | 1.0 MB | new |
 | 🆕 | android\: native \(compressed\) | – | 20.0 MB | new |
+| 🆕 | android\: native libraries arm64\-v8a \(compressed\) | – | 12.0 MB | new |
+| 🆕 | android\: native libraries x86\_64 \(compressed\) | – | 8.0 MB | new |
 
 **Packages with the largest change** <sub>minified bytes from source maps</sub>
 
@@ -65,6 +67,8 @@ Base `aaaaaaa` → head `aaaaaaa` · 3 apps · ⚠️ 2 budget warnings
 | ➖ | android\: dex \(compressed\) | 8.0 MB | – | removed |
 | ➖ | android\: js\-bundle \(compressed\) | 1.0 MB | – | removed |
 | ➖ | android\: native \(compressed\) | 20.0 MB | – | removed |
+| ➖ | android\: native libraries arm64\-v8a \(compressed\) | 12.0 MB | – | removed |
+| ➖ | android\: native libraries x86\_64 \(compressed\) | 8.0 MB | – | removed |
 
 **Packages with the largest change** <sub>minified bytes from source maps</sub>
 
