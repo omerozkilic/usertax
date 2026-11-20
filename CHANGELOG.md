@@ -1,5 +1,15 @@
 # Changelog
 
+## [0.4.0](https://github.com/omerozkilic/usertax/compare/v0.3.0...v0.4.0) (2026-11-20)
+
+
+### Features
+
+* **core,action,cli:** limit size, depth and lengths of untrusted reports, plus fuzz tests ([#91](https://github.com/omerozkilic/usertax/issues/91)) ([4d94713](https://github.com/omerozkilic/usertax/commit/4d94713249d199a44bd1ac9c17756b9e7fa91b19))
+* **measure,core:** estimate the download size of an AAB per device, validated against bundletool ([#94](https://github.com/omerozkilic/usertax/issues/94)) ([5a86e2b](https://github.com/omerozkilic/usertax/commit/5a86e2b394b449727f2947c30b472e2ae0b5fa48))
+* **measure,core:** report native libraries per ABI in APK and AAB archives ([#89](https://github.com/omerozkilic/usertax/issues/89)) ([e1f58c4](https://github.com/omerozkilic/usertax/commit/e1f58c48f972c65b0cca37e5dfdbcd86c357779c))
+* **measure,core:** report the size of an Expo update (OTA) from the export directory ([#92](https://github.com/omerozkilic/usertax/issues/92)) ([07c2040](https://github.com/omerozkilic/usertax/commit/07c20401e60fa70e60f01d24e3ba90359cf8e7b8))
+
 ## [0.3.0](https://github.com/omerozkilic/usertax/compare/v0.2.0...v0.3.0) (2026-11-13)
 
 
