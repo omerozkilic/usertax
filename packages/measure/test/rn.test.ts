@@ -73,6 +73,18 @@ describe('measureBundle', () => {
     expect(bundle.gzip).toBeGreaterThan(0);
   });
 
+  it('degrades a Hermes bundle without a source map to its total, with a warning', async () => {
+    const dir = await mkdtemp(join(tmpdir(), 'usertax-rn-'));
+    await cp(join(hermesDir, 'index.android.hbc'), join(dir, 'index.android.hbc'));
+    const { bundle, warnings } = await measureBundle(
+      { platform: 'android', file: join(dir, 'index.android.hbc') },
+      dir,
+    );
+    expect(bundle).toMatchObject({ format: 'hermes', raw: 636 });
+    expect(bundle).not.toHaveProperty('packages');
+    expect(warnings[0]?.message).toMatch(/no source map/);
+  });
+
   it('warns about missing or broken maps', async () => {
     const dir = await mkdtemp(join(tmpdir(), 'usertax-rn-'));
     await writeFile(join(dir, 'a.bundle'), 'x');

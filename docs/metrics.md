@@ -244,7 +244,10 @@ usertax never builds a mobile app; it reads what your build produced.
   For **Hermes bytecode**, the source map's generated columns are bytecode offsets, so the
   bytes from one mapping to the next are attributed to that mapping's module. Headers, string
   tables and the last mapping of each function block have no known source and are counted as
-  unattributed; the three parts still add up to the file size. Metro's indexed source maps
+  unattributed; the three parts still add up to the file size. The per-package numbers are
+  therefore bytecode bytes and a lower bound: on the Expo example 38.1 % of the bytecode is
+  unattributed ([benchmarks](benchmarks/README.md#hermes-bytecode-attribution)). Without a
+  source map the bundle is reported as a total with a warning. Metro's indexed source maps
   (with `sections`) are supported.
 - **Archives.** APK, AAB and IPA files are read through their ZIP central directory without
   extracting them, including ZIP64. Entries are grouped into `dex`, `native`, `resources`,
