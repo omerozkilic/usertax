@@ -142,6 +142,20 @@ export const archiveSchema = z.object({
     )
     .max(20)
     .optional(),
+  /**
+   * Estimated download size of an AAB on a device with this ABI and screen density, as a Play
+   * Store split APK set would be (ADR 0009). An estimate, not a measurement of the store.
+   */
+  downloads: z
+    .array(
+      z.object({
+        abi: z.string().min(1).max(100),
+        density: z.string().min(1).max(20),
+        bytes,
+      }),
+    )
+    .max(10)
+    .optional(),
   entries: z
     .array(
       z.object({

@@ -21,8 +21,8 @@ Android SDK, and iOS tooling needs a macOS runner, which costs more.
 - A Hermes bytecode bundle is recognised by its magic number and reported as such.
 - Reported sizes are the archive's file size and per-category compressed sizes. These are
   proxies for download size: Google Play builds per-device APKs from an AAB and the App Store
-  thins IPAs per device. The comment states this; per-device estimates may come later and will
-  be labelled as estimates.
+  thins IPAs per device. The comment states this; per-device estimates are labelled as
+  estimates (see the notes on AAB downloads below).
 - Works on Linux runners; no macOS runner is required to analyse an IPA.
 
 ## Implementation notes (milestone 5)
@@ -47,3 +47,21 @@ Android SDK, and iOS tooling needs a macOS runner, which costs more.
   Android SDK on the runner. Possible later as an optional mode.
 - A third-party ZIP library: the central directory is small to parse and we want full control
   over ZIP64 and malformed input.
+
+## Implementation notes (AAB download estimate)
+
+- Per-device download sizes of an AAB are estimated from its entries, without Java or
+  `bundletool`: the base split (everything outside `lib/` and density-specific `res/`), the native
+  libraries of the device's ABI, and for each resource its variant of the closest density (the
+  next higher, else the next lower). Sizes are the entries' compressed sizes. `BUNDLE-METADATA/`
+  (debug symbols), `META-INF/` and `BundleConfig.pb` are not part of any split and are left out.
+  Language splits are not modelled.
+- Profiles are `arm64-v8a` and `x86_64` at `xxhdpi`, and `armeabi-v7a` at `xhdpi`; one is
+  reported only when the AAB has native libraries for its ABI. An AAB without native libraries
+  gets no estimate.
+- The estimate was validated against `bundletool get-size total` (1.18.3) on the release AAB of
+  `examples/expo-app`: it is 0.04 % to 0.26 % higher in eleven profiles, never lower
+  ([benchmarks](../benchmarks/README.md#aab-download-estimate)). That is one app. Dynamic
+  feature modules are counted as if installed with the app and have not been validated.
+- Play Store compression and delta updates cannot be reproduced locally and are not estimated;
+  the numbers are what `bundletool` computes, not what a store transfers.

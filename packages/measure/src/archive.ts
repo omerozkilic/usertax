@@ -207,6 +207,87 @@ export function abiOf(format: ArchiveFormat, path: string): string | undefined {
   return /^lib\/([^/]+)\/[^/]/.exec(inner)?.[1];
 }
 
+/** Screen densities (dpi) of the resource qualifiers that Play delivers as separate splits. */
+const DENSITY_DPI: Readonly<Record<string, number>> = {
+  ldpi: 120,
+  mdpi: 160,
+  tvdpi: 213,
+  hdpi: 240,
+  xhdpi: 320,
+  xxhdpi: 480,
+  xxxhdpi: 640,
+};
+
+export interface DeviceProfile {
+  readonly abi: string;
+  /** A key of the density table: `xhdpi`, `xxhdpi`, … */
+  readonly density: string;
+}
+
+/**
+ * Device profiles of the download estimate. They are validated against `bundletool get-size`
+ * (docs/benchmarks); a profile is only reported when the AAB has native libraries for its ABI.
+ */
+export const DEVICE_PROFILES: readonly DeviceProfile[] = [
+  { abi: 'arm64-v8a', density: 'xxhdpi' },
+  { abi: 'armeabi-v7a', density: 'xhdpi' },
+  { abi: 'x86_64', density: 'xxhdpi' },
+];
+
+/**
+ * Estimates the download of an AAB per device profile. Play serves a base split (code, assets and
+ * resources without a density), the native libraries of the device's ABI and, for each resource,
+ * its variant of the closest density (the next higher one, else the next lower one). The sizes
+ * are the entries' compressed sizes. `BUNDLE-METADATA/` (debug symbols), signatures and the
+ * bundle configuration are not part of any split, and language splits are not modelled: both
+ * differ from `bundletool` by well under 1 % on the AAB of `examples/expo-app`.
+ */
+export function estimateDownloads(
+  entries: readonly Pick<ZipEntry, 'path' | 'compressed'>[],
+  profiles: readonly DeviceProfile[] = DEVICE_PROFILES,
+): NonNullable<Archive['downloads']> {
+  let base = 0;
+  const libs = new Map<string, number>();
+  // Variants of one resource: its path without the density qualifier, then (dpi, size).
+  const resources = new Map<string, [number, number][]>();
+  for (const { path, compressed } of entries) {
+    if (!path.includes('/') || path.startsWith('BUNDLE-METADATA/') || path.startsWith('META-INF/'))
+      continue;
+    const abi = abiOf('aab', path);
+    if (abi !== undefined) {
+      libs.set(abi, (libs.get(abi) ?? 0) + compressed);
+      continue;
+    }
+    const resource = /^([^/]+)\/res\/([^/]+)\/(.+)$/.exec(path);
+    const [, module = '', directory = '', file = ''] = resource ?? [];
+    const qualifiers = directory.split('-');
+    const density = qualifiers.map((q) => DENSITY_DPI[q]).find((dpi) => dpi !== undefined);
+    if (density === undefined) {
+      base += compressed;
+      continue;
+    }
+    const key = `${module}/${qualifiers.filter((q) => DENSITY_DPI[q] === undefined).join('-')}/${file}`;
+    const variants = resources.get(key) ?? [];
+    variants.push([density, compressed]);
+    resources.set(key, variants);
+  }
+  const downloads: NonNullable<Archive['downloads']> = [];
+  for (const { abi, density } of profiles) {
+    const lib = libs.get(abi);
+    const wanted = DENSITY_DPI[density];
+    if (lib === undefined || wanted === undefined) continue;
+    let bytes = base + lib;
+    for (const variants of resources.values()) {
+      const rank = ([dpi]: [number, number]): number =>
+        dpi >= wanted ? dpi - wanted : (wanted - dpi) * 1000;
+      const [best] = [...variants].sort((a, b) => rank(a) - rank(b));
+      bytes += best?.[1] ?? 0;
+    }
+    downloads.push({ abi, density, bytes });
+  }
+  return downloads;
+}
+
 function detectFormat(file: string, entries: readonly ZipEntry[]): ArchiveFormat {
   const extension = /\.(apk|aab|ipa)$/i.exec(file)?.[1]?.toLowerCase();
   if (extension === 'apk' || extension === 'aab' || extension === 'ipa') return extension;
@@ -281,6 +362,7 @@ export async function analyzeArchive(options: AnalyzeArchiveOptions): Promise<Ar
         omitted.uncompressed += entry.uncompressed;
       }
     }
+    const downloads = format === 'aab' ? estimateDownloads(entries) : [];
     const hermes =
       bundle === undefined ? undefined : isHermesBytecode(await readEntryPrefix(handle, bundle));
     return {
@@ -301,6 +383,7 @@ export async function analyzeArchive(options: AnalyzeArchiveOptions): Promise<Ar
                 .sort((a, b) => b.compressed - a.compressed || a.abi.localeCompare(b.abi)),
             }
           : {}),
+        ...(downloads.length > 0 ? { downloads } : {}),
         entries: kept.sort((a, b) => b.compressed - a.compressed || a.path.localeCompare(b.path)),
         ...(omitted.count > 0 ? { omittedEntries: omitted } : {}),
       },

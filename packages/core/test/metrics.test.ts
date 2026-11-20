@@ -134,6 +134,18 @@ describe('extractMetrics', () => {
     });
   });
 
+  it('reports the estimated AAB download per device profile', () => {
+    const app = mobileApp();
+    const archive = app.archives?.[0];
+    if (archive === undefined) throw new Error('fixture has no archive');
+    archive.downloads = [{ abi: 'arm64-v8a', density: 'xxhdpi', bytes: 9_000_000 }];
+    expect(byId(app).get('archive[android].download[arm64-v8a]')).toMatchObject({
+      value: 9_000_000,
+      group: 'archive',
+      label: 'android: estimated download on arm64-v8a (xxhdpi)',
+    });
+  });
+
   it('reports the Expo update per platform: total, bundle and assets', () => {
     const metrics = byId(mobileApp());
     expect(metrics.get('update[android].total')).toMatchObject({

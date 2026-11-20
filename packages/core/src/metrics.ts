@@ -238,6 +238,14 @@ function archiveMetrics(app: App): Metric[] {
       direction: 'lower-is-better' as const,
       value: abi.compressed,
     })),
+    ...(archive.downloads ?? []).map((download) => ({
+      id: `archive[${archive.key}].download[${download.abi}]`,
+      group: 'archive' as const,
+      label: `${archive.key}: estimated download on ${download.abi} (${download.density})`,
+      unit: 'bytes' as const,
+      direction: 'lower-is-better' as const,
+      value: download.bytes,
+    })),
   ]);
 }
 

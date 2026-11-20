@@ -167,3 +167,51 @@ node packages/cli/bin/usertax.js measure examples/expo-app --output expo.json
 node -e 'for (const b of JSON.parse(require("fs").readFileSync("expo.json")).apps[0].bundles)
   console.log(b.platform, b.raw, b.unattributedBytes)'
 ```
+
+## AAB download estimate
+
+usertax estimates what a device downloads from an AAB without Java (ADR 0009). The estimate is
+validated against `bundletool get-size total`, which builds the split APKs for a device
+specification and sums their gzip sizes. Play Store compression and delta updates are not part of
+either number.
+
+The AAB is the release build of [`examples/expo-app`](../../examples/expo-app) (44,936,798
+bytes, SHA-256 `fca3f5fa1ea0c1df3d74f10a11d77412d37f047022d24f0f065faf2de775adbd`, all four ABIs), compared with bundletool 1.18.3
+(2026-11-20, `sdkVersion` 34). Raw output and the AAB's entries are in
+[`data/2026-11-20-aab-bundletool/`](data/2026-11-20-aab-bundletool/).
+
+| ABI         | Density | Locale | bundletool (bytes) | usertax (bytes) | Difference       |
+| ----------- | ------- | ------ | ------------------ | --------------- | ---------------- |
+| arm64-v8a   | mdpi    | en     | 8,581,532          | 8,585,085       | +3,553 (0.04 %)  |
+| arm64-v8a   | hdpi    | en     | 8,598,622          | 8,604,838       | +6,216 (0.07 %)  |
+| arm64-v8a   | xhdpi   | en     | 8,609,660          | 8,619,300       | +9,640 (0.11 %)  |
+| arm64-v8a   | xxhdpi  | en     | 8,631,104          | 8,645,959       | +14,855 (0.17 %) |
+| arm64-v8a   | xxxhdpi | en     | 8,646,547          | 8,668,806       | +22,259 (0.26 %) |
+| arm64-v8a   | xxhdpi  | tr     | 8,630,118          | 8,645,959       | +15,841 (0.18 %) |
+| arm64-v8a   | xxhdpi  | zh     | 8,630,925          | 8,645,959       | +15,034 (0.17 %) |
+| armeabi-v7a | hdpi    | en     | 7,897,324          | 7,905,505       | +8,181 (0.10 %)  |
+| armeabi-v7a | xhdpi   | en     | 7,908,362          | 7,919,967       | +11,605 (0.15 %) |
+| x86         | xhdpi   | en     | 9,207,955          | 9,220,132       | +12,177 (0.13 %) |
+| x86_64      | xxhdpi  | en     | 8,833,798          | 8,851,906       | +18,108 (0.20 %) |
+
+The estimate is 0.04 % to 0.26 % above bundletool in all eleven profiles, never below. Changing
+the language moves bundletool's number by less than 1 kB, which is why language splits are not
+modelled. The AAB itself is 44,936,798 bytes, of which `BUNDLE-METADATA/` (debug symbols that no
+device downloads) is 18,673,712 bytes compressed; the estimate leaves it out. Limits: this is
+one app, and dynamic feature modules were not tested.
+
+To reproduce (Java 17 and the Android SDK are needed for the build, not for usertax):
+
+```bash
+pnpm install && pnpm build
+cd examples/expo-app
+pnpm exec expo prebuild --platform android --no-install
+(cd android && ./gradlew bundleRelease)
+cd ../..
+curl -L -o bundletool.jar https://github.com/google/bundletool/releases/download/1.18.3/bundletool-all-1.18.3.jar
+node scripts/compare-bundletool.js examples/expo-app/android/app/build/outputs/bundle/release/app-release.aab \
+  bundletool.jar --ks examples/expo-app/android/app/debug.keystore
+```
+
+The AAB changes with every build, so sizes differ from the table in a new build; the difference
+between the two columns is what stays comparable.

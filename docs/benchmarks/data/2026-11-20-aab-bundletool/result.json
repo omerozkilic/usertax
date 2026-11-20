@@ -1,0 +1,98 @@
+{
+  "aab": {
+    "file": "expo.aab",
+    "bytes": 44936798,
+    "sha256": "fca3f5fa1ea0c1df3d74f10a11d77412d37f047022d24f0f065faf2de775adbd"
+  },
+  "bundletool": "1.18.3",
+  "rows": [
+    {
+      "abi": "arm64-v8a",
+      "density": "mdpi",
+      "locale": "en",
+      "bundletool": 8581532,
+      "bundletoolMax": 8581532,
+      "usertax": 8585085
+    },
+    {
+      "abi": "arm64-v8a",
+      "density": "hdpi",
+      "locale": "en",
+      "bundletool": 8598622,
+      "bundletoolMax": 8598622,
+      "usertax": 8604838
+    },
+    {
+      "abi": "arm64-v8a",
+      "density": "xhdpi",
+      "locale": "en",
+      "bundletool": 8609660,
+      "bundletoolMax": 8609660,
+      "usertax": 8619300
+    },
+    {
+      "abi": "arm64-v8a",
+      "density": "xxhdpi",
+      "locale": "en",
+      "bundletool": 8631104,
+      "bundletoolMax": 8631104,
+      "usertax": 8645959
+    },
+    {
+      "abi": "arm64-v8a",
+      "density": "xxxhdpi",
+      "locale": "en",
+      "bundletool": 8646547,
+      "bundletoolMax": 8646547,
+      "usertax": 8668806
+    },
+    {
+      "abi": "arm64-v8a",
+      "density": "xxhdpi",
+      "locale": "tr",
+      "bundletool": 8630118,
+      "bundletoolMax": 8630118,
+      "usertax": 8645959
+    },
+    {
+      "abi": "arm64-v8a",
+      "density": "xxhdpi",
+      "locale": "zh",
+      "bundletool": 8630925,
+      "bundletoolMax": 8630925,
+      "usertax": 8645959
+    },
+    {
+      "abi": "armeabi-v7a",
+      "density": "hdpi",
+      "locale": "en",
+      "bundletool": 7897324,
+      "bundletoolMax": 7897324,
+      "usertax": 7905505
+    },
+    {
+      "abi": "armeabi-v7a",
+      "density": "xhdpi",
+      "locale": "en",
+      "bundletool": 7908362,
+      "bundletoolMax": 7908362,
+      "usertax": 7919967
+    },
+    {
+      "abi": "x86",
+      "density": "xhdpi",
+      "locale": "en",
+      "bundletool": 9207955,
+      "bundletoolMax": 9207955,
+      "usertax": 9220132
+    },
+    {
+      "abi": "x86_64",
+      "density": "xxhdpi",
+      "locale": "en",
+      "bundletool": 8833798,
+      "bundletoolMax": 8833798,
+      "usertax": 8851906
+    }
+  ]
+}

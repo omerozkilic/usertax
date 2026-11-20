@@ -38,6 +38,7 @@ archive keys) are wrapped in brackets.
 | `archive[<key>].file`                              | APK / AAB / IPA file size                                                                                              | bytes    |
 | `archive[<key>].category.<category>`               | Compressed size of one category (`js-bundle`, `dex`, `native`, `resources`, `assets`, `binary`, `frameworks`, `other`) | bytes    |
 | `archive[<key>].abi[<abi>]`                        | Compressed size of the native libraries (`lib/<abi>/`) of one ABI in an APK or AAB                                     | bytes    |
+| `archive[<key>].download[<abi>]`                   | Estimated download of an AAB on a device with that ABI (and `xxhdpi`, `xhdpi` for `armeabi-v7a`)                       | bytes    |
 | `update[<android\|ios>].total`                     | Expo update (OTA): launch bundle plus assets, as exported                                                              | bytes    |
 | `update[<android\|ios>].bundle`                    | Expo update: the launch bundle                                                                                         | bytes    |
 | `update[<android\|ios>].assets`                    | Expo update: the assets `metadata.json` lists                                                                          | bytes    |
@@ -253,7 +254,13 @@ usertax never builds a mobile app; it reads what your build produced.
   `assets`, `js-bundle`, `binary`, `frameworks` and `other` (see
   `packages/measure/src/archive.ts`), and the comment lists the entries that changed most. The
   file size and compressed sizes are proxies for download size: stores deliver per-device
-  variants (ADR 0009).
+  variants (ADR 0009). For an **AAB** usertax also estimates what a device downloads
+  (`archive[<key>].download[<abi>]`, labelled as an estimate): the base split, the native
+  libraries of the device's ABI and the closest density of each resource, left without
+  `BUNDLE-METADATA/` debug symbols. On the release AAB of `examples/expo-app` (44,936,798 bytes)
+  it is 8,645,959 bytes on `arm64-v8a` against 8,631,104 from `bundletool get-size total`, and at
+  most 0.26 % above it in eleven profiles ([benchmarks](benchmarks/README.md#aab-download-estimate)).
+  Language splits, Play Store compression and delta updates are not modelled.
 - **Expo update (OTA).** A JavaScript-only change reaches users as an EAS Update, not as a store
   build. For an Expo app, usertax reads `metadata.json` in the `expo export` directory, which
   lists what an update serves per platform: the launch bundle and its assets. It reports their
