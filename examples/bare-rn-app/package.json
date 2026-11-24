@@ -14,7 +14,7 @@
   },
   "devDependencies": {
     "@babel/runtime": "^8.1.0",
-    "@react-native-community/cli": "20.2.0",
+    "@react-native-community/cli": "21.0.0",
     "@react-native/babel-preset": "0.88.1",
     "@react-native/metro-config": "0.88.1"
   }
